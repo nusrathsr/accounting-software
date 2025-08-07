@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FiEdit, FiTrash2 } from 'react-icons/fi';
 
 export default function ViewPurchase() {
   const [purchases, setPurchases] = useState([]);
@@ -8,36 +9,76 @@ export default function ViewPurchase() {
     setPurchases(storedPurchases);
   }, []);
 
+  const handleDelete = (index) => {
+    if (window.confirm('Are you sure you want to delete this purchase?')) {
+      const updatedPurchases = purchases.filter((_, i) => i !== index);
+      setPurchases(updatedPurchases);
+      localStorage.setItem('purchases', JSON.stringify(updatedPurchases));
+    }
+  };
+
+  const handleEdit = (index) => {
+    alert(`Edit functionality for purchase #${index + 1} not implemented yet.`);
+  };
+
   return (
-    <div className="p-0">
-      <h1 className="text-2xl font-bold mb-4">View Purchases</h1>
+    <div className="px-6 pt-2 pb-4">
+      <h1 className="text-xl font-semibold mb-2">Purchase Records</h1>
       {purchases.length > 0 ? (
-        <div className="w-full">
-          <table className="table-auto border-collapse border border-gray-300 w-full text-left">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 px-4 py-2">Supplier</th>
-                <th className="border border-gray-300 px-4 py-2">Product</th>
-                <th className="border border-gray-300 px-4 py-2">Quantity</th>
-                <th className="border border-gray-300 px-4 py-2">Price</th>
-                <th className="border border-gray-300 px-4 py-2">Date</th>
+        <div className="overflow-x-auto rounded shadow">
+          <table className="min-w-full bg-white border border-gray-200 text-sm">
+            <thead className="bg-gray-100 text-gray-700 text-xs uppercase sticky top-0">
+              <tr>
+                <th className="px-4 py-3 border">PO Number</th>
+                <th className="px-4 py-3 border">Supplier</th>
+                <th className="px-4 py-3 border">Product</th>
+                <th className="px-4 py-3 border">Qty</th>
+                <th className="px-4 py-3 border">Unit Price</th>
+                <th className="px-4 py-3 border">Discount (%)</th>
+                <th className="px-4 py-3 border">Tax (%)</th>
+                <th className="px-4 py-3 border">Total</th>
+                <th className="px-4 py-3 border">Date</th>
+                <th className="px-4 py-3 border">Actions</th>
               </tr>
             </thead>
             <tbody>
               {purchases.map((purchase, index) => (
-                <tr key={index} draggable='false'>
-                  <td className="border border-gray-300 px-4 py-2">{purchase.supplierName}</td>
-                  <td className="border border-gray-300 px-4 py-2">{purchase.product}</td>
-                  <td className="border border-gray-300 px-4 py-2">{purchase.quantity}</td>
-                  <td className="border border-gray-300 px-4 py-2">${purchase.price}</td>
-                  <td className="border border-gray-300 px-4 py-2">{purchase.date}</td>
+                <tr
+                  key={index}
+                  className="hover:bg-gray-50 transition duration-200"
+                >
+                  <td className="px-4 py-2 border">{purchase.purchaseOrderNumber}</td>
+                  <td className="px-4 py-2 border">{purchase.supplierName}</td>
+                  <td className="px-4 py-2 border">{purchase.product}</td>
+                  <td className="px-4 py-2 border">{purchase.quantity}</td>
+                  <td className="px-4 py-2 border">${purchase.unitPrice}</td>
+                  <td className="px-4 py-2 border">{purchase.discount}%</td>
+                  <td className="px-4 py-2 border">{purchase.tax}%</td>
+                  <td className="px-4 py-2 border">${purchase.totalAmount}</td>
+                  <td className="px-4 py-2 border">{purchase.purchaseDate}</td>
+                  <td className="px-4 py-2 border text-center">
+                    <button
+                      onClick={() => handleEdit(index)}
+                      className="text-blue-600 hover:text-blue-800 mx-1"
+                      title="Edit Purchase"
+                    >
+                      <FiEdit size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(index)}
+                      className="text-red-600 hover:text-red-800 mx-1"
+                      title="Delete Purchase"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <p>No purchase data available.</p>
+        <p className="text-gray-600">No purchase records found.</p>
       )}
     </div>
   );

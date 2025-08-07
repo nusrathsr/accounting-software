@@ -262,12 +262,12 @@ function Sidebar({
                 )}
               </SidebarLinkGroup>
 
-              <SidebarLinkGroup activecondition={pathname.includes("sales")}>
+              <SidebarLinkGroup activecondition={pathname.includes("purchase")}>
                 {(handleClick, open) => (
                   <>
                     <a
                       href="#0"
-                      className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${pathname.includes("sales")
+                      className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${pathname.includes("purchase")
                           ? ""
                           : "hover:text-gray-900 dark:hover:text-white"
                         }`}
@@ -279,7 +279,7 @@ function Sidebar({
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          {/* Sales Icon */}
+                          {/* Purchase Icon */}
                           <svg
                             className={`shrink-0 fill-current ${pathname.includes("purchase")
                                 ? "text-violet-500"
