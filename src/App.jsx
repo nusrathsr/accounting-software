@@ -8,8 +8,6 @@ import AddSales from './pages/sales/AddSales';
 import ViewSales from './pages/sales/ViewSales';
 import AddPurchase from './pages/purchase/AddPurchase';
 import ViewPurchase from './pages/purchase/ViewPurchase';
-import Sales from './pages/sales/Sales';
-import Purchase from './pages/purchase/Purchase';
 
 import './css/style.css';
 
@@ -17,7 +15,6 @@ import './charts/ChartjsConfig';
 
 // Import pages
 import Dashboard from './pages/Dashboard';
-import MainLayout from './layout/MainLayout';
 
 function App() {
 
@@ -37,12 +34,6 @@ function App() {
         <Route path="/sales/view" element={<ViewSales />} />
         <Route path="/purchase/add" element={<AddPurchase />} />
         <Route path="/purchase/view" element={<ViewPurchase />} />
-        <Route path='/sales' element={<MainLayout>
-        <Sales />
-      </MainLayout>} />
-      <Route path='/purchase' element={<MainLayout>
-        <Purchase />
-      </MainLayout>} />
       </Routes>
     </>
   );
