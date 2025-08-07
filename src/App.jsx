@@ -4,10 +4,10 @@ import {
   Route,
   useLocation
 } from 'react-router-dom';
-// import AddSales from './pages/sales/AddSales';
-// import ViewSales from './pages/sales/ViewSales';
-// import AddPurchase from './pages/purchase/AddPurchase';
-// import ViewPurchase from './pages/purchase/ViewPurchase';
+import AddSales from './pages/sales/AddSales';
+import ViewSales from './pages/sales/ViewSales';
+import AddPurchase from './pages/purchase/AddPurchase';
+import ViewPurchase from './pages/purchase/ViewPurchase';
 import Sales from './pages/sales/Sales';
 import Purchase from './pages/purchase/Purchase';
 
@@ -33,10 +33,10 @@ function App() {
     <>
       <Routes>
         <Route exact path="/" element={<Dashboard />} />
-        {/* <Route path="/sales/add" element={<AddSales />} />
+        <Route path="/sales/add" element={<AddSales />} />
         <Route path="/sales/view" element={<ViewSales />} />
         <Route path="/purchase/add" element={<AddPurchase />} />
-        <Route path="/purchase/view" element={<ViewPurchase />} /> */}
+        <Route path="/purchase/view" element={<ViewPurchase />} />
         <Route path='/sales' element={<MainLayout>
         <Sales />
       </MainLayout>} />
