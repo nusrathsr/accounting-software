@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 
 export default function AddSales() {
   const [formData, setFormData] = useState({
+    invoiceNumber: '',
     customerName: '',
     product: '',
     quantity: '',
-    price: '',
-    date: '',
+    unitPrice: '',
+    discount: '',
+    tax: '',
+    totalAmount:'',
+    saleDate: '',
   });
 
   // Handle input changes
@@ -28,7 +32,7 @@ export default function AddSales() {
   localStorage.setItem('sales', JSON.stringify(updatedSales));
   
     alert('Sales data submitted!');
-  setFormData({ customerName: '', product: '', quantity: '', price: '', date: '' });
+  setFormData({ invoiceNumber:'', customerName: '', product: '', quantity: '', unitPrice: '', discount:'', tax:'', totalAmount:'', saleDate: '' });
   };
 
   return (
@@ -38,6 +42,20 @@ export default function AddSales() {
         onSubmit={handleSubmit}
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-lg"
       >
+        {/* Invoice Number */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Invoice Number
+          </label>
+          <input
+            type="text"
+            name="invoiceNumber"
+            value={formData.invoiceNumber}
+            onChange={handleChange}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required
+          />
+        </div>
         {/* Customer Name */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -86,12 +104,54 @@ export default function AddSales() {
         {/* Price */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">
-            Price
+            Unit Price
           </label>
           <input
             type="number"
-            name="price"
-            value={formData.price}
+            name="unitPrice"
+            value={formData.unitPrice}
+            onChange={handleChange}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required
+          />
+        </div>
+        {/* Discount */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Discount
+          </label>
+          <input
+            type="number"
+            name="discount"
+            value={formData.discount}
+            onChange={handleChange}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required
+          />
+        </div>
+        {/* Tax */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Tax
+          </label>
+          <input
+            type="number"
+            name="tax"
+            value={formData.tax}
+            onChange={handleChange}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            required
+          />
+        </div>
+        {/* Total Amount */}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Total Amount
+          </label>
+          <input
+            type="number"
+            name="totalAmount"
+            value={formData.totalAmount}
             onChange={handleChange}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             required
