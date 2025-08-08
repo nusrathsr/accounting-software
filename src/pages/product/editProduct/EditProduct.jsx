@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+
 import { useParams } from 'react-router-dom'; // assuming you're using React Router
 
 const EditProduct = () => {
@@ -11,18 +12,22 @@ const EditProduct = () => {
   ]);
 
   const [categories, setCategories] = useState([
+
     {
       name: 'clothing',
       subcategories: ['Shirts', 'T-Shirts', 'Pants', 'Kids Wear'],
     },
     {
       name: 'grocery',
+
       subcategories: ['Fruits', 'Vegetables', 'Snacks', 'dairy products'],
+
     },
     {
       name: 'electronics',
       subcategories: ['Mobiles', 'Laptops', 'Chargers'],
     },
+
   ]);
 
   const [subcategories, setSubcategories] = useState([]);
@@ -50,6 +55,7 @@ const EditProduct = () => {
     setProduct(fetchedProduct);
 
     // Set subcategories
+
     const selected = categories.find((cat) => cat.name === fetchedProduct.category);
     setSubcategories(selected ? selected.subcategories : []);
   }, [id]);
@@ -65,6 +71,7 @@ const EditProduct = () => {
     }
   };
 
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -75,6 +82,7 @@ const EditProduct = () => {
     reader.readAsDataURL(file);
   };
 
+
   const handleSizeChange = (index, field, value) => {
     const updated = [...product.sizes];
     updated[index][field] = value;
@@ -82,16 +90,19 @@ const EditProduct = () => {
   };
 
   const addSizeField = () => {
+
     setProduct((prev) => ({
       ...prev,
       sizes: [...prev.sizes, { size: '', quantity: '' }],
     }));
+
   };
 
   const removeSizeField = (index) => {
     const updated = product.sizes.filter((_, i) => i !== index);
     setProduct((prev) => ({ ...prev, sizes: updated }));
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -203,6 +214,7 @@ const EditProduct = () => {
           <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Update</button>
         </div>
       </form>
+
     </div>
   );
 };

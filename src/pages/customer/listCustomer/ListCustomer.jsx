@@ -86,7 +86,9 @@ const ListCustomer = () => {
             </thead>
             <tbody>
               {filteredCustomers.map((cust) => (
+
                 <tr key={cust.id} className="text-sm text-white border-t">
+
                   <td className="px-4 py-2 border">{cust.name}</td>
                   <td className="px-4 py-2 border">{cust.phone}</td>
                   <td className="px-4 py-2 border capitalize">{cust.type}</td>

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const EditCustomer = () => {
+
   const { id } = useParams();
+
   const [customer, setCustomer] = useState(null);
 
   useEffect(() => {
@@ -26,6 +28,8 @@ const EditCustomer = () => {
     setCustomer((prev) => ({ ...prev, [name]: value }));
   };
 
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Updated Customer:', customer);
@@ -36,6 +40,7 @@ const EditCustomer = () => {
 
   return (
     <div className="p-4 sm:px-8 lg:px-12">
+
       <div className="bg-transparent p-6 shadow rounded max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold mb-6 text-white">Edit Customer</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -161,6 +166,7 @@ const EditCustomer = () => {
             >
               Update Customer
             </button>
+
           </div>
         </form>
       </div>
