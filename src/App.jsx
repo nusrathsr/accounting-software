@@ -45,7 +45,7 @@ function App() {
         </Route>
       </Routes>
 
-         {/* <Route path="/sales/add" element={<AddSales />} />
+          <Route path="/sales/add" element={<AddSales />} />
           <Route path="/sales/view" element={<ViewSales />} />
           <Route path="/purchase/add" element={<AddPurchase />} />
           <Route path="/purchase/view" element={<ViewPurchase />} />
