@@ -41,43 +41,22 @@ function App() {
           <Route path='/editCustomer' element={<EditCustomer />} />
           <Route path='/listCustomer' element={<ListCustomer />} />
 
+          
+          <Route path="/sales/add" element={<AddSales />} />
+          <Route path="/sales/view" element={<ViewSales />} />
+          
+          <Route path="/purchase/add" element={<AddPurchase />} />
+          <Route path="/purchase/view" element={<ViewPurchase />} />
+
        
         </Route>
       </Routes>
 
-          <Route path="/sales/add" element={<AddSales />} />
-          <Route path="/sales/view" element={<ViewSales />} />
-          <Route path="/purchase/add" element={<AddPurchase />} />
-          <Route path="/purchase/view" element={<ViewPurchase />} />
-          <Route path='/sales' element={<MainLayout>
-            <Sales />
-          </MainLayout>} />
-          <Route path='/purchase' element={<MainLayout>
-            <Purchase />
-          </MainLayout>} /> */}
+           
     </>
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  );
+ );
 }
 
 export default App;
