@@ -99,11 +99,10 @@ function Dashboard() {
               </>  
                )}
             </div>
+            <Outlet/>
           </div>
         </main>
-        <Outlet/>
         <Banner />
-
       </div>
     </div>
   );
