@@ -41,9 +41,12 @@ function App() {
           <Route path='/addCustomer' element={<AddCustomer />} />
           <Route path='/editCustomer' element={<EditCustomer />} />
           <Route path='/listCustomer' element={<ListCustomer />} />
+         
         </Route>
       </Routes>
-      </>
+    </>
+
+     
   );
 }
 

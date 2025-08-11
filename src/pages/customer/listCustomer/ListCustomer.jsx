@@ -47,7 +47,7 @@ const ListCustomer = () => {
     <div className="p-4 sm:px-8 lg:px-12">
       <div className="bg-transparent p-6 shadow rounded max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-white">Customer List</h2>
+          <h2 className="text-2xl font-bold text-white-700">Customer List</h2>
           <div className="flex flex-wrap justify-end gap-4 w-full md:w-auto">
             <input
               type="text"
@@ -87,8 +87,7 @@ const ListCustomer = () => {
             <tbody>
               {filteredCustomers.map((cust) => (
 
-                <tr key={cust.id} className="text-sm text-white border-t">
-
+                <tr key={cust.id} className="text-sm text-white-700 border-t">
                   <td className="px-4 py-2 border">{cust.name}</td>
                   <td className="px-4 py-2 border">{cust.phone}</td>
                   <td className="px-4 py-2 border capitalize">{cust.type}</td>
@@ -96,7 +95,6 @@ const ListCustomer = () => {
                   <td className="px-4 py-2 border">
                     <Link
                       to={`/editCUstomer`}
-                      // to={`/editCUstomer${cust.id}`}
                       className="text-blue-600 hover:underline mr-2"
                     >
                       Edit

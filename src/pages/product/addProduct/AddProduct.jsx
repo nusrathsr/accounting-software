@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 
 const AddProduct = () => {
+  const [taxInclusive, setTaxInclusive] = useState(false);
+ 
   const [suppliers, setSuppliers] = useState([
   { id: 1, name: 'ABC Distributors' },
   { id: 2, name: 'Global Suppliers Co.' },
@@ -40,6 +42,8 @@ const AddProduct = () => {
     expiryDate: '',
     supplier: '',
     image: '',
+    taxPercentage:"",
+    taxType:""
   });
 
   const handleChange = (e) => {
@@ -85,7 +89,7 @@ const AddProduct = () => {
 
   return (
     <div className="p-6 shadow rounded max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-white">Add Product</h2>
+      <h2 className="text-2xl font-bold mb-6 text-white-700">Add Product</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         <div>
@@ -147,10 +151,7 @@ const AddProduct = () => {
           <input type="number" name="costPrice" value={product.costPrice} onChange={handleChange} className="w-full p-2 border rounded bg-transparent" />
         </div>
 
-        <div>
-          <label className="block font-medium">Tax (%)</label>
-          <input type="number" name="tax" value={product.tax} onChange={handleChange} className="w-full p-2 border rounded bg-transparent" />
-        </div>
+        
 
         <div>
           <label className="block font-medium">Expiry Date</label>
@@ -173,6 +174,35 @@ const AddProduct = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className='block font-medium'  >
+            <input type="checkbox" 
+            className='h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+            checked={taxInclusive}
+            onChange={(e)=>setTaxInclusive(e.target.checked)}
+             />
+              {" "}Tax Inclusive
+          </label>
+
+            {/* Show only if checked */}
+            {taxInclusive && (
+              <>
+                <div>
+                  <label className='block font-medium'>Tax Percentage (%)</label>
+                  <input name='taxPercentage' min="0" type="number" value={product.taxPercentage}   placeholder='Enter tax %' onChange={handleChange} className='w-full p-2 border rounded bg-transparent' />
+                </div>
+                <div>
+                  <label className="block font-medium" >Tax Type</label>
+                  <select name="taxType" value={product.taxType} onChange={handleChange} className='w-full p-2 border rounded bg-transparent'>
+                    <option value="">Select tax type</option>
+                    <option value="GST">GST</option>
+                    <option value="VAT">VAT</option>
+                  </select>
+                </div>
+               </>
+            )}
         </div>
 
 

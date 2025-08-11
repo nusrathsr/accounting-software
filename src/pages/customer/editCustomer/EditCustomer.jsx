@@ -42,7 +42,7 @@ const EditCustomer = () => {
     <div className="p-4 sm:px-8 lg:px-12">
 
       <div className="bg-transparent p-6 shadow rounded max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6 text-white">Edit Customer</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white-700">Edit Customer</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* 2-column layout */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
