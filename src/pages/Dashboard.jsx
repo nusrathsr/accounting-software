@@ -67,7 +67,7 @@ function Dashboard() {
 
             {/* Cards */}
             <div className="grid grid-cols-12 gap-6">
-              {location.pathname === "/" && (
+               {location.pathname === "/" && (
               <>
 
               {/* Line chart (Acme Plus) */}
@@ -96,14 +96,12 @@ function Dashboard() {
               <DashboardCard12 />
               {/* Card (Income/Expenses) */}
               <DashboardCard13 />
-              </>
-              )}
-              
+              </>  
+               )}
             </div>
-
           </div>
         </main>
-         <Outlet />
+        <Outlet/>
         <Banner />
 
       </div>
