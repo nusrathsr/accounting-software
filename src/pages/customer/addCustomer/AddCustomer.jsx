@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
 const AddCustomer = () => {
+
+
   const [customer, setCustomer] = useState({
     name: '',
     phone: '',
@@ -18,15 +20,18 @@ const AddCustomer = () => {
     setCustomer((prev) => ({ ...prev, [name]: value }));
   };
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Customer Added:', customer);
     // Send to backend here
+
   };
 
   return (
     <div className="p-4 sm:px-8 lg:px-12">
       <div className="bg-transparent p-6 shadow rounded max-w-5xl mx-auto">
+
         <h2 className="text-2xl font-bold mb-6 text-white-700">Add Customer</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -164,6 +169,7 @@ const AddCustomer = () => {
               Add Customer
             </button>
           </div>
+
 
         </form>
       </div>

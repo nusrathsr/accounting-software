@@ -120,18 +120,19 @@ const ListProduct = () => {
               {filterProducts.map((prod) => (
                 <tr
                   key={prod.id}
-                  className={`text-sm text-white-700 border-t `}
-                >
+                  className={`text-sm text-white-700 border-t `}>
                   <td className="px-4 py-2 border">{prod.name}</td>
                   <td className="px-4 py-2 border">{prod.sku}</td>
                   <td className="px-4 py-2 border capitalize">{prod.category}</td>
                   <td className="px-4 py-2 border">{prod.subcategory}</td>
                   <td className="px-4 py-2 border">{prod.brand}</td>
+
                   <td className={`px-4 py-2 border text-black ${prod.stockStatus === 'Out of stock' ? 'bg-orange-200' :
                       prod.stockStatus === 'Low Stock' ? 'bg-red-200' :
                         prod.stockStatus === 'In stock' ? 'bg-green-200' :
                           'bg-transparent'
                     }`}>{prod.stockStatus}</td>
+
                   <td className="px-4 py-2 border">₹{prod.sellingPrice}</td>
                   <td className="px-4 py-2 border">
                     {prod.sizes.length > 0
@@ -141,7 +142,7 @@ const ListProduct = () => {
                   <td className="px-4 py-2 border">
                     <Link
                       to={`/editProduct`}
-                      // to={`/editProduct/${prod.id}`}
+                     
                       className="text-blue-600 hover:underline mr-2"
                     >
                       Edit

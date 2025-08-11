@@ -86,6 +86,7 @@ const ListCustomer = () => {
             </thead>
             <tbody>
               {filteredCustomers.map((cust) => (
+
                 <tr key={cust.id} className="text-sm text-white-700 border-t">
                   <td className="px-4 py-2 border">{cust.name}</td>
                   <td className="px-4 py-2 border">{cust.phone}</td>
@@ -94,7 +95,6 @@ const ListCustomer = () => {
                   <td className="px-4 py-2 border">
                     <Link
                       to={`/editCUstomer`}
-                      // to={`/editCUstomer${cust.id}`}
                       className="text-blue-600 hover:underline mr-2"
                     >
                       Edit
