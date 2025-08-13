@@ -15,6 +15,8 @@ import './charts/ChartjsConfig';
 
 // Import pages
 import Dashboard from './pages/Dashboard';
+import AddExpense from './pages/expense/AddExpense';
+import ListExpenses from './pages/expense/ListExpense';
 
 function App() {
 
@@ -30,23 +32,28 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Dashboard />} >
-        <Route path="sales/add" element={<AddSales />} />
-        <Route path="sales/view" element={<ViewSales />} />
-        
-        <Route path="purchase/add" element={<AddPurchase />} />
-        <Route path="purchase/view" element={<ViewPurchase />} />
+          <Route path="sales/add" element={<AddSales />} />
+          <Route path="sales/view" element={<ViewSales />} />
+
+          <Route path="purchase/add" element={<AddPurchase />} />
+          <Route path="purchase/view" element={<ViewPurchase />} />
           <Route path='/addProduct' element={<AddProduct />} />
-          <Route path='/editProduct' element={<EditProduct />} />
+          <Route path='/editProduct/:id' element={<EditProduct />} />
           <Route path='/listProduct' element={<ListProduct />} />
           <Route path='/addCustomer' element={<AddCustomer />} />
-          <Route path='/editCustomer' element={<EditCustomer />} />
+          <Route path='/editCustomer/:id' element={<EditCustomer />} />
           <Route path='/listCustomer' element={<ListCustomer />} />
-         
+          <Route path='/addExpense' element={<AddExpense />} />
+          <Route path='/listExpense' element={<ListExpenses />} />
+
+
+
+
         </Route>
       </Routes>
     </>
 
-     
+
   );
 }
 
