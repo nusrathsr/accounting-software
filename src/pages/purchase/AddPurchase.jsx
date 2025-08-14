@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function AddPurchase() {
   const sellers = ["ABC Traders", "XYZ Supplies", "Global Wholesale", "FastMart"];
-  const products = [
-    { name: "Laptop", price: 25000 },
-    { name: "Mouse", price: 500 },
-    { name: "Keyboard", price: 1200 },
-    { name: "Monitor", price: 8000 },
-  ];
 
+  const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     purchaseOrderNumber: "",
     sellerName: "",
@@ -26,29 +22,41 @@ export default function AddPurchase() {
   const [productSearch, setProductSearch] = useState("");
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
 
-  // Auto-generate Purchase Order Number
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:4000/api/products");
+        setProducts(res.data);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    generatePONumber();
+  }, []);
+
+  const generatePONumber = () => {
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     setFormData((prev) => ({
       ...prev,
       purchaseOrderNumber: `PO-${new Date().getFullYear()}-${randomNum}`,
     }));
-  }, []);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-
       if (name === "quantity" || name === "unitPrice" || name === "tax") {
         const qty = parseFloat(updated.quantity) || 0;
         const price = parseFloat(updated.unitPrice) || 0;
         const taxPct = parseFloat(updated.tax) || 0;
-        const total = qty * price + (qty * price * taxPct) / 100;
-        updated.totalAmount = total.toFixed(2);
+        updated.totalAmount = (qty * price + (qty * price * taxPct) / 100).toFixed(2);
       }
-
       return updated;
     });
   };
@@ -63,37 +71,32 @@ export default function AddPurchase() {
     setFormData((prev) => ({
       ...prev,
       product: product.name,
-      unitPrice: product.price,
+      unitPrice: product.purchasePrice || 0,
     }));
     setProductSearch(product.name);
     setProductDropdownOpen(false);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const existingPurchases = JSON.parse(localStorage.getItem("purchases")) || [];
-    const updatedPurchases = [...existingPurchases, formData];
-    localStorage.setItem("purchases", JSON.stringify(updatedPurchases));
-
-    alert("Purchase data submitted!");
-    setFormData({
-      purchaseOrderNumber: "",
-      sellerName: "",
-      product: "",
-      quantity: "",
-      unitPrice: "",
-      tax: "",
-      totalAmount: "",
-      purchaseDate: "",
-    });
-
-    // Regenerate PO number
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    setFormData((prev) => ({
-      ...prev,
-      purchaseOrderNumber: `PO-${new Date().getFullYear()}-${randomNum}`,
-    }));
+    try {
+      await axios.post("http://localhost:4000/api/purchase", formData);
+      alert("✅ Purchase saved to MongoDB!");
+      setFormData({
+        purchaseOrderNumber: "",
+        sellerName: "",
+        product: "",
+        quantity: "",
+        unitPrice: "",
+        tax: "",
+        totalAmount: "",
+        purchaseDate: "",
+      });
+      generatePONumber();
+    } catch (err) {
+      console.error("❌ Error saving purchase:", err);
+      alert("Failed to save purchase.");
+    }
   };
 
   return (
@@ -105,7 +108,7 @@ export default function AddPurchase() {
       >
         {/* Row 1 */}
         <div className="flex flex-wrap space-x-4 mb-4">
-          {/* Auto-generated Purchase Order Number */}
+          {/* Purchase Order Number */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Purchase Order Number
@@ -164,9 +167,8 @@ export default function AddPurchase() {
           </div>
         </div>
 
-        {/* Row 2 */}
+        {/* Product Row */}
         <div className="flex flex-wrap space-x-4 mb-4">
-          {/* Product Dropdown */}
           <div className="flex-1 min-w-[200px] relative">
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Product
@@ -192,21 +194,23 @@ export default function AddPurchase() {
               </button>
             </div>
             {productDropdownOpen && (
-              <ul className="absolute z-10 bg-white border w-full max-h-40 overflow-y-auto">
-                {products
-                  .filter((p) =>
-                    p.name.toLowerCase().includes(productSearch.toLowerCase())
-                  )
-                  .map((p, i) => (
-                    <li
-                      key={i}
-                      onClick={() => handleProductSelect(p)}
-                      className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-                    >
-                      {p.name}
-                    </li>
-                  ))}
-              </ul>
+              <div className="absolute z-10 bg-white border w-full max-h-60 overflow-y-auto">
+                <ul>
+                  {products
+                    .filter((p) =>
+                      p.name.toLowerCase().includes(productSearch.toLowerCase())
+                    )
+                    .map((p, i) => (
+                      <li
+                        key={i}
+                        onClick={() => handleProductSelect(p)}
+                        className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                      >
+                        {p.name} - ₹{p.purchasePrice}
+                      </li>
+                    ))}
+                </ul>
+              </div>
             )}
           </div>
 
@@ -226,9 +230,8 @@ export default function AddPurchase() {
           </div>
         </div>
 
-        {/* Row 3 */}
+        {/* Price and Tax */}
         <div className="flex flex-wrap space-x-4 mb-4">
-          {/* Purchased Price */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Purchased Price
@@ -243,7 +246,6 @@ export default function AddPurchase() {
             />
           </div>
 
-          {/* Tax */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Tax (%)
@@ -254,12 +256,11 @@ export default function AddPurchase() {
               value={formData.tax}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-              required
             />
           </div>
         </div>
 
-        {/* Row 4 */}
+        {/* Total Amount */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">
             Total Amount

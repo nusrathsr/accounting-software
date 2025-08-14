@@ -1,33 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
+import axios from 'axios';
 
 export default function ViewPurchase() {
   const [purchases, setPurchases] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState(null);
   const itemsPerPage = 5;
 
+  // Fetch purchases from backend
   useEffect(() => {
-    const storedPurchases = JSON.parse(localStorage.getItem('purchases')) || [];
-    setPurchases(storedPurchases);
+    fetchPurchases();
   }, []);
 
-  const handleDelete = (index) => {
-    if (window.confirm('Are you sure you want to delete this purchase?')) {
-      const updatedPurchases = purchases.filter((_, i) => i !== index);
-      setPurchases(updatedPurchases);
-      localStorage.setItem('purchases', JSON.stringify(updatedPurchases));
-      if ((updatedPurchases.length / itemsPerPage) < currentPage) {
-        setCurrentPage((prev) => Math.max(prev - 1, 1));
-      }
+  const fetchPurchases = async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/api/purchase');
+      setPurchases(response.data);
+    } catch (err) {
+      console.error('Error fetching purchases:', err);
+      alert('Failed to load purchases.');
     }
   };
 
-  const startIndex = (currentPage - 1) * itemsPerPage;
+  // Delete purchase
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this purchase?')) return;
 
-  // Search filter
+    try {
+      await axios.delete(`http://localhost:4000/api/purchase/${id}`);
+      setPurchases(purchases.filter((p) => p._id !== id));
+    } catch (err) {
+      console.error('Error deleting purchase:', err);
+      alert('Failed to delete purchase.');
+    }
+  };
+
+  // Search and pagination
   const filteredPurchases = purchases.filter((purchase) =>
     Object.values(purchase).some((value) =>
       String(value).toLowerCase().includes(searchQuery.toLowerCase())
@@ -35,33 +45,30 @@ export default function ViewPurchase() {
   );
 
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
   const currentPurchases = filteredPurchases.slice(startIndex, startIndex + itemsPerPage);
 
-  const openEditModal = (index) => {
-    setEditIndex(index);
-    setEditData({ ...purchases[index] });
-  };
-
-  const closeEditModal = () => {
-    setEditIndex(null);
-    setEditData(null);
-  };
+  // Edit modal handlers
+  const openEditModal = (purchase) => setEditData({ ...purchase });
+  const closeEditModal = () => setEditData(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setEditData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editData) return;
-    const updatedPurchases = [...purchases];
-    updatedPurchases[editIndex] = editData;
-    setPurchases(updatedPurchases);
-    localStorage.setItem('purchases', JSON.stringify(updatedPurchases));
-    closeEditModal();
+
+    try {
+      await axios.put(`http://localhost:4000/api/purchase/${editData._id}`, editData);
+      const updated = purchases.map((p) => (p._id === editData._id ? editData : p));
+      setPurchases(updated);
+      closeEditModal();
+    } catch (err) {
+      console.error('Error updating purchase:', err);
+      alert('Failed to update purchase.');
+    }
   };
 
   return (
@@ -97,8 +104,8 @@ export default function ViewPurchase() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {currentPurchases.map((purchase, index) => (
-                <tr key={startIndex + index} className="hover:bg-gray-50">
+              {currentPurchases.map((purchase) => (
+                <tr key={purchase._id} className="hover:bg-gray-50">
                   <td className="px-4 py-2">{purchase.purchaseOrderNumber}</td>
                   <td className="px-4 py-2">{purchase.sellerName}</td>
                   <td className="px-4 py-2">{purchase.product}</td>
@@ -109,14 +116,14 @@ export default function ViewPurchase() {
                   <td className="px-4 py-2">{purchase.purchaseDate}</td>
                   <td className="px-4 py-2 text-center space-x-2">
                     <button
-                      onClick={() => openEditModal(startIndex + index)}
+                      onClick={() => openEditModal(purchase)}
                       className="text-blue-600 hover:text-blue-800"
                       title="Edit Purchase"
                     >
                       <FiEdit size={18} />
                     </button>
                     <button
-                      onClick={() => handleDelete(startIndex + index)}
+                      onClick={() => handleDelete(purchase._id)}
                       className="text-red-600 hover:text-red-800"
                       title="Delete Purchase"
                     >
@@ -183,125 +190,29 @@ export default function ViewPurchase() {
               }}
               className="space-y-4"
             >
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  PO Number
-                </label>
-                <input
-                  type="text"
-                  name="purchaseOrderNumber"
-                  value={editData.purchaseOrderNumber}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Seller Name
-                </label>
-                <input
-                  type="text"
-                  name="sellerName"
-                  value={editData.sellerName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Product
-                </label>
-                <input
-                  type="text"
-                  name="product"
-                  value={editData.product}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Quantity
-                </label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={editData.quantity}
-                  onChange={handleChange}
-                  min="0"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Purchased Price
-                </label>
-                <input
-                  type="number"
-                  name="unitPrice"
-                  value={editData.unitPrice}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Tax (%)
-                </label>
-                <input
-                  type="number"
-                  name="tax"
-                  value={editData.tax}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Total Amount
-                </label>
-                <input
-                  type="number"
-                  name="totalAmount"
-                  value={editData.totalAmount}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Purchase Date
-                </label>
-                <input
-                  type="date"
-                  name="purchaseDate"
-                  value={editData.purchaseDate}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
+              {/* Reuse inputs as before */}
+              {[
+                { label: 'PO Number', name: 'purchaseOrderNumber', type: 'text' },
+                { label: 'Seller Name', name: 'sellerName', type: 'text' },
+                { label: 'Product', name: 'product', type: 'text' },
+                { label: 'Quantity', name: 'quantity', type: 'number' },
+                { label: 'Purchased Price', name: 'unitPrice', type: 'number' },
+                { label: 'Tax (%)', name: 'tax', type: 'number' },
+                { label: 'Total Amount', name: 'totalAmount', type: 'number' },
+                { label: 'Purchase Date', name: 'purchaseDate', type: 'date' },
+              ].map((field) => (
+                <div key={field.name}>
+                  <label className="block text-sm font-medium text-gray-700">{field.label}</label>
+                  <input
+                    type={field.type}
+                    name={field.name}
+                    value={editData[field.name]}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+              ))}
 
               <div className="flex justify-end space-x-2 pt-4">
                 <button

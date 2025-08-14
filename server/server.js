@@ -3,10 +3,12 @@ const mongoose =require('mongoose')
 const dotenv =require('dotenv')
 const cors =require('cors')
 // const fileUpload =require('express-fileupload')
-const productRoutes = require('./routes/productRoutes')
-const path =require('path')
-const customerRoutes =require('./routes/customerRoutes')
-const expenseRoutes =require('./routes/expenseRoutes')
+const productRoutes = require('./routes/productRoutes');
+const path =require('path');
+const customerRoutes =require('./routes/customerRoutes');
+const expenseRoutes =require('./routes/expenseRoutes');
+const salesRoutes = require("./routes/salesRoutes");
+const purchaseRoutes = require("./routes/purchaseRoutes");
 // Load env variables
 dotenv.config();
 
@@ -29,8 +31,8 @@ mongoose.connect(process.env.MONGO_URL,{
 app.use('/api/products',productRoutes)
 app.use('/api/customer',customerRoutes)
 app.use('/api/expense',expenseRoutes)
-
-
+app.use("/api/sales", salesRoutes);
+app.use("/api/purchase", purchaseRoutes);
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')

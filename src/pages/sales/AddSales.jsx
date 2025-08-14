@@ -1,21 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
-const productOptions = [
-  { id: 1, name: "Product A", price: 1000 },
-  { id: 2, name: "Product B", price: 2000 },
-  { id: 3, name: "Product C", price: 500 },
-  { id: 4, name: "Product D", price: 13599 },
-  { id: 5, name: "Product E", price: 999 },
-];
+export default function AddSalesInvoice() {
+  const invoiceRef = useRef();
+  const n = (v) => parseFloat(v) || 0;
 
-export default function SalesInvoiceForm() {
-  const generateInvoiceNumber = () => {
-    const year = new Date().getFullYear();
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `INV-${year}-${randomNum}`;
-  };
+  const [productOptions, setProductOptions] = useState([]);
+  useEffect(() => {
+      const fetchProducts = async () => {
+        try {
+          const res = await axios.get("http://localhost:4000/api/products");
+          const products = res.data.map((p) => ({
+            id: p._id,
+            name: p.name || "Unnamed Product",
+            price: Number(p.sellingPrice) || 0,
+            taxRate: Number(p.taxPercentage) || 0,
+            isTaxInclusive: p.taxType === "GST IN",
+          }));
+          setProductOptions(products);
+        } catch (err) {
+          console.error("Error fetching products:", err);
+        }
+      };
+      fetchProducts();
+    }, []);
+  
 
   const [formData, setFormData] = useState({
     invoiceNumber: "",
@@ -25,21 +35,15 @@ export default function SalesInvoiceForm() {
     items: [{ productId: null, productName: "", quantity: "", unitPrice: "", tax: "" }],
   });
 
-  // For each item, we'll track dropdown open & search term state separately
-  const [dropdownState, setDropdownState] = useState(
-    formData.items.map(() => ({ open: false, searchTerm: "" }))
-  );
+  const [dropdownState, setDropdownState] = useState([{ open: false, searchTerm: "" }]);
 
-  const invoiceRef = useRef();
+  const generateInvoiceNumber = () =>
+    `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      invoiceNumber: generateInvoiceNumber(),
-    }));
+    setFormData((prev) => ({ ...prev, invoiceNumber: generateInvoiceNumber() }));
   }, []);
 
-  // Sync dropdownState length with items length
   useEffect(() => {
     if (dropdownState.length !== formData.items.length) {
       setDropdownState(formData.items.map(() => ({ open: false, searchTerm: "" })));
@@ -57,12 +61,11 @@ export default function SalesInvoiceForm() {
       productId: product.id,
       productName: product.name,
       quantity: "",
-      unitPrice: String(product.price),
-      tax: "",
+      unitPrice: product.price.toFixed(2),
+      tax: product.taxRate.toFixed(2),
     };
     setFormData((prev) => ({ ...prev, items: updatedItems }));
 
-    // Close dropdown and clear search for that index
     const updatedDropdown = [...dropdownState];
     updatedDropdown[index] = { open: false, searchTerm: "" };
     setDropdownState(updatedDropdown);
@@ -79,24 +82,18 @@ export default function SalesInvoiceForm() {
       ...prev,
       items: [...prev.items, { productId: null, productName: "", quantity: "", unitPrice: "", tax: "" }],
     }));
-
     setDropdownState((prev) => [...prev, { open: false, searchTerm: "" }]);
   };
 
   const removeItem = (index) => {
-    const updatedItems = formData.items.filter((_, i) => i !== index);
-    setFormData((prev) => ({ ...prev, items: updatedItems }));
-
-    const updatedDropdown = dropdownState.filter((_, i) => i !== index);
-    setDropdownState(updatedDropdown);
+    setFormData((prev) => ({ ...prev, items: prev.items.filter((_, i) => i !== index) }));
+    setDropdownState((prev) => prev.filter((_, i) => i !== index));
   };
 
   const toggleDropdown = (index) => {
-    const updatedDropdown = dropdownState.map((d, i) => {
-      if (i === index) return { ...d, open: !d.open, searchTerm: "" };
-      return { ...d, open: false, searchTerm: "" }; // close others
-    });
-    setDropdownState(updatedDropdown);
+    setDropdownState((prev) =>
+      prev.map((d, i) => (i === index ? { ...d, open: !d.open, searchTerm: "" } : { ...d, open: false, searchTerm: "" }))
+    );
   };
 
   const onSearchChange = (index, value) => {
@@ -111,79 +108,85 @@ export default function SalesInvoiceForm() {
     setFormData((prev) => ({ ...prev, items: updatedItems }));
   };
 
-  const n = (v) => {
-    const x = parseFloat(v);
-    return isNaN(x) ? 0 : x;
-  };
-
   const calculateSubtotal = () =>
     formData.items.reduce((sum, item) => sum + n(item.quantity) * n(item.unitPrice), 0);
 
   const calculateTaxTotal = () =>
-    formData.items.reduce((sum, item) => {
-      const line = n(item.quantity) * n(item.unitPrice);
-      const taxPct = n(item.tax);
-      return sum + (line * taxPct) / 100;
-    }, 0);
+    formData.items.reduce((sum, item) => sum + (n(item.quantity) * n(item.unitPrice) * n(item.tax)) / 100, 0);
 
   const calculateTotal = () => calculateSubtotal() + calculateTaxTotal();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     const salesRecord = {
-      ...formData,
+      invoiceNumber: formData.invoiceNumber,
+      customerName: formData.customerName,
+      number: formData.number,
+      saleDate: formData.saleDate,
+      products: formData.items.map((item) => ({
+        name: item.productName,
+        quantity: n(item.quantity),
+        unitPrice: n(item.unitPrice),
+        tax: n(item.tax),
+        total: n(item.quantity) * n(item.unitPrice) + (n(item.quantity) * n(item.unitPrice) * n(item.tax)) / 100,
+      })),
       subtotal: calculateSubtotal(),
-      taxTotal: calculateTaxTotal(),
+      tax: calculateTaxTotal(),
       totalAmount: calculateTotal(),
     };
 
-    const existingSales = JSON.parse(localStorage.getItem("sales")) || [];
-    localStorage.setItem("sales", JSON.stringify([...existingSales, salesRecord]));
-
-    alert("Sales invoice saved!");
-    setFormData({
-      invoiceNumber: generateInvoiceNumber(),
-      customerName: "",
-      number: "",
-      saleDate: new Date().toISOString().slice(0, 10),
-      items: [{ productId: null, productName: "", quantity: "", unitPrice: "", tax: "" }],
-    });
-    setDropdownState([{ open: false, searchTerm: "" }]);
+    try {
+      await axios.post("http://localhost:4000/api/sales", salesRecord);
+      alert("Sales invoice saved successfully!");
+      setFormData({
+        invoiceNumber: generateInvoiceNumber(),
+        customerName: "",
+        number: "",
+        saleDate: new Date().toISOString().slice(0, 10),
+        items: [{ productId: null, productName: "", quantity: "", unitPrice: "", tax: "" }],
+      });
+      setDropdownState([{ open: false, searchTerm: "" }]);
+    } catch (err) {
+      console.error(err);
+      alert("Error saving invoice. Check server connection.");
+    }
   };
 
-  // Download PDF logic unchanged (same as you provided)
-  const handleDownload = () => {
-    const sales = JSON.parse(localStorage.getItem("sales")) || [];
-    if (sales.length === 0) {
-      alert("No invoices found to download!");
+  const handleDownload = async () => {
+  try {
+    const res = await axios.get("http://localhost:4000/api/sales/latest");
+    const invoice = res.data;
+
+    if (!invoice) {
+      alert("No invoice found!");
       return;
     }
-    const lastInvoice = sales[sales.length - 1];
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
+    const formattedDate = isNaN(invoiceDate.getTime())
+      ? new Date().toLocaleDateString()
+      : invoiceDate.toLocaleDateString();
 
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
     let y = 40;
+
     doc.setFontSize(18);
     doc.text("Shop Name", 40, y);
     doc.setFontSize(11);
-    doc.text("Phone: +1234567890", 40, y + 45);
-    doc.text("Email: shop@example.com", 40, y + 60);
+    doc.text("Phone: +1234567890", 40, y + 25);
+    doc.text("Email: shop@example.com", 40, y + 40);
 
-    y += 80;
+    y += 70;
     doc.setFontSize(16);
     doc.text("Sales Invoice", 40, y);
-
-    y += 25;
+    y += 20;
     doc.setFontSize(11);
-    doc.text(`Invoice No: ${lastInvoice.invoiceNumber}`, 40, y);
-    doc.text(`Date: ${lastInvoice.saleDate}`, 300, y);
+    doc.text(`Invoice No: ${invoice.invoiceNumber}`, 40, y);
+    doc.text(`Date: ${formattedDate}`, 300, y);
+    y += 20;
+    doc.text(`Bill To: ${invoice.customerName}`, 40, y);
+    doc.text(`Mobile: ${invoice.number}`, 40, y + 15);
 
     y += 20;
-    doc.text(`Bill To:`, 40, y);
-    doc.text(`${lastInvoice.customerName || ""}`, 90, y);
-
-    y += 20;
-
     doc.setFontSize(12);
     doc.setFont(undefined, "bold");
     doc.text("Product", 40, y);
@@ -191,23 +194,20 @@ export default function SalesInvoiceForm() {
     doc.text("Unit (Rs.)", 260, y);
     doc.text("Tax %", 340, y);
     doc.text("Line Total (Rs.)", 420, y);
-
     doc.setFont(undefined, "normal");
     y += 10;
     doc.line(40, y, 550, y);
     y += 15;
 
-    lastInvoice.items.forEach((item) => {
-      const qty = n(item.quantity);
-      const price = n(item.unitPrice);
-      const taxPct = n(item.tax);
-      const line = qty * price;
-      const lineWithTax = line + (line * taxPct) / 100;
+    invoice.products.forEach((item) => {
+      const lineTotal = item.quantity * item.unitPrice;
+      // const lineWithTax = lineTotal + (lineTotal * item.tax) / 100 || lineTotal;
+      const lineWithTax = lineTotal + (lineTotal * (item.tax || 0)) / 100;
 
-      doc.text(item.productName || "N/A", 40, y);
-      doc.text(String(qty), 200, y);
-      doc.text(price.toFixed(2), 260, y);
-      doc.text(String(taxPct), 340, y);
+      doc.text(item.name || "N/A", 40, y);
+      doc.text(String(item.quantity), 200, y);
+      doc.text(item.unitPrice.toFixed(2), 260, y);
+      doc.text(String(item.tax || 0), 340, y);
       doc.text(lineWithTax.toFixed(2), 420, y);
       y += 20;
     });
@@ -215,102 +215,73 @@ export default function SalesInvoiceForm() {
     y += 10;
     doc.line(40, y, 550, y);
     y += 20;
-
-    doc.text(`Subtotal: Rs.${(lastInvoice.subtotal || 0).toFixed(2)}`, 300, y);
+    doc.text(`Subtotal: Rs.${invoice.subtotal.toFixed(2)}`, 300, y);
     y += 15;
-    doc.text(`Tax Total: Rs.${(lastInvoice.taxTotal || 0).toFixed(2)}`, 300, y);
+    doc.text(`Tax Total: Rs.${invoice.tax.toFixed(2)}`, 300, y);
     y += 15;
     doc.setFont(undefined, "bold");
-    doc.text(`Total Amount: Rs.${(lastInvoice.totalAmount || 0).toFixed(2)}`, 300, y);
+    doc.text(`Total Amount: Rs.${invoice.totalAmount.toFixed(2)}`, 300, y);
 
-    doc.save(`invoice-${lastInvoice.invoiceNumber}.pdf`);
-  };
+    doc.save(`invoice-${invoice.invoiceNumber}.pdf`);
+  } catch (err) {
+    console.error(err);
+    alert("Error fetching the latest invoice.");
+  }
+};
 
-  // Print invoice preview div only
+
   const handlePrint = () => {
     if (!invoiceRef.current) return;
     const printContents = invoiceRef.current.innerHTML;
     const originalContents = document.body.innerHTML;
-
     document.body.innerHTML = printContents;
     window.print();
     document.body.innerHTML = originalContents;
-    window.location.reload(); // restore React UI
+    window.location.reload();
   };
 
   return (
     <div className="p-6 w-full bg-white rounded shadow">
-      {/* Top Buttons */}
       <div className="flex justify-end space-x-3 mb-6">
-        <button
-          onClick={handleDownload}
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-        >
+        <button onClick={handleDownload} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
           Download Invoice
         </button>
-        <button
-          onClick={handlePrint}
-          className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700"
-        >
-          Print Invoice
+        <button onClick={handlePrint} className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
+          Export
         </button>
       </div>
 
       <h1 className="text-3xl font-bold mb-6">Add Sales Invoice</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Top fields */}
         <div className="flex space-x-4">
           <div className="flex-1">
-            <label className="block font-semibold mb-1">Invoice Number</label>
-            <input
-              type="text"
-              value={formData.invoiceNumber}
-              readOnly
-              className="w-full border px-3 py-2 rounded bg-gray-100"
-            />
+            <label>Invoice Number</label>
+            <input type="text" value={formData.invoiceNumber} readOnly className="w-full border px-3 py-2 rounded bg-gray-100" />
           </div>
-
           <div className="flex-1">
-            <label className="block font-semibold mb-1">Customer Name (Optional)</label>
-            <input
-              type="text"
-              name="customerName"
-              value={formData.customerName}
-              onChange={handleChange}
-              placeholder="Enter customer name"
-              className="w-full border px-3 py-2 rounded"
-            />
+            <label>Customer Name(optional)</label>
+            <input type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
           </div>
-
           <div className="flex-1">
-            <label className="block font-semibold mb-1">Number (Optional)</label>
-            <input
-              type="text"
-              name="number"
-              value={formData.number}
-              onChange={handleChange}
-              placeholder="Enter mobile number"
-              className="w-full border px-3 py-2 rounded"
-            />
-          </div>
+    <label>Mobile Number(optional)</label>
+    <input
+      type="tel"
+      name="number"
+      value={formData.number}
+      onChange={handleChange}
+      className="w-full border px-3 py-2 rounded"
+      placeholder="Enter mobile number"
+    />
+  </div>
+        </div>
+        <div>
+          <label>Sale Date</label>
+          <input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
         </div>
 
         <div>
-          <label className="block font-semibold mb-1">Sale Date</label>
-          <input
-            type="date"
-            name="saleDate"
-            value={formData.saleDate}
-            onChange={handleChange}
-            required
-            className="w-full border px-3 py-2 rounded"
-          />
-        </div>
-
-        {/* Items */}
-        <div>
-          <label className="block font-semibold mb-2">Items</label>
+          <label>Items</label>
           {formData.items.map((item, index) => {
             const filteredOptions = dropdownState[index]?.searchTerm
               ? productOptions.filter((p) =>
@@ -320,191 +291,102 @@ export default function SalesInvoiceForm() {
 
             return (
               <div key={index} className="flex space-x-2 mb-3 items-center relative">
-                {/* Searchable dropdown with arrow */}
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Enter or search product..."
-                    value={item.productName}
-                    onChange={(e) => onSearchChange(index, e.target.value)}
-                    onFocus={() => {
-                      const updatedDropdown = [...dropdownState];
-                      updatedDropdown[index].open = true;
-                      setDropdownState(updatedDropdown);
-                    }}
-                    className="w-full border px-3 py-2 rounded pr-8"
-                    autoComplete="off"
-                  />
-                  {/* Dropdown arrow */}
-                  <button
-                    type="button"
-                    onClick={() => toggleDropdown(index)}
-                    className="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-600"
-                    aria-label="Toggle product dropdown"
-                  >
-                    ▼
-                  </button>
-                  {/* Dropdown list */}
-                  {dropdownState[index]?.open && (
-                    <div className="absolute z-20 bg-white border w-full max-h-48 overflow-auto mt-1 rounded shadow-lg">
-                      {filteredOptions.length > 0 ? (
-                        filteredOptions.map((product) => (
-                          <div
-                            key={product.id}
-                            onMouseDown={(e) => {
-                              e.preventDefault();
-                              handleProductSelect(index, product);
-                            }}
-                            className="cursor-pointer px-3 py-2 hover:bg-gray-200"
-                          >
-                            {product.name} - ₹{product.price.toFixed(2)}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="px-3 py-2 text-gray-500">No products found</div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
                 <input
-                  type="number"
-                  name="quantity"
-                  value={item.quantity}
-                  onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
-                  className="w-20 border px-3 py-2 rounded text-center"
-                  placeholder="Qty"
-                  min="0"
+                  type="text"
+                  placeholder="Enter or search product..."
+                  value={item.productName}
+                  onChange={(e) => onSearchChange(index, e.target.value)}
+                  onFocus={() => {
+                    const updatedDropdown = [...dropdownState];
+                    updatedDropdown[index].open = true;
+                    setDropdownState(updatedDropdown);
+                  }}
+                  className="w-full border px-3 py-2 rounded"
                 />
-
-                <input
-                  type="number"
-                  name="unitPrice"
-                  value={item.unitPrice}
-                  onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)}
-                  className="w-28 border px-3 py-2 rounded text-right"
-                  placeholder="Unit Price"
-                  min="0"
-                />
-
-                <input
-                  type="number"
-                  name="tax"
-                  value={item.tax}
-                  onChange={(e) => handleItemChange(index, "tax", e.target.value)}
-                  className="w-20 border px-3 py-2 rounded text-center"
-                  placeholder="Tax %"
-                  min="0"
-                  max="100"
-                />
-
+                {dropdownState[index]?.open && (
+                  <div className="absolute z-20 bg-white border w-full max-h-48 overflow-auto mt-1 rounded shadow-lg">
+                    {filteredOptions.length > 0 ? (
+                      filteredOptions.map((product) => (
+                        <div
+                          key={product.id}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            handleProductSelect(index, product);
+                          }}
+                          className="cursor-pointer px-3 py-2 hover:bg-gray-200"
+                        >
+                          {product.name} - ₹{Number(product.price).toFixed(2)} {product.isTaxInclusive ? "(Tax Incl.)" : ""}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-gray-500">No products found</div>
+                    )}
+                  </div>
+                )}
+                <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-20 border px-3 py-2 rounded text-center" />
+                <input type="number" placeholder="Unit Price" value={item.unitPrice} onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)} className="w-28 border px-3 py-2 rounded text-right" />
+                <input type="number" placeholder="Tax %" value={item.tax} onChange={(e) => handleItemChange(index, "tax", e.target.value)} className="w-20 border px-3 py-2 rounded text-center" />
                 {formData.items.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeItem(index)}
-                    className="text-red-600 px-2"
-                    title="Remove item"
-                  >
+                  <button type="button" onClick={() => removeItem(index)} className="text-red-600 px-2">
                     ✖
                   </button>
                 )}
               </div>
             );
           })}
-          <button
-            type="button"
-            onClick={addItem}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
+          <button type="button" onClick={addItem} className="bg-blue-600 text-white px-4 py-2 rounded">
             + Add Item
           </button>
         </div>
 
-        {/* Totals */}
         <div className="text-right font-semibold space-y-1">
-          <p>Subtotal: ₹{calculateSubtotal().toFixed(2)}</p>
-          <p>Tax Total: ₹{calculateTaxTotal().toFixed(2)}</p>
+          <p>Subtotal: Rs.{calculateSubtotal().toFixed(2)}</p>
+          <p>Tax Total: Rs.{calculateTaxTotal().toFixed(2)}</p>
           <p className="text-lg">Total: ₹{calculateTotal().toFixed(2)}</p>
         </div>
 
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-        >
+        <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
           Save Invoice
         </button>
       </form>
 
-      {/* Invoice Preview to print */}
-      <div className="mt-10 p-6 border rounded shadow max-w-3xl mx-auto" ref={invoiceRef}>
-        <h2 className="text-xl font-bold mb-4">Invoice Preview</h2>
-        <p>Shop Name</p>
-        <p>Phone: +1234567890</p>
-        <p>Email: shop@example.com</p>
-        <hr className="my-4" />
-        <p>
-          <strong>Invoice No:</strong> {formData.invoiceNumber} <br />
-          <strong>Date:</strong> {formData.saleDate}
-        </p>
-        <p>
-          <strong>Bill To:</strong> {formData.customerName || "—"}
-        </p>
-        <table className="w-full mt-4 border-collapse border border-gray-300">
+      <div ref={invoiceRef} className="mt-10 p-6 border rounded bg-gray-50">
+        <h2 className="text-2xl font-bold mb-4">Invoice Preview</h2>
+        <p>Invoice No: {formData.invoiceNumber}</p>
+        <p>Date: {formData.saleDate}</p>
+        <p>Customer: {formData.customerName || "—"}</p>
+        <p>Mobile: {formData.number || "—"}</p>
+        <table className="w-full mt-4 border-collapse border">
           <thead>
-            <tr>
-              <th className="border border-gray-300 px-2 py-1 text-left">Product</th>
-              <th className="border border-gray-300 px-2 py-1 text-right">Qty</th>
-              <th className="border border-gray-300 px-2 py-1 text-right">Unit (₹)</th>
-              <th className="border border-gray-300 px-2 py-1 text-right">Tax %</th>
-              <th className="border border-gray-300 px-2 py-1 text-right">Line Total (₹)</th>
+            <tr className="border">
+              <th className="border px-2 py-1">Product</th>
+              <th className="border px-2 py-1">Qty</th>
+              <th className="border px-2 py-1">Unit ₹</th>
+              <th className="border px-2 py-1">Tax %</th>
+              <th className="border px-2 py-1">Total ₹</th>
             </tr>
           </thead>
           <tbody>
-            {formData.items.map((item, i) => {
-              const qty = n(item.quantity);
-              const price = n(item.unitPrice);
-              const taxPct = n(item.tax);
-              const line = qty * price;
-              const lineWithTax = line + (line * taxPct) / 100;
-
+            {formData.items.map((item, index) => {
+              const lineTotal = n(item.quantity) * n(item.unitPrice);
+              const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
               return (
-                <tr key={i}>
-                  <td className="border border-gray-300 px-2 py-1">{item.productName || "—"}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-right">{qty}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-right">{price.toFixed(2)}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-right">{taxPct}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-right">{lineWithTax.toFixed(2)}</td>
+                <tr key={index}>
+                  <td className="border px-2 py-1">{item.productName || "N/A"}</td>
+                  <td className="border px-2 py-1 text-center">{n(item.quantity)}</td>
+                  <td className="border px-2 py-1 text-right">{n(item.unitPrice).toFixed(2)}</td>
+                  <td className="border px-2 py-1 text-center">{n(item.tax)}</td>
+                  <td className="border px-2 py-1 text-right">{lineWithTax.toFixed(2)}</td>
                 </tr>
               );
             })}
           </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan={4} className="border border-gray-300 px-2 py-1 text-right font-semibold">
-                Subtotal:
-              </td>
-              <td className="border border-gray-300 px-2 py-1 text-right font-semibold">
-                ₹{calculateSubtotal().toFixed(2)}
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={4} className="border border-gray-300 px-2 py-1 text-right font-semibold">
-                Tax Total:
-              </td>
-              <td className="border border-gray-300 px-2 py-1 text-right font-semibold">
-                ₹{calculateTaxTotal().toFixed(2)}
-              </td>
-            </tr>
-            <tr>
-              <td colSpan={4} className="border border-gray-300 px-2 py-1 text-right font-bold text-lg">
-                Total:
-              </td>
-              <td className="border border-gray-300 px-2 py-1 text-right font-bold text-lg">
-                ₹{calculateTotal().toFixed(2)}
-              </td>
-            </tr>
-          </tfoot>
         </table>
+        <div className="text-right mt-4 space-y-1">
+          <p>Subtotal: Rs.{calculateSubtotal().toFixed(2)}</p>
+          <p>Tax Total: Rs.{calculateTaxTotal().toFixed(2)}</p>
+          <p className="font-bold">Total: Rs.{calculateTotal().toFixed(2)}</p>
+        </div>
       </div>
     </div>
   );

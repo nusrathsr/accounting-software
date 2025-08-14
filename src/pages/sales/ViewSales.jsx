@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FiTrash2 } from "react-icons/fi";
+import axios from "axios";
 
 export default function ViewSalesInvoices() {
   const [sales, setSales] = useState([]);
@@ -7,34 +8,47 @@ export default function ViewSalesInvoices() {
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
 
+  // Fetch sales from backend
+  const fetchSales = async () => {
+    try {
+      const res = await axios.get("http://localhost:4000/api/sales");
+      setSales(res.data);
+    } catch (err) {
+      console.error("Error fetching sales:", err);
+    }
+  };
+
   useEffect(() => {
-    const savedSales = JSON.parse(localStorage.getItem("sales")) || [];
-    setSales(savedSales);
+    fetchSales();
   }, []);
 
+  // Filter sales based on search
   const filteredSales = sales.filter((sale) => {
     const s = search.toLowerCase();
     return (
       sale.invoiceNumber.toLowerCase().includes(s) ||
       (sale.customerName && sale.customerName.toLowerCase().includes(s)) ||
-      sale.items.some((item) =>
-        (item.productName || "").toLowerCase().includes(s)
+      (sale.products || []).some((item) =>
+        (item.name || "").toLowerCase().includes(s)
       )
     );
   });
 
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
-  const currentSales = filteredSales.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const currentSales = filteredSales.slice(startIndex, startIndex + itemsPerPage);
 
-  const deleteSale = (index) => {
-    const newSales = [...sales];
-    newSales.splice(index, 1);
-    setSales(newSales);
-    localStorage.setItem("sales", JSON.stringify(newSales));
+  // Delete a sale
+  const deleteSale = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this invoice?")) return;
+
+    try {
+      await axios.delete(`http://localhost:4000/api/sales/${id}`);
+      fetchSales(); // Refresh list
+    } catch (err) {
+      console.error("Error deleting sale:", err);
+      alert("Failed to delete sale.");
+    }
   };
 
   return (
@@ -62,15 +76,9 @@ export default function ViewSalesInvoices() {
               <th className="border border-gray-300 px-2 py-1">Customer</th>
               <th className="border border-gray-300 px-2 py-1">Date</th>
               <th className="border border-gray-300 px-2 py-1">Items</th>
-              <th className="border border-gray-300 px-2 py-1 text-right">
-                Subtotal
-              </th>
-              <th className="border border-gray-300 px-2 py-1 text-right">
-                Tax Amount (₹)
-              </th>
-              <th className="border border-gray-300 px-2 py-1 text-right">
-                Total
-              </th>
+              <th className="border border-gray-300 px-2 py-1 text-right">Subtotal</th>
+              <th className="border border-gray-300 px-2 py-1 text-right">Tax Amount (₹)</th>
+              <th className="border border-gray-300 px-2 py-1 text-right">Total</th>
               <th className="border border-gray-300 px-2 py-1">Action</th>
             </tr>
           </thead>
@@ -79,48 +87,26 @@ export default function ViewSalesInvoices() {
               const idx = startIndex + i;
               return (
                 <tr key={idx}>
-                  <td className="border border-gray-300 px-2 py-1">
-                    {sale.invoiceNumber}
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1">
-                    {sale.customerName || "—"}
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1">
-                    {sale.saleDate}
-                  </td>
+                  <td className="border border-gray-300 px-2 py-1">{sale.invoiceNumber}</td>
+                  <td className="border border-gray-300 px-2 py-1">{sale.customerName || "—"}</td>
+                  <td className="border border-gray-300 px-2 py-1">{sale.date?.slice(0, 10)}</td>
                   <td className="border border-gray-300 px-2 py-1 max-w-xs">
                     <ul className="list-disc pl-5 max-h-24 overflow-y-auto">
-                      {sale.items.map((item, j) => (
+                      {(sale.products || []).map((item, j) => (
                         <li key={j}>
-                          {item.productName || "Unnamed Product"} — Qty:{" "}
-                          {item.quantity || 0}, Price: ₹
-                          {parseFloat(item.unitPrice || 0).toFixed(2)}
-                          {item.tax ? `, Tax: ${item.tax}%` : ""}
+                          {item.name || "Unnamed Product"} — Qty: {item.quantity || 0}, Price: ₹{parseFloat(item.unitPrice || 0).toFixed(2)}
                         </li>
                       ))}
                     </ul>
                   </td>
-                  <td className="border border-gray-300 px-2 py-1 text-right">
-                    ₹{parseFloat(sale.subtotal || 0).toFixed(2)}
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 text-right">
-                     ₹{parseFloat(sale.taxTotal || 0).toFixed(2)}
-                  </td>
-                  <td className="border border-gray-300 px-2 py-1 text-right font-semibold">
-                    ₹{parseFloat(sale.totalAmount || 0).toFixed(2)}
-                  </td>
+                  <td className="border border-gray-300 px-2 py-1 text-right">₹{parseFloat(sale.subtotal || 0).toFixed(2)}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-right">₹{parseFloat(sale.tax || 0).toFixed(2)}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-right font-semibold">₹{parseFloat(sale.totalAmount || 0).toFixed(2)}</td>
                   <td className="border border-gray-300 px-2 py-1 text-center">
                     <button
-                      onClick={() => {
-                        if (
-                          window.confirm(`Delete invoice ${sale.invoiceNumber}?`)
-                        ) {
-                          deleteSale(idx);
-                        }
-                      }}
+                      onClick={() => deleteSale(sale._id)}
                       className="text-red-600 hover:text-red-800"
                       title="Delete"
-                      aria-label={`Delete invoice ${sale.invoiceNumber}`}
                     >
                       <FiTrash2 size={20} />
                     </button>
@@ -146,9 +132,7 @@ export default function ViewSalesInvoices() {
             <button
               key={i}
               onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 border rounded ${
-                page === i + 1 ? "bg-blue-600 text-white" : ""
-              }`}
+              className={`px-3 py-1 border rounded ${page === i + 1 ? "bg-blue-600 text-white" : ""}`}
             >
               {i + 1}
             </button>
