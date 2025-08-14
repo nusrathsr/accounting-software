@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 export default function AddPurchase() {
-  const suppliers = ["ABC Traders", "XYZ Supplies", "Global Wholesale", "FastMart"];
+  const sellers = ["ABC Traders", "XYZ Supplies", "Global Wholesale", "FastMart"];
   const products = [
     { name: "Laptop", price: 25000 },
     { name: "Mouse", price: 500 },
@@ -11,7 +11,7 @@ export default function AddPurchase() {
 
   const [formData, setFormData] = useState({
     purchaseOrderNumber: "",
-    supplierName: "",
+    sellerName: "",
     product: "",
     quantity: "",
     unitPrice: "",
@@ -20,8 +20,8 @@ export default function AddPurchase() {
     purchaseDate: "",
   });
 
-  const [supplierSearch, setSupplierSearch] = useState("");
-  const [supplierDropdownOpen, setSupplierDropdownOpen] = useState(false);
+  const [sellerSearch, setSellerSearch] = useState("");
+  const [sellerDropdownOpen, setSellerDropdownOpen] = useState(false);
 
   const [productSearch, setProductSearch] = useState("");
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
@@ -53,10 +53,10 @@ export default function AddPurchase() {
     });
   };
 
-  const handleSupplierSelect = (name) => {
-    setFormData((prev) => ({ ...prev, supplierName: name }));
-    setSupplierSearch(name);
-    setSupplierDropdownOpen(false);
+  const handleSellerSelect = (name) => {
+    setFormData((prev) => ({ ...prev, sellerName: name }));
+    setSellerSearch(name);
+    setSellerDropdownOpen(false);
   };
 
   const handleProductSelect = (product) => {
@@ -79,7 +79,7 @@ export default function AddPurchase() {
     alert("Purchase data submitted!");
     setFormData({
       purchaseOrderNumber: "",
-      supplierName: "",
+      sellerName: "",
       product: "",
       quantity: "",
       unitPrice: "",
@@ -119,41 +119,41 @@ export default function AddPurchase() {
             />
           </div>
 
-          {/* Supplier Dropdown */}
+          {/* Seller Dropdown */}
           <div className="flex-1 min-w-[200px] relative">
             <label className="block text-gray-700 text-sm font-bold mb-2">
-              Supplier Name
+              Seller Name
             </label>
             <div className="relative">
               <input
                 type="text"
-                value={supplierSearch}
+                value={sellerSearch}
                 onChange={(e) => {
-                  setSupplierSearch(e.target.value);
-                  setSupplierDropdownOpen(true);
+                  setSellerSearch(e.target.value);
+                  setSellerDropdownOpen(true);
                 }}
-                onFocus={() => setSupplierDropdownOpen(true)}
-                placeholder="Search supplier..."
+                onFocus={() => setSellerDropdownOpen(true)}
+                placeholder="Search seller..."
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
               />
               <button
                 type="button"
                 className="absolute right-2 top-2 text-gray-500"
-                onClick={() => setSupplierDropdownOpen((prev) => !prev)}
+                onClick={() => setSellerDropdownOpen((prev) => !prev)}
               >
                 ▼
               </button>
             </div>
-            {supplierDropdownOpen && (
+            {sellerDropdownOpen && (
               <ul className="absolute z-10 bg-white border w-full max-h-40 overflow-y-auto">
-                {suppliers
+                {sellers
                   .filter((s) =>
-                    s.toLowerCase().includes(supplierSearch.toLowerCase())
+                    s.toLowerCase().includes(sellerSearch.toLowerCase())
                   )
                   .map((s, i) => (
                     <li
                       key={i}
-                      onClick={() => handleSupplierSelect(s)}
+                      onClick={() => handleSellerSelect(s)}
                       className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
                     >
                       {s}

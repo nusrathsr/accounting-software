@@ -86,7 +86,7 @@ export default function ViewPurchase() {
             <thead className="bg-gray-50 sticky top-0">
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-gray-700">PO Number</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Supplier Name</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">Seller Name</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-700">Product</th>
                 <th className="px-4 py-3 text-right font-medium text-gray-700">Qty</th>
                 <th className="px-4 py-3 text-right font-medium text-gray-700">Purchased Price</th>
@@ -100,7 +100,7 @@ export default function ViewPurchase() {
               {currentPurchases.map((purchase, index) => (
                 <tr key={startIndex + index} className="hover:bg-gray-50">
                   <td className="px-4 py-2">{purchase.purchaseOrderNumber}</td>
-                  <td className="px-4 py-2">{purchase.supplierName}</td>
+                  <td className="px-4 py-2">{purchase.sellerName}</td>
                   <td className="px-4 py-2">{purchase.product}</td>
                   <td className="px-4 py-2 text-right">{purchase.quantity}</td>
                   <td className="px-4 py-2 text-right">₹{purchase.unitPrice}</td>
@@ -199,12 +199,12 @@ export default function ViewPurchase() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Supplier Name
+                  Seller Name
                 </label>
                 <input
                   type="text"
-                  name="supplierName"
-                  value={editData.supplierName}
+                  name="sellerName"
+                  value={editData.sellerName}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   required
