@@ -37,19 +37,16 @@ export default function ViewPurchase() {
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
   const currentPurchases = filteredPurchases.slice(startIndex, startIndex + itemsPerPage);
 
-  // Open edit modal with selected purchase data
   const openEditModal = (index) => {
     setEditIndex(index);
     setEditData({ ...purchases[index] });
   };
 
-  // Close edit modal
   const closeEditModal = () => {
     setEditIndex(null);
     setEditData(null);
   };
 
-  // Handle form input changes inside modal
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditData((prev) => ({
@@ -58,21 +55,18 @@ export default function ViewPurchase() {
     }));
   };
 
-  // Save edited data
   const handleSave = () => {
     if (!editData) return;
-
     const updatedPurchases = [...purchases];
     updatedPurchases[editIndex] = editData;
-
     setPurchases(updatedPurchases);
     localStorage.setItem('purchases', JSON.stringify(updatedPurchases));
     closeEditModal();
   };
 
   return (
-    <div className="px-6 pt-2 pb-4">
-      <h1 className="text-2xl font-semibold mb-4">Purchase Records</h1>
+    <div className="w-full max-w-full px-6 py-4 mx-auto">
+      <h1 className="text-2xl font-semibold mb-4 text-center">Purchase Records</h1>
 
       {/* Search input */}
       <input
@@ -92,11 +86,10 @@ export default function ViewPurchase() {
             <thead className="bg-gray-50 sticky top-0">
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-gray-700">PO Number</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Supplier</th>
+                <th className="px-4 py-3 text-left font-medium text-gray-700">Supplier Name</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-700">Product</th>
                 <th className="px-4 py-3 text-right font-medium text-gray-700">Qty</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">Unit Price</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">Discount (%)</th>
+                <th className="px-4 py-3 text-right font-medium text-gray-700">Purchased Price</th>
                 <th className="px-4 py-3 text-right font-medium text-gray-700">Tax (%)</th>
                 <th className="px-4 py-3 text-right font-medium text-gray-700">Total</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-700">Date</th>
@@ -110,10 +103,9 @@ export default function ViewPurchase() {
                   <td className="px-4 py-2">{purchase.supplierName}</td>
                   <td className="px-4 py-2">{purchase.product}</td>
                   <td className="px-4 py-2 text-right">{purchase.quantity}</td>
-                  <td className="px-4 py-2 text-right">${purchase.unitPrice}</td>
-                  <td className="px-4 py-2 text-right">{purchase.discount}%</td>
+                  <td className="px-4 py-2 text-right">₹{purchase.unitPrice}</td>
                   <td className="px-4 py-2 text-right">{purchase.tax}%</td>
-                  <td className="px-4 py-2 text-right">${purchase.totalAmount}</td>
+                  <td className="px-4 py-2 text-right">₹{purchase.totalAmount}</td>
                   <td className="px-4 py-2">{purchase.purchaseDate}</td>
                   <td className="px-4 py-2 text-center space-x-2">
                     <button
@@ -137,7 +129,7 @@ export default function ViewPurchase() {
           </table>
         </div>
       ) : (
-        <p className="text-gray-600">No purchase records found.</p>
+        <p className="text-gray-600 text-center">No purchase records found.</p>
       )}
 
       {/* Pagination */}
@@ -150,7 +142,6 @@ export default function ViewPurchase() {
           >
             Prev
           </button>
-
           {[...Array(totalPages)].map((_, i) => (
             <button
               key={i}
@@ -164,7 +155,6 @@ export default function ViewPurchase() {
               {i + 1}
             </button>
           ))}
-
           <button
             className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50"
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
@@ -252,7 +242,7 @@ export default function ViewPurchase() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Unit Price
+                  Purchased Price
                 </label>
                 <input
                   type="number"
@@ -261,23 +251,6 @@ export default function ViewPurchase() {
                   onChange={handleChange}
                   step="0.01"
                   min="0"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Discount (%)
-                </label>
-                <input
-                  type="number"
-                  name="discount"
-                  value={editData.discount}
-                  onChange={handleChange}
-                  step="0.01"
-                  min="0"
-                  max="100"
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   required
                 />
