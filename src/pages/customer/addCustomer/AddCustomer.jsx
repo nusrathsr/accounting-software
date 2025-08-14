@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import axios from 'axios';
+import {GlobalContext} from '../../../context/GlobalContext'
+import { useNavigate } from 'react-router-dom';
 
 const AddCustomer = () => {
-
-
+  const {baseURL} =useContext(GlobalContext)
+  const navigate =useNavigate()
   const [customer, setCustomer] = useState({
     name: '',
     phone: '',
@@ -20,22 +23,39 @@ const AddCustomer = () => {
     setCustomer((prev) => ({ ...prev, [name]: value }));
   };
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Customer Added:', customer);
-    // Send to backend here
 
+    try {
+      const res = await axios.post(`${baseURL}/customer`, customer); // <-- Backend API endpoint
+      console.log('Customer Added:', res.data);
+
+      alert('Customer added successfully!');
+      navigate('/listCustomer')
+      // Reset form
+      setCustomer({
+        name: '',
+        phone: '',
+        email: '',
+        type: '',
+        gstNumber: '',
+        address: '',
+        city: '',
+        state: '',
+        pincode: '',
+      });
+    } catch (error) {
+      console.error('Error adding customer:', error);
+      alert(error.response?.data?.message || 'Failed to add customer');
+    }
   };
 
   return (
     <div className="p-4 sm:px-8 lg:px-12">
       <div className="bg-transparent p-6 shadow rounded max-w-5xl mx-auto">
-
         <h2 className="text-2xl font-bold mb-6 text-white-700">Add Customer</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* ROW 1: Name + Phone */}
+          {/* Name + Phone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-medium">Full Name *</label>
@@ -48,7 +68,6 @@ const AddCustomer = () => {
                 className="w-full p-2 border rounded bg-transparent"
               />
             </div>
-
             <div>
               <label className="block font-medium">Phone Number *</label>
               <input
@@ -62,7 +81,7 @@ const AddCustomer = () => {
             </div>
           </div>
 
-          {/* ROW 2: Email + Customer Type */}
+          {/* Email + Type */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-medium">Email</label>
@@ -74,7 +93,6 @@ const AddCustomer = () => {
                 className="w-full p-2 border rounded bg-transparent"
               />
             </div>
-
             <div>
               <label className="block font-medium">Customer Type *</label>
               <select
@@ -85,16 +103,16 @@ const AddCustomer = () => {
                 className="w-full p-2 border rounded bg-transparent"
               >
                 <option value="">Select Type</option>
-                <option value="retail">Retail Customer</option>
-                <option value="wholesale">Wholesale Customer</option>
-                <option value="distributor">Distributor</option>
+                <option value="Retail Customer">Retail Customer</option>
+                <option value="Wholesale Customer">Wholesale Customer</option>
+                <option value="Distributor">Distributor</option>
                 <option value="seller">Seller</option>
                 <option value="vendor">Vendor</option>
               </select>
             </div>
           </div>
 
-          {/* GST (only visible for specific types) */}
+          {/* GST for certain types */}
           {['wholesale', 'distributor', 'vendor'].includes(customer.type) && (
             <div>
               <label className="block font-medium">GST Number</label>
@@ -121,7 +139,7 @@ const AddCustomer = () => {
             ></textarea>
           </div>
 
-          {/* ROW 3: City + State */}
+          {/* City + State */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-medium">City</label>
@@ -133,7 +151,6 @@ const AddCustomer = () => {
                 className="w-full p-2 border rounded bg-transparent"
               />
             </div>
-
             <div>
               <label className="block font-medium">State</label>
               <input
@@ -146,7 +163,7 @@ const AddCustomer = () => {
             </div>
           </div>
 
-          {/* ROW 4: Pincode */}
+          {/* Pincode */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-medium">Pincode</label>
@@ -160,7 +177,7 @@ const AddCustomer = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <div className="pt-4 text-right">
             <button
               type="submit"
@@ -169,8 +186,6 @@ const AddCustomer = () => {
               Add Customer
             </button>
           </div>
-
-
         </form>
       </div>
     </div>
