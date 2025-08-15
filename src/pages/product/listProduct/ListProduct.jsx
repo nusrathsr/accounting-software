@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import './listProduct.css';
 import { GlobalContext } from '../../../context/GlobalContext';
 import { MdDeleteForever } from "react-icons/md";
 import { FaRegEdit } from "react-icons/fa";
@@ -67,7 +66,7 @@ const ListProduct = () => {
 
   return (
     <div className="p-4 sm:px-8 lg:px-12">
-      <div className="bg-transparent p-6 shadow rounded max-w-6xl mx-auto">
+      <div className="bg-white p-6 shadow rounded max-w-8xl mx-auto">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
           <h2 className="text-2xl font-bold text-white-700">Product List</h2>
           <div className="flex flex-wrap justify-end gap-4 w-full md:w-auto">
@@ -104,12 +103,14 @@ const ListProduct = () => {
             <thead>
               <tr className="bg-black-100 text-left text-lg font-bold text-white-100">
                 <th className="px-4 py-2 border">productID</th>
+                <th className="px-4 py-2 border">product</th>
                 <th className="px-4 py-2 border">Name</th>
                 <th className="px-4 py-2 border">SKU</th>
                 <th className="px-4 py-2 border">Category</th>
                 <th className="px-4 py-2 border">Subcategory</th>
                 <th className="px-4 py-2 border">Brand</th>
-                <th className="px-4 py-2 border">Price</th>
+                <th className="px-4 py-2 border">purchase Price</th>
+                <th className="px-4 py-2 border">selling Price</th>
                 <th className="px-4 py-2 border">Stock</th>
                 <th className="px-4 py-2 border">Actions</th>
               </tr>
@@ -118,12 +119,14 @@ const ListProduct = () => {
               {filterProducts.map((prod) => (
                 <tr key={prod._id} className="text-sm text-white-700 border-t">
                   <td className="px-4 py-2 border">{prod.productId}</td>
+                  <td className="px-4 py-2 border"><img src={prod.image} style={{ width: "30px" }} alt="" /></td>
                   <td className="px-4 py-2 border">{prod.name}</td>
                   <td className="px-4 py-2 border">{prod.sku}</td>
                   <td className="px-4 py-2 border capitalize">{prod.category}</td>
                   <td className="px-4 py-2 border">{prod.subcategory}</td>
                   <td className="px-4 py-2 border">{prod.brand}</td>
 
+                  <td className="px-4 py-2 border">₹{prod.purchasePrice}</td>
 
 
                   <td className="px-4 py-2 border">₹{prod.sellingPrice}</td>
@@ -135,13 +138,13 @@ const ListProduct = () => {
                       to={`/editProduct/${prod._id}`}
                       className="text-blue-600 hover:underline mr-2"
                     >
-                       <FaRegEdit  size={18}/>
+                      <FaRegEdit size={18} />
                     </Link>
                     <button
                       onClick={() => handleDelete(prod._id)}
                       className="text-red-600 hover:underline"
                     >
-                     <MdDeleteForever size={19} />
+                      <MdDeleteForever size={19} />
                     </button>
                   </td>
                 </tr>

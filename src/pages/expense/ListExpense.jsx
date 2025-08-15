@@ -85,45 +85,51 @@ const ListExpenses = () => {
 
   return (
     <div className="p-4 sm:px-6 lg:px-8">
+       <h2 className="text-2xl font-bold mb-5 text-white-700"> Expense</h2>
       <div className="bg-white text-gray-800 p-4 shadow rounded max-w-7xl mx-auto">
+        
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
-          <h2 className="text-xl md:text-2xl font-bold">Expenses List</h2>
-          <div className="flex flex-wrap gap-2 items-center">
-            <input
-              type="date"
-              name="startDate"
-              value={filter.startDate}
-              onChange={handleFilterChange}
-              className="px-2 py-1 text-sm md:text-base border rounded"
-            />
-            <input
-              type="date"
-              name="endDate"
-              value={filter.endDate}
-              onChange={handleFilterChange}
-              className="px-2 py-1 text-sm md:text-base border rounded"
-            />
-            <button
-              onClick={() => quickFilter('lastMonth')}
-              className="px-3 py-1 md:px-4 md:py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm md:text-base"
-            >
-              Last Month
-            </button>
-            <button
-              onClick={() => quickFilter('thisMonth')}
-              className="px-3 py-1 md:px-4 md:py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm md:text-base"
-            >
-              This Month
-            </button>
-            <button
-              onClick={generatePDF}
-              className="px-3 py-1 md:px-4 md:py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm md:text-base"
-            >
-              EXPORT
-            </button>
-          </div>
-        </div>
+      <div className="flex flex-wrap justify-between items-center gap-2">
+  {/* Left side: Filters */}
+  <div className="flex flex-wrap gap-2 items-center">
+    <input
+      type="date"
+      name="startDate"
+      value={filter.startDate}
+      onChange={handleFilterChange}
+      className="px-2 py-1 text-sm md:text-base border rounded"
+    />
+    <input
+      type="date"
+      name="endDate"
+      value={filter.endDate}
+      onChange={handleFilterChange}
+      className="px-2 py-1 text-sm md:text-base border rounded"
+    />
+    <select
+      name="quickFilter"
+      value=""
+      onChange={(e) => {
+        if (e.target.value === 'lastMonth') quickFilter('lastMonth');
+        if (e.target.value === 'thisMonth') quickFilter('thisMonth');
+      }}
+      className="px-6 py-2 border border-gray-300 rounded"
+    >
+      <option value="">Filter by</option>
+      <option value="lastMonth">Last Month</option>
+      <option value="thisMonth">This Month</option>
+    </select>
+  </div>
+
+  {/* Right side: Export Button */}
+  <button
+    onClick={generatePDF}
+    className="px-3 py-1 md:px-4 md:py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm md:text-base"
+  >
+    EXPORT
+  </button>
+</div>
+
 
         {/* Total */}
         <div className="mb-4 text-right text-sm md:text-base font-semibold">

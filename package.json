@@ -16,10 +16,9 @@
     "chartjs-adapter-moment": "^1.0.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-<<<<<<< HEAD
+
     "html2canvas": "^1.4.1",
-=======
->>>>>>> 1e58dc8801c7f4591181060e5d3309f8fcdb6937
+
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "moment": "^2.29.4",

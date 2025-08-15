@@ -54,7 +54,7 @@ const AddExpense = () => {
 
   return (
     <div className="p-4 sm:px-8 lg:px-12">
-      <div className="bg-transparent p-6 shadow rounded max-w-4xl mx-auto">
+      <div className="bg-white p-6 shadow rounded max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold mb-6 text-white-700">Add Expense</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
 

@@ -8,10 +8,10 @@ const EditProduct = () => {
   const navigate = useNavigate();
   const { suppliers, baseURL, loading } = useContext(GlobalContext);
 
-  const [categories, setCategories] = useState([
-    { name: "clothing", subcategories: ["Shirts", "T-Shirts", "Pants", "Kids Wear"] },
-    { name: "grocery", subcategories: ["Fruits", "Vegetables", "Snacks", "dairy products"] },
-    { name: "electronics", subcategories: ["Mobiles", "Laptops", "Chargers", "speaker"] },
+   const [categories, setCategories] = useState([
+    { name: 'clothing', subcategories: ['Shirts', 'T-Shirts', 'Pants', 'Kids Wear','top','dress','shawls'] },
+    { name: 'grocery', subcategories: ['Fruits', 'Vegetables', 'Snacks', 'dairy products','spices',"essentials","cookware","dinnerware"] },
+    { name: 'electronics', subcategories: ['Mobiles', 'Laptops', 'Chargers','speaker',"tv","washing machine","mixer grinder","refrigerator","fan","light","vacuum cleaner","headphones","oven","kettle","electric stove","intention cooker",] },
   ]);
   const [subcategories, setSubcategories] = useState([]);
   const [taxInclusive, setTaxInclusive] = useState(false);

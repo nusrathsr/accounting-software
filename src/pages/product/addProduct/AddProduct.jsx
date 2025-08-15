@@ -129,7 +129,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="p-6 shadow rounded max-w-5xl mx-auto ">
+    <div className="p-6 bg-white shadow rounded max-w-5xl mx-auto ">
       <h2 className="text-2xl font-bold mb-6 text-white-700">Add Product</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Product ID */}
