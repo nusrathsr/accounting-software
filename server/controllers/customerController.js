@@ -47,6 +47,17 @@ exports.getAllCustomers = async (req, res) => {
   }
 };
 
+// Get only customers of type "seller"
+exports.getSellers = async (req, res) => {
+  try {
+    const sellers = await Customer.find({ type: 'seller' }).select('name'); // filter only sellers
+    res.json(sellers);
+  } catch (err) {
+        console.error(err);
+    res.status(500).json({ error: 'Failed to fetch sellers' });
+  }
+};
+
 // Get single customer by ID
 exports.getCustomerById = async (req, res) => {
   try {

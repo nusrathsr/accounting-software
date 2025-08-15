@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function AddPurchase() {
-  const sellers = ["ABC Traders", "XYZ Supplies", "Global Wholesale", "FastMart"];
-
+  const [sellers, setSellers] = useState([]);
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({
     purchaseOrderNumber: "",
@@ -33,6 +32,18 @@ export default function AddPurchase() {
     };
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+  const fetchSellers = async () => {
+    try {
+      const res = await axios.get("http://localhost:4000/api/customer/sellers");
+      setSellers(res.data);
+    } catch (err) {
+      console.error("Error fetching sellers:", err);
+    }
+  };
+  fetchSellers();
+}, []);
 
   useEffect(() => {
     generatePONumber();
@@ -71,7 +82,6 @@ export default function AddPurchase() {
     setFormData((prev) => ({
       ...prev,
       product: product.name,
-      unitPrice: product.purchasePrice || 0,
     }));
     setProductSearch(product.name);
     setProductDropdownOpen(false);
@@ -79,8 +89,22 @@ export default function AddPurchase() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.sellerName || !formData.product) {
+    alert("Please select a seller and a product.");
+    return;
+  }
     try {
-      await axios.post("http://localhost:4000/api/purchase", formData);
+      const payload = {
+      purchaseOrderNumber: formData.purchaseOrderNumber,
+      sellerName: formData.sellerName,
+      product: formData.product,
+      quantity: Number(formData.quantity),      // ✅ Ensure number
+      unitPrice: Number(formData.unitPrice),    // ✅ Ensure number
+      tax: Number(formData.tax) || 0,           // ✅ Ensure number
+      totalAmount: Number(formData.totalAmount),// ✅ Ensure number
+      purchaseDate: new Date(formData.purchaseDate), // ✅ Date object
+    };
+      await axios.post("http://localhost:4000/api/purchase", payload);
       alert("✅ Purchase saved to MongoDB!");
       setFormData({
         purchaseOrderNumber: "",
@@ -94,7 +118,7 @@ export default function AddPurchase() {
       });
       generatePONumber();
     } catch (err) {
-      console.error("❌ Error saving purchase:", err);
+      console.error("❌ Error saving purchase:", err.response?.data || err);
       alert("Failed to save purchase.");
     }
   };
@@ -132,7 +156,9 @@ export default function AddPurchase() {
                 type="text"
                 value={sellerSearch}
                 onChange={(e) => {
-                  setSellerSearch(e.target.value);
+                  const val = e.target.value;
+                  setSellerSearch(val);
+                  setFormData(prev => ({ ...prev, sellerName: val })); // ✅ Update formData
                   setSellerDropdownOpen(true);
                 }}
                 onFocus={() => setSellerDropdownOpen(true)}
@@ -151,15 +177,15 @@ export default function AddPurchase() {
               <ul className="absolute z-10 bg-white border w-full max-h-40 overflow-y-auto">
                 {sellers
                   .filter((s) =>
-                    s.toLowerCase().includes(sellerSearch.toLowerCase())
+                    s.name.toLowerCase().includes(sellerSearch.toLowerCase())
                   )
-                  .map((s, i) => (
+                  .map((s) => (
                     <li
-                      key={i}
-                      onClick={() => handleSellerSelect(s)}
+                      key={s._id}
+                      onClick={() => handleSellerSelect(s.name)}
                       className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
                     >
-                      {s}
+                      {s.name}
                     </li>
                   ))}
               </ul>
@@ -178,7 +204,9 @@ export default function AddPurchase() {
                 type="text"
                 value={productSearch}
                 onChange={(e) => {
-                  setProductSearch(e.target.value);
+                  const val = e.target.value;
+                  setProductSearch(val);
+                  setFormData(prev => ({ ...prev, product: val })); // ✅ Add this
                   setProductDropdownOpen(true);
                 }}
                 onFocus={() => setProductDropdownOpen(true)}
@@ -206,7 +234,7 @@ export default function AddPurchase() {
                         onClick={() => handleProductSelect(p)}
                         className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
                       >
-                        {p.name} - ₹{p.purchasePrice}
+                        {p.name}
                       </li>
                     ))}
                 </ul>

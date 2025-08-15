@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const customerController = require('../controllers/customerController');
 
+router.get('/sellers', customerController.getSellers);
+
 // Create customer
 router.post('/', customerController.addCustomer);
 
@@ -16,5 +18,7 @@ router.put('/:id', customerController.updateCustomer);
 
 // Delete customer
 router.delete('/:id', customerController.deleteCustomer);
+
+
 
 module.exports = router;
