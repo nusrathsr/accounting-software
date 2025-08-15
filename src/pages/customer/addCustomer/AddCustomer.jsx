@@ -51,8 +51,8 @@ const AddCustomer = () => {
   };
 
   return (
-    <div className="p-4 sm:px-8 lg:px-12">
-      <div className="bg-transparent p-6 shadow rounded max-w-5xl mx-auto">
+    <div className="p-4  sm:px-8 lg:px-12">
+      <div className="bg-white p-6 shadow rounded max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold mb-6 text-white-700">Add Customer</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name + Phone */}
@@ -105,9 +105,9 @@ const AddCustomer = () => {
                 <option value="">Select Type</option>
                 <option value="Retail Customer">Retail Customer</option>
                 <option value="Wholesale Customer">Wholesale Customer</option>
-                <option value="Distributor">Distributor</option>
+                <option value="Supplier">supplier</option>
                 <option value="seller">Seller</option>
-                <option value="vendor">Vendor</option>
+                
               </select>
             </div>
           </div>
