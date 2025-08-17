@@ -41,6 +41,54 @@ exports.getAllPurchases = async (req, res) => {
   }
 };
 
+exports.updatePurchase = async (req, res) => {
+  try {
+    const { purchaseOrderNumber, sellerName, product: productName, size, quantity, unitPrice, tax, totalAmount, purchaseDate } = req.body;
+
+    // Validate required fields
+    if (!purchaseOrderNumber || !sellerName || !productName || !quantity || !unitPrice || !totalAmount || !purchaseDate) {
+      return res.status(400).json({ message: "All required fields must be filled" });
+    }
+
+    // Find existing purchase
+    const existingPurchase = await PurchaseInvoice.findById(req.params.id);
+    if (!existingPurchase) return res.status(404).json({ message: "Purchase not found" });
+
+    // Calculate quantity difference for stock update
+    const qtyDiff = Number(quantity) - Number(existingPurchase.quantity);
+
+    // Update purchase document
+    existingPurchase.purchaseOrderNumber = purchaseOrderNumber;
+    existingPurchase.sellerName = sellerName;
+    existingPurchase.product = productName;
+    existingPurchase.size = size;
+    existingPurchase.quantity = quantity;
+    existingPurchase.unitPrice = unitPrice;
+    existingPurchase.tax = tax;
+    existingPurchase.totalAmount = totalAmount;
+    existingPurchase.purchaseDate = purchaseDate;
+
+    await existingPurchase.save();
+
+    // Update Product stock
+    const product = await Product.findOne({ name: productName.trim() });
+    if (product) {
+      if (product.sizes && product.sizes.length > 0) {
+        product.sizes[0].quantity = (product.sizes[0].quantity || 0) + qtyDiff;
+      } else {
+        product.sizes = [{ size: size || "Default", quantity: qtyDiff }];
+      }
+      product.purchasePrice = Number(unitPrice);
+      await product.save();
+    }
+
+    res.json({ message: "✅ Purchase updated & stock adjusted", purchase: existingPurchase, product });
+  } catch (err) {
+    console.error("Update error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
 // 🗑️ Delete a purchase (and adjust stock)
 exports.deletePurchase = async (req, res) => {
   try {
