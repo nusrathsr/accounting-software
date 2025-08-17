@@ -67,27 +67,27 @@ const ListCustomer = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border border-grey-200">
-            <thead className="text-left text-lg font-semibold text-white-700">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+            <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th className="px-4 py-2 border">Name</th>
-                <th className="px-4 py-2 border">Email</th>
+                <th className="border border-gray-300 px-2 py-1">Name</th>
+                <th className="border border-gray-300 px-2 py-1">Email</th>
 
-                <th className="px-4 py-2 border">Phone</th>
-                <th className="px-4 py-2 border">Type</th>
-                <th className="px-4 py-2 border">City</th>
-                <th className="px-4 py-2 border">Actions</th>
+                <th className="border border-gray-300 px-2 py-1">Phone</th>
+                <th className="border border-gray-300 px-2 py-1">Type</th>
+                <th className="border border-gray-300 px-2 py-1">City</th>
+                <th className="border border-gray-300 px-2 py-1">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredCustomers.map((cust) => (
-                <tr key={cust._id} className="text-sm text-white-700 border-t">
-                  <td className="px-4 py-2 border">{cust.name}</td>
-                  <td className="px-4 py-2 border">{cust.email}</td>
-                  <td className="px-4 py-2 border">{cust.phone}</td>
-                  <td className="px-4 py-2 border">{cust.type}</td>
-                  <td className="px-4 py-2 border">{cust.city}</td>
-                  <td className="px-4 py-2 border flex ">
+                <tr key={cust._id} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 px-2 py-1">{cust.name}</td>
+                  <td className="border border-gray-300 px-2 py-1">{cust.email}</td>
+                  <td className="border border-gray-300 px-2 py-1">{cust.phone}</td>
+                  <td className="border border-gray-300 px-2 py-1">{cust.type}</td>
+                  <td className="border border-gray-300 px-2 py-1">{cust.city}</td>
+                  <td className="border border-gray-300 px-2 py-1 flex ">
                     <Link
                       to={`/editCustomer/${cust._id}`}
                       className="text-blue-600 hover:underline mr-8"

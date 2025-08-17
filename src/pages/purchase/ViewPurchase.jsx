@@ -131,29 +131,29 @@ export default function ViewPurchase() {
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">PO Number</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Seller Name</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Product</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">Qty</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">Purchased Price</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">Tax (%)</th>
-                <th className="px-4 py-3 text-right font-medium text-gray-700">Total</th>
-                <th className="px-4 py-3 text-left font-medium text-gray-700">Date</th>
-                <th className="px-4 py-3 text-center font-medium text-gray-700">Actions</th>
+                <th className="border border-gray-300 px-2 py-1">PO Number</th>
+                <th className="border border-gray-300 px-2 py-1">Seller Name</th>
+                <th className="border border-gray-300 px-2 py-1">Product</th>
+                <th className="border border-gray-300 px-2 py-1">Qty</th>
+                <th className="border border-gray-300 px-2 py-1">Purchased Price</th>
+                <th className="border border-gray-300 px-2 py-1">Tax (%)</th>
+                <th className="border border-gray-300 px-2 py-1">Total</th>
+                <th className="border border-gray-300 px-2 py-1">Date</th>
+                <th className="border border-gray-300 px-2 py-1">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {currentPurchases.map((purchase) => (
                 <tr key={purchase._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2">{purchase.purchaseOrderNumber}</td>
-                  <td className="px-4 py-2">{purchase.sellerName}</td>
-                  <td className="px-4 py-2">{purchase.product}</td>
-                  <td className="px-4 py-2 text-right">{purchase.quantity}</td>
-                  <td className="px-4 py-2 text-right">₹{purchase.unitPrice}</td>
-                  <td className="px-4 py-2 text-right">{purchase.tax}%</td>
-                  <td className="px-4 py-2 text-right">₹{purchase.totalAmount}</td>
-                  <td className="px-4 py-2">{new Date(purchase.purchaseDate).toLocaleDateString()}</td>
-                  <td className="px-4 py-2 text-center space-x-2">
+                  <td className="border border-gray-300 px-2 py-1">{purchase.purchaseOrderNumber}</td>
+                  <td className="border border-gray-300 px-2 py-1">{purchase.sellerName}</td>
+                  <td className="border border-gray-300 px-2 py-1">{purchase.product}</td>
+                  <td className="border border-gray-300 px-2 py-1">{purchase.quantity}</td>
+                  <td className="border border-gray-300 px-2 py-1">₹{purchase.unitPrice}</td>
+                  <td className="border border-gray-300 px-2 py-1">{purchase.tax}%</td>
+                  <td className="border border-gray-300 px-2 py-1">₹{purchase.totalAmount}</td>
+                  <td className="border border-gray-300 px-2 py-1">{new Date(purchase.purchaseDate).toLocaleDateString()}</td>
+                  <td className="border border-gray-300 px-2 py-1">
                     <button
                       onClick={() => openEditModal(purchase)}
                       className="text-blue-600 hover:text-blue-800"

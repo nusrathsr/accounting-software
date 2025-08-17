@@ -138,27 +138,27 @@ const ListExpenses = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="min-w-full table-auto border border-gray-300 text-sm md:text-base">
-            <thead className="bg-gray-100 font-semibold">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+            <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-2 border">ID</th>
-                <th className="px-3 py-2 border">Date</th>
-                <th className="px-3 py-2 border">Category</th>
-                <th className="px-3 py-2 border">Amount</th>
-                <th className="px-3 py-2 border">Paid To</th>
-                <th className="px-3 py-2 border">Payment Method</th>
+                <th className="border border-gray-300 px-2 py-1">ID</th>
+                <th className="border border-gray-300 px-2 py-1">Date</th>
+                <th className="border border-gray-300 px-2 py-1">Category</th>
+                <th className="border border-gray-300 px-2 py-1">Amount</th>
+                <th className="border border-gray-300 px-2 py-1">Paid To</th>
+                <th className="border border-gray-300 px-2 py-1">Payment Method</th>
               </tr>
             </thead>
             <tbody>
               {filteredExpenses.length > 0 ? (
                 filteredExpenses.map(exp => (
-                  <tr key={exp._id} className="border-t">
-                    <td className="px-3 py-2 border">{exp.expenseId}</td>
-                    <td className="px-3 py-2 border">{new Date(exp.date).toLocaleDateString()}</td>
-                    <td className="px-3 py-2 border">{exp.category}</td>
-                    <td className="px-3 py-2 border">{exp.amount}</td>
-                    <td className="px-3 py-2 border">{exp.paidTo}</td>
-                    <td className="px-3 py-2 border">{exp.paymentMethod}</td>
+                  <tr key={exp._id} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 px-2 py-1">{exp.expenseId}</td>
+                    <td className="border border-gray-300 px-2 py-1">{new Date(exp.date).toLocaleDateString()}</td>
+                    <td className="border border-gray-300 px-2 py-1">{exp.category}</td>
+                    <td className="border border-gray-300 px-2 py-1">{exp.amount}</td>
+                    <td className="border border-gray-300 px-2 py-1">{exp.paidTo}</td>
+                    <td className="border border-gray-300 px-2 py-1">{exp.paymentMethod}</td>
                   </tr>
                 ))
               ) : (

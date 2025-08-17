@@ -69,8 +69,8 @@ export default function ViewSalesInvoices() {
       {currentSales.length === 0 ? (
         <p>No sales found.</p>
       ) : (
-        <table className="min-w-full border-collapse border border-gray-300">
-          <thead>
+        <table className="min-w-full divide-y divide-gray-200 text-sm">
+           <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
               <th className="border border-gray-300 px-2 py-1">Invoice #</th>
               <th className="border border-gray-300 px-2 py-1">Customer</th>
@@ -86,7 +86,7 @@ export default function ViewSalesInvoices() {
             {currentSales.map((sale, i) => {
               const idx = startIndex + i;
               return (
-                <tr key={idx}>
+                <tr key={idx} className="hover:bg-gray-50">
                   <td className="border border-gray-300 px-2 py-1">{sale.invoiceNumber}</td>
                   <td className="border border-gray-300 px-2 py-1">{sale.customerName || "—"}</td>
                   <td className="border border-gray-300 px-2 py-1">{sale.date?.slice(0, 10)}</td>
