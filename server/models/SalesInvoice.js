@@ -6,7 +6,9 @@ const salesInvoiceSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   products: [
     {
+      productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
       name: String,
+      size: String,
       quantity: Number,
       unitPrice: Number,
       tax: Number,

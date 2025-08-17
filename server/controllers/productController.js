@@ -130,3 +130,26 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch products" });
   }
 };
+
+
+// @desc Update product stock
+exports.updateStock = async (req, res) => {
+  try {
+    const { productName, quantityChange } = req.body;
+
+    const product = await Product.findOneAndUpdate(
+      { name: productName.trim() },
+      { $inc: { quantity: Number(quantityChange) } },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json({ message: "✅ Stock updated", product });
+  } catch (err) {
+    console.error("❌ Error updating stock:", err);
+    res.status(500).json({ error: err.message });
+  }
+};

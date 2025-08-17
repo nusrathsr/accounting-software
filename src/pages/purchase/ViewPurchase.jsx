@@ -9,7 +9,7 @@ export default function ViewPurchase() {
   const [editData, setEditData] = useState(null);
   const itemsPerPage = 5;
 
-  // Fetch purchases from backend
+  // Fetch purchases
   useEffect(() => {
     fetchPurchases();
   }, []);
@@ -27,7 +27,6 @@ export default function ViewPurchase() {
   // Delete purchase
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this purchase?')) return;
-
     try {
       await axios.delete(`http://localhost:4000/api/purchase/${id}`);
       setPurchases(purchases.filter((p) => p._id !== id));
@@ -37,7 +36,71 @@ export default function ViewPurchase() {
     }
   };
 
-  // Search and pagination
+  // Open edit modal
+  const openEditModal = (purchase) => {
+    setEditData({
+      ...purchase,
+      purchaseDate: purchase.purchaseDate
+        ? new Date(purchase.purchaseDate).toISOString().slice(0, 10)
+        : '',
+      totalAmount: purchase.totalAmount || 0,
+      quantity: purchase.quantity || 0,
+      unitPrice: purchase.unitPrice || 0,
+      tax: purchase.tax || 0,
+    });
+  };
+
+  const closeEditModal = () => setEditData(null);
+
+  // Handle input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setEditData((prev) => {
+      const newVal =
+        ['quantity', 'unitPrice', 'tax'].includes(name) && value !== '' ? Number(value) : value;
+
+      const qty = name === 'quantity' ? newVal : prev.quantity;
+      const price = name === 'unitPrice' ? newVal : prev.unitPrice;
+      const tax = name === 'tax' ? newVal : prev.tax;
+
+      return {
+        ...prev,
+        [name]: newVal,
+        totalAmount: +(qty * price + (qty * price * tax) / 100).toFixed(2),
+      };
+    });
+  };
+
+  // Save edited purchase
+  const handleSave = async () => {
+    if (!editData) return;
+
+    try {
+      const original = purchases.find((p) => p._id === editData._id);
+      const qtyDiff = editData.quantity - original.quantity;
+
+      // Update purchase in backend
+      await axios.put(`http://localhost:4000/api/purchase/${editData._id}`, editData);
+
+      // Update product stock
+      await axios.put(`http://localhost:4000/api/product/stock`, {
+        productName: editData.product,
+        quantityChange: qtyDiff,
+      });
+
+      // Update local state
+      const updated = purchases.map((p) => (p._id === editData._id ? editData : p));
+      setPurchases(updated);
+      closeEditModal();
+      alert('Purchase updated successfully!');
+    } catch (err) {
+      console.error('Error updating purchase:', err);
+      alert('Failed to update purchase.');
+    }
+  };
+
+  // Search & Pagination
   const filteredPurchases = purchases.filter((purchase) =>
     Object.values(purchase).some((value) =>
       String(value).toLowerCase().includes(searchQuery.toLowerCase())
@@ -48,34 +111,10 @@ export default function ViewPurchase() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentPurchases = filteredPurchases.slice(startIndex, startIndex + itemsPerPage);
 
-  // Edit modal handlers
-  const openEditModal = (purchase) => setEditData({ ...purchase });
-  const closeEditModal = () => setEditData(null);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSave = async () => {
-    if (!editData) return;
-
-    try {
-      await axios.put(`http://localhost:4000/api/purchase/${editData._id}`, editData);
-      const updated = purchases.map((p) => (p._id === editData._id ? editData : p));
-      setPurchases(updated);
-      closeEditModal();
-    } catch (err) {
-      console.error('Error updating purchase:', err);
-      alert('Failed to update purchase.');
-    }
-  };
-
   return (
     <div className="w-full max-w-full px-6 py-4 mx-auto">
       <h1 className="text-2xl font-semibold mb-4 text-center">Purchase Records</h1>
 
-      {/* Search input */}
       <input
         type="text"
         placeholder="Search purchases..."
@@ -90,7 +129,7 @@ export default function ViewPurchase() {
       {currentPurchases.length > 0 ? (
         <div className="overflow-x-auto rounded shadow border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 <th className="px-4 py-3 text-left font-medium text-gray-700">PO Number</th>
                 <th className="px-4 py-3 text-left font-medium text-gray-700">Seller Name</th>
@@ -113,19 +152,17 @@ export default function ViewPurchase() {
                   <td className="px-4 py-2 text-right">₹{purchase.unitPrice}</td>
                   <td className="px-4 py-2 text-right">{purchase.tax}%</td>
                   <td className="px-4 py-2 text-right">₹{purchase.totalAmount}</td>
-                  <td className="px-4 py-2">{purchase.purchaseDate}</td>
+                  <td className="px-4 py-2">{new Date(purchase.purchaseDate).toLocaleDateString()}</td>
                   <td className="px-4 py-2 text-center space-x-2">
                     <button
                       onClick={() => openEditModal(purchase)}
                       className="text-blue-600 hover:text-blue-800"
-                      title="Edit Purchase"
                     >
                       <FiEdit size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(purchase._id)}
                       className="text-red-600 hover:text-red-800"
-                      title="Delete Purchase"
                     >
                       <FiTrash2 size={18} />
                     </button>
@@ -174,13 +211,17 @@ export default function ViewPurchase() {
 
       {/* Edit Modal */}
       {editData && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
-          onClick={closeEditModal}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
           <div
-            className="bg-white rounded-lg shadow-lg max-w-xl w-full p-6"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-0 bg-black bg-opacity-40"
+            onClick={closeEditModal}
+          ></div>
+
+          {/* Modal content */}
+          <div
+            className="relative bg-white rounded-lg shadow-lg max-w-xl w-full p-6 z-50"
+            onClick={(e) => e.stopPropagation()} // Stop backdrop click
           >
             <h2 className="text-xl font-semibold mb-4">Edit Purchase</h2>
             <form
@@ -190,15 +231,14 @@ export default function ViewPurchase() {
               }}
               className="space-y-4"
             >
-              {/* Reuse inputs as before */}
               {[
-                { label: 'PO Number', name: 'purchaseOrderNumber', type: 'text' },
+                { label: 'PO Number', name: 'purchaseOrderNumber', type: 'text', readOnly: true },
                 { label: 'Seller Name', name: 'sellerName', type: 'text' },
                 { label: 'Product', name: 'product', type: 'text' },
                 { label: 'Quantity', name: 'quantity', type: 'number' },
                 { label: 'Purchased Price', name: 'unitPrice', type: 'number' },
                 { label: 'Tax (%)', name: 'tax', type: 'number' },
-                { label: 'Total Amount', name: 'totalAmount', type: 'number' },
+                { label: 'Total Amount', name: 'totalAmount', type: 'number', readOnly: true },
                 { label: 'Purchase Date', name: 'purchaseDate', type: 'date' },
               ].map((field) => (
                 <div key={field.name}>
@@ -206,10 +246,11 @@ export default function ViewPurchase() {
                   <input
                     type={field.type}
                     name={field.name}
-                    value={editData[field.name]}
+                    value={editData[field.name] || ''}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
+                    readOnly={field.readOnly}
                   />
                 </div>
               ))}

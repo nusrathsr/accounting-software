@@ -17,6 +17,7 @@ export default function AddSalesInvoice() {
             price: Number(p.sellingPrice) || 0,
             taxRate: Number(p.taxPercentage) || 0,
             isTaxInclusive: p.taxType === "GST IN",
+            sizes: (p.sizes || []).map(s => s?.size?.trim() || ""),
           }));
           setProductOptions(products);
         } catch (err) {
@@ -32,7 +33,7 @@ export default function AddSalesInvoice() {
     customerName: "",
     number: "",
     saleDate: new Date().toISOString().slice(0, 10),
-    items: [{ productId: null, productName: "", quantity: "", unitPrice: "", tax: "" }],
+    items: [{ productId: null, productName: "", size: "", quantity: "", unitPrice: "", tax: "" }],
   });
 
   const [dropdownState, setDropdownState] = useState([{ open: false, searchTerm: "" }]);
@@ -80,7 +81,7 @@ export default function AddSalesInvoice() {
   const addItem = () => {
     setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, { productId: null, productName: "", quantity: "", unitPrice: "", tax: "" }],
+      items: [...prev.items, { productId: null, productName: "",size: "", quantity: "", unitPrice: "", tax: "" }],
     }));
     setDropdownState((prev) => [...prev, { open: false, searchTerm: "" }]);
   };
@@ -105,6 +106,7 @@ export default function AddSalesInvoice() {
     const updatedItems = [...formData.items];
     updatedItems[index].productName = value;
     updatedItems[index].productId = null;
+    updatedItems[index].size = "";
     setFormData((prev) => ({ ...prev, items: updatedItems }));
   };
 
@@ -118,13 +120,24 @@ export default function AddSalesInvoice() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const validItems = formData.items.filter(
+    (item) => item.productId && n(item.quantity) > 0
+  );
+
+  if (validItems.length === 0) {
+    alert("Please add at least one product with quantity > 0");
+    return;
+  }
     const salesRecord = {
       invoiceNumber: formData.invoiceNumber,
       customerName: formData.customerName,
       number: formData.number,
       saleDate: formData.saleDate,
       products: formData.items.map((item) => ({
+        productId: item.productId,
         name: item.productName,
+        size: item.size,
         quantity: n(item.quantity),
         unitPrice: n(item.unitPrice),
         tax: n(item.tax),
@@ -323,6 +336,21 @@ export default function AddSalesInvoice() {
                     )}
                   </div>
                 )}
+
+                {item.productId && productOptions.find(p => p.id === item.productId)?.sizes && (
+  <select
+    value={item.size}
+    onChange={(e) => handleItemChange(index, "size", e.target.value)}
+    className="border px-2 py-1 rounded"
+  >
+    <option value="">Select Size</option>
+    {productOptions
+      .find(p => p.id === item.productId)
+      .sizes.map((s, i) => (
+        <option key={i} value={s}>{s}</option>
+    ))}
+  </select>
+)}
                 <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-20 border px-3 py-2 rounded text-center" />
                 <input type="number" placeholder="Unit Price" value={item.unitPrice} onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)} className="w-28 border px-3 py-2 rounded text-right" />
                 <input type="number" placeholder="Tax %" value={item.tax} onChange={(e) => handleItemChange(index, "tax", e.target.value)} className="w-20 border px-3 py-2 rounded text-center" />

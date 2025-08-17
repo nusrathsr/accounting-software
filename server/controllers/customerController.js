@@ -50,10 +50,12 @@ exports.getAllCustomers = async (req, res) => {
 // Get only customers of type "seller"
 exports.getSellers = async (req, res) => {
   try {
-    const sellers = await Customer.find({ type: 'seller' }).select('name'); // filter only sellers
+    const sellers = await Customer.find({
+      type: { $regex: /^seller$/i }  // matches 'Seller', 'seller', 'SELLER', etc.
+    }).select('name');
     res.json(sellers);
   } catch (err) {
-        console.error(err);
+    console.error(err);
     res.status(500).json({ error: 'Failed to fetch sellers' });
   }
 };
