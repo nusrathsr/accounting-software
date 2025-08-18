@@ -17,11 +17,10 @@ export default function AddPurchase() {
 
   const [sellerSearch, setSellerSearch] = useState("");
   const [sellerDropdownOpen, setSellerDropdownOpen] = useState(false);
-
   const [productSearch, setProductSearch] = useState("");
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
 
-  useEffect(() => {
+  // Fetch products
     const fetchProducts = async () => {
       try {
         const res = await axios.get("http://localhost:4000/api/products");
@@ -30,21 +29,24 @@ export default function AddPurchase() {
         console.error("Error fetching products:", err);
       }
     };
+    useEffect(() => {
     fetchProducts();
   }, []);
 
+  // Fetch sellers
   useEffect(() => {
-  const fetchSellers = async () => {
-    try {
-      const res = await axios.get("http://localhost:4000/api/customer/sellers");
-      setSellers(res.data);
-    } catch (err) {
-      console.error("Error fetching sellers:", err);
-    }
-  };
-  fetchSellers();
-}, []);
+    const fetchSellers = async () => {
+      try {
+        const res = await axios.get("http://localhost:4000/api/customer/sellers");
+        setSellers(res.data);
+      } catch (err) {
+        console.error("Error fetching sellers:", err);
+      }
+    };
+    fetchSellers();
+  }, []);
 
+  // Generate purchase order number
   useEffect(() => {
     generatePONumber();
   }, []);
@@ -57,12 +59,12 @@ export default function AddPurchase() {
     }));
   };
 
+  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      if (name === "quantity" || name === "unitPrice" || name === "tax") {
+      if (["quantity", "unitPrice", "tax"].includes(name)) {
         const qty = parseFloat(updated.quantity) || 0;
         const price = parseFloat(updated.unitPrice) || 0;
         const taxPct = parseFloat(updated.tax) || 0;
@@ -72,40 +74,50 @@ export default function AddPurchase() {
     });
   };
 
+  // Select seller from dropdown
   const handleSellerSelect = (name) => {
     setFormData((prev) => ({ ...prev, sellerName: name }));
     setSellerSearch(name);
     setSellerDropdownOpen(false);
   };
 
+  // Select product from dropdown
   const handleProductSelect = (product) => {
     setFormData((prev) => ({
       ...prev,
-      product: product.name,
+      product: product.name, // Send string, not object
     }));
     setProductSearch(product.name);
     setProductDropdownOpen(false);
+    const currentStock = product.sizes && product.sizes.length > 0 ? product.sizes[0].quantity : 0;
+    alert(`Current stock of ${product.name}: ${currentStock}`);
   };
 
+  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.sellerName || !formData.product) {
-    alert("Please select a seller and a product.");
-    return;
-  }
+      alert("Please select a seller and a product.");
+      return;
+    }
+
     try {
       const payload = {
-      purchaseOrderNumber: formData.purchaseOrderNumber,
-      sellerName: formData.sellerName,
-      product: formData.product,
-      quantity: Number(formData.quantity),      // ✅ Ensure number
-      unitPrice: Number(formData.unitPrice),    // ✅ Ensure number
-      tax: Number(formData.tax) || 0,           // ✅ Ensure number
-      totalAmount: Number(formData.totalAmount),// ✅ Ensure number
-      purchaseDate: new Date(formData.purchaseDate), // ✅ Date object
-    };
+        purchaseOrderNumber: formData.purchaseOrderNumber,
+        sellerName: formData.sellerName,
+        product: formData.product,
+        quantity: Number(formData.quantity),
+        unitPrice: Number(formData.unitPrice),
+        tax: Number(formData.tax) || 0,
+        totalAmount: Number(formData.totalAmount),
+        purchaseDate: new Date(formData.purchaseDate),
+      };
+
       await axios.post("http://localhost:4000/api/purchase", payload);
+      fetchProducts();
       alert("✅ Purchase saved to MongoDB!");
+
+      // Reset form
       setFormData({
         purchaseOrderNumber: "",
         sellerName: "",
@@ -116,6 +128,8 @@ export default function AddPurchase() {
         totalAmount: "",
         purchaseDate: "",
       });
+      setSellerSearch("");
+      setProductSearch("");
       generatePONumber();
     } catch (err) {
       console.error("❌ Error saving purchase:", err.response?.data || err);
@@ -126,17 +140,12 @@ export default function AddPurchase() {
   return (
     <div className="p-6 w-full max-w-full mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">Add Purchase</h1>
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full"
-      >
-        {/* Row 1 */}
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full">
+        {/* Row 1: Purchase Order & Seller */}
         <div className="flex flex-wrap space-x-4 mb-4">
           {/* Purchase Order Number */}
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Purchase Order Number
-            </label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Purchase Order Number</label>
             <input
               type="text"
               name="purchaseOrderNumber"
@@ -146,39 +155,24 @@ export default function AddPurchase() {
             />
           </div>
 
-          {/* Seller Dropdown */}
+          {/* Seller */}
           <div className="flex-1 min-w-[200px] relative">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Seller Name
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={sellerSearch}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setSellerSearch(val);
-                  setFormData(prev => ({ ...prev, sellerName: val })); // ✅ Update formData
-                  setSellerDropdownOpen(true);
-                }}
-                onFocus={() => setSellerDropdownOpen(true)}
-                placeholder="Search seller..."
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-2 text-gray-500"
-                onClick={() => setSellerDropdownOpen((prev) => !prev)}
-              >
-                ▼
-              </button>
-            </div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Seller Name</label>
+            <input
+              type="text"
+              value={sellerSearch}
+              onChange={(e) => {
+                setSellerSearch(e.target.value);
+                setSellerDropdownOpen(true);
+              }}
+              onFocus={() => setSellerDropdownOpen(true)}
+              placeholder="Search seller..."
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
+            />
             {sellerDropdownOpen && (
               <ul className="absolute z-10 bg-white border w-full max-h-40 overflow-y-auto">
                 {sellers
-                  .filter((s) =>
-                    s.name.toLowerCase().includes(sellerSearch.toLowerCase())
-                  )
+                  .filter((s) => s.name.toLowerCase().includes(sellerSearch.toLowerCase()))
                   .map((s) => (
                     <li
                       key={s._id}
@@ -193,60 +187,42 @@ export default function AddPurchase() {
           </div>
         </div>
 
-        {/* Product Row */}
+        {/* Row 2: Product & Quantity */}
         <div className="flex flex-wrap space-x-4 mb-4">
+          {/* Product */}
           <div className="flex-1 min-w-[200px] relative">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Product
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={productSearch}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setProductSearch(val);
-                  setFormData(prev => ({ ...prev, product: val })); // ✅ Add this
-                  setProductDropdownOpen(true);
-                }}
-                onFocus={() => setProductDropdownOpen(true)}
-                placeholder="Search product..."
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-2 text-gray-500"
-                onClick={() => setProductDropdownOpen((prev) => !prev)}
-              >
-                ▼
-              </button>
-            </div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Product</label>
+            <input
+              type="text"
+              value={productSearch}
+              onChange={(e) => {
+                setProductSearch(e.target.value);
+                setProductDropdownOpen(true);
+              }}
+              onFocus={() => setProductDropdownOpen(true)}
+              placeholder="Search product..."
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
+            />
             {productDropdownOpen && (
-              <div className="absolute z-10 bg-white border w-full max-h-60 overflow-y-auto">
-                <ul>
-                  {products
-                    .filter((p) =>
-                      p.name.toLowerCase().includes(productSearch.toLowerCase())
-                    )
-                    .map((p, i) => (
-                      <li
-                        key={i}
-                        onClick={() => handleProductSelect(p)}
-                        className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {p.name}
-                      </li>
-                    ))}
-                </ul>
-              </div>
+              <ul className="absolute z-10 bg-white border w-full max-h-60 overflow-y-auto">
+                {products
+                  .filter((p) => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+                  .map((p) => (
+                    <li
+                      key={p._id}
+                      onClick={() => handleProductSelect(p)}
+                      className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+                    >
+                      {p.name}
+                    </li>
+                  ))}
+              </ul>
             )}
           </div>
 
           {/* Quantity */}
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Quantity
-            </label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
             <input
               type="number"
               name="quantity"
@@ -258,12 +234,10 @@ export default function AddPurchase() {
           </div>
         </div>
 
-        {/* Price and Tax */}
+        {/* Row 3: Price & Tax */}
         <div className="flex flex-wrap space-x-4 mb-4">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Purchased Price
-            </label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Purchased Price</label>
             <input
               type="number"
               name="unitPrice"
@@ -275,9 +249,7 @@ export default function AddPurchase() {
           </div>
 
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Tax (%)
-            </label>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Tax (%)</label>
             <input
               type="number"
               name="tax"
@@ -290,9 +262,7 @@ export default function AddPurchase() {
 
         {/* Total Amount */}
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Total Amount
-          </label>
+          <label className="block text-gray-700 text-sm font-bold mb-2">Total Amount</label>
           <input
             type="number"
             name="totalAmount"
@@ -304,9 +274,7 @@ export default function AddPurchase() {
 
         {/* Purchase Date */}
         <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Purchase Date
-          </label>
+          <label className="block text-gray-700 text-sm font-bold mb-2">Purchase Date</label>
           <input
             type="date"
             name="purchaseDate"

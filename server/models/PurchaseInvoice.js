@@ -17,6 +17,7 @@ const purchaseSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    size: { type: String },
     quantity: {
       type: Number,
       required: true,
