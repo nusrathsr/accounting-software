@@ -18,7 +18,7 @@ const customerSchema =new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['Retail Customer', 'seller', 'vendor','Wholesale Customer','Supplier'], // ✅ update if you have other types
+    enum: ['Retail Customer', 'seller','Wholesale Customer','Supplier'], // ✅ update if you have other types
     required: true,
   },
   gstNumber: {

@@ -96,7 +96,7 @@ const EditCustomer = () => {
                 <option value="Retail Customer">Retail Customer</option>
                 <option value="Wholesale Customer">Wholesale Customer</option>
                 <option value="Supplier">Supplier</option>
-                <option value="Seller">Seller</option>
+                <option value="seller">Seller</option>
                 
               </select>
             </div>

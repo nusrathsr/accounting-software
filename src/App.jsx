@@ -17,6 +17,10 @@ import './charts/ChartjsConfig';
 import Dashboard from './pages/Dashboard';
 import AddExpense from './pages/expense/AddExpense';
 import ListExpenses from './pages/expense/ListExpense';
+import SalesReport from './pages/reports/SalesReport';
+import ExpenseReport from './pages/reports/ExpenseReport';
+import StockReport from './pages/reports/StockReport';
+import PurchaseReport from './pages/reports/PurchaseReport';
 
 function App() {
 
@@ -45,6 +49,14 @@ function App() {
           <Route path='/listCustomer' element={<ListCustomer />} />
           <Route path='/addExpense' element={<AddExpense />} />
           <Route path='/listExpense' element={<ListExpenses />} />
+          <Route path='sales/report' element={<SalesReport />} />
+          <Route path='expense/report' element={<ExpenseReport />} />
+          <Route path='stock/report' element={<StockReport/>} />
+          <Route path='purchase/report' element={<PurchaseReport />} />
+
+
+
+
 
 
 

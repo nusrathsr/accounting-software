@@ -8,6 +8,7 @@ import { FaRegEdit } from "react-icons/fa";
 const ListProduct = () => {
   const { baseURL } = useContext(GlobalContext)
   const [products, setProducts] = useState([]);
+  const [page, SetPage] = useState(1);
   const [filter, setFilter] = useState({
     search: "",
     category: "",
@@ -18,20 +19,17 @@ const ListProduct = () => {
 
   const categories = ['clothing', 'grocery', 'electronics'];
 
-  // Fetch products from backend
   const fetchProducts = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await axios.get(`${baseURL}/products`); // Change to your backend endpoint
-      setProducts(response.data);
+      const response = await axios.get(`${baseURL}/products`);
+      const data = response.data;
+      setProducts(data)
+      console.log(response);
     } catch (err) {
       console.error(err);
-      setError("Failed to fetch products. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
+
 
   // Delete product from backend
   const handleDelete = async (id) => {
@@ -47,7 +45,7 @@ const ListProduct = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [page]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -64,11 +62,19 @@ const ListProduct = () => {
     return searchMatch && categoryMatch;
   });
 
+
+  // pagination
+   const itemsPerPage =4;
+   const startIndex =(page-1)* itemsPerPage;
+   const paginatedProducts =filterProducts.slice(startIndex,startIndex+itemsPerPage);
+   const totalPages =Math.ceil(filterProducts.length/itemsPerPage)
+console.log(paginatedProducts);
+
   return (
     <div className="p-4 sm:px-8 lg:px-12">
       <div className="bg-white p-6 shadow rounded max-w-8xl mx-auto">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-white-700">Product List</h2>
+          <h2 className="text-2xl font-bold text-white-700">Products</h2>
           <div className="flex flex-wrap justify-end gap-4 w-full md:w-auto">
             <input
               type="text"
@@ -116,7 +122,7 @@ const ListProduct = () => {
               </tr>
             </thead>
             <tbody>
-              {filterProducts.map((prod) => (
+              {paginatedProducts.map((prod) => (
                 <tr key={prod._id} className="text-sm text-white-700 border-t">
                   <td className="px-4 py-2 border">{prod.productId}</td>
                   <td className="px-4 py-2 border"><img src={prod.image} style={{ width: "30px" }} alt="" /></td>
@@ -131,7 +137,7 @@ const ListProduct = () => {
 
                   <td className="px-4 py-2 border">₹{prod.sellingPrice}</td>
                   <td className="px-4 py-2 border">
-                    {prod.sizes.map(s => `${s.size} (${s.quantity})`).join(', ')}
+                    {prod.sizes.map(s => `${s.size}(${s.quantity})`).join(',')}
                   </td>
                   <td className="px-4 py-2 border flex">
                     <Link
@@ -158,6 +164,26 @@ const ListProduct = () => {
               )}
             </tbody>
           </table>
+        </div>
+        {/* pagination button */}
+        <div className="flex items-center justify-center gap-4 my-8">
+          <button 
+            className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+
+            disabled={page === 1}
+            onClick={() => SetPage(page - 1)}
+          >prev</button>
+          <span className="text-gray-700 font-medium">
+            {page} of  {totalPages}
+          </span>
+          <button
+              className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+
+            disabled={page === totalPages}
+            onClick={() => SetPage(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

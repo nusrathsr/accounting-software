@@ -6,6 +6,7 @@ import { GlobalContext } from '../../context/GlobalContext';
 
 const ListExpenses = () => {
   const { baseURL } = useContext(GlobalContext);
+  const [page, SetPage] = useState(1);
   const [expenses, setExpenses] = useState([]);
   const [filter, setFilter] = useState({ startDate: '', endDate: '' });
 
@@ -83,52 +84,59 @@ const ListExpenses = () => {
     doc.output('dataurlnewwindow');
   };
 
+
+  //pagination
+  const itemsPerPage = 3;
+  const startIndex =(page - 1) * itemsPerPage
+  const paginatedExpense =filteredExpenses.slice(startIndex,startIndex+itemsPerPage)
+  const totalPages =Math.ceil(filteredExpenses.length/itemsPerPage)
+
   return (
     <div className="p-4 sm:px-6 lg:px-8">
-       <h2 className="text-2xl font-bold mb-5 text-white-700"> Expense</h2>
+      <h2 className="text-2xl font-bold mb-5 text-white-700"> Expense</h2>
       <div className="bg-white text-gray-800 p-4 shadow rounded max-w-7xl mx-auto">
-        
-        {/* Header */}
-      <div className="flex flex-wrap justify-between items-center gap-2">
-  {/* Left side: Filters */}
-  <div className="flex flex-wrap gap-2 items-center">
-    <input
-      type="date"
-      name="startDate"
-      value={filter.startDate}
-      onChange={handleFilterChange}
-      className="px-2 py-1 text-sm md:text-base border rounded"
-    />
-    <input
-      type="date"
-      name="endDate"
-      value={filter.endDate}
-      onChange={handleFilterChange}
-      className="px-2 py-1 text-sm md:text-base border rounded"
-    />
-    <select
-      name="quickFilter"
-      value=""
-      onChange={(e) => {
-        if (e.target.value === 'lastMonth') quickFilter('lastMonth');
-        if (e.target.value === 'thisMonth') quickFilter('thisMonth');
-      }}
-      className="px-6 py-2 border border-gray-300 rounded"
-    >
-      <option value="">Filter by</option>
-      <option value="lastMonth">Last Month</option>
-      <option value="thisMonth">This Month</option>
-    </select>
-  </div>
 
-  {/* Right side: Export Button */}
-  <button
-    onClick={generatePDF}
-    className="px-3 py-1 md:px-4 md:py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm md:text-base"
-  >
-    EXPORT
-  </button>
-</div>
+        {/* Header */}
+        <div className="flex flex-wrap justify-between items-center gap-2">
+          {/* Left side: Filters */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <input
+              type="date"
+              name="startDate"
+              value={filter.startDate}
+              onChange={handleFilterChange}
+              className="px-2 py-1 text-sm md:text-base border rounded"
+            />
+            <input
+              type="date"
+              name="endDate"
+              value={filter.endDate}
+              onChange={handleFilterChange}
+              className="px-2 py-1 text-sm md:text-base border rounded"
+            />
+            <select
+              name="quickFilter"
+              value=""
+              onChange={(e) => {
+                if (e.target.value === 'lastMonth') quickFilter('lastMonth');
+                if (e.target.value === 'thisMonth') quickFilter('thisMonth');
+              }}
+              className="px-6 py-2 border border-gray-300 rounded"
+            >
+              <option value="">Filter by</option>
+              <option value="lastMonth">Last Month</option>
+              <option value="thisMonth">This Month</option>
+            </select>
+          </div>
+
+          {/* Right side: Export Button */}
+          <button
+            onClick={generatePDF}
+            className="px-3 py-1 md:px-4 md:py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm md:text-base"
+          >
+            EXPORT
+          </button>
+        </div>
 
 
         {/* Total */}
@@ -151,7 +159,7 @@ const ListExpenses = () => {
             </thead>
             <tbody>
               {filteredExpenses.length > 0 ? (
-                filteredExpenses.map(exp => (
+                paginatedExpense.map(exp => (
                   <tr key={exp._id} className="border-t">
                     <td className="px-3 py-2 border">{exp.expenseId}</td>
                     <td className="px-3 py-2 border">{new Date(exp.date).toLocaleDateString()}</td>
@@ -170,6 +178,26 @@ const ListExpenses = () => {
               )}
             </tbody>
           </table>
+        </div>
+           {/* pagination button */}
+        <div className="flex items-center justify-center gap-4 my-8">
+          <button 
+            className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+
+            disabled={page === 1}
+            onClick={() => SetPage(page - 1)}
+          >prev</button>
+          <span className="text-gray-700 font-medium">
+            {page} of  {totalPages}
+          </span>
+          <button
+              className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+
+            disabled={page === totalPages}
+            onClick={() => SetPage(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

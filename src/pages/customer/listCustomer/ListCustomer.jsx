@@ -7,6 +7,7 @@ import { FaRegEdit } from "react-icons/fa";
 
 const ListCustomer = () => {
   const { baseURL } = useContext(GlobalContext)
+  const [page, SetPage] = useState(1);
   const [customers, setCustomers] = useState([]);
   const [filter, setFilter] = useState({ search: '', type: '' });
 
@@ -14,7 +15,7 @@ const ListCustomer = () => {
     const fetchCustomers = async () => {
       try {
         const res = await axios.get(`${baseURL}/customer`);
-        setCustomers(res.data); // Assuming backend returns array of customers
+        setCustomers(res.data);
       } catch (error) {
         console.error('Error fetching customers:', error);
       }
@@ -28,18 +29,26 @@ const ListCustomer = () => {
     setFilter((prev) => ({ ...prev, [name]: value }));
   };
 
+  
+
   const filteredCustomers = customers.filter((cust) => {
     const matchesSearch = cust.name.toLowerCase().includes(filter.search.toLowerCase());
     const matchesType = filter.type ? cust.type === filter.type : true;
     return matchesSearch && matchesType;
   });
 
+//pagination
+const itemsPerPage =3;
+const startIndex =(page-1) * itemsPerPage
+const paginatedCustomer = filteredCustomers.slice(startIndex,startIndex+itemsPerPage)
+const totalPages =Math.ceil(filteredCustomers.length/itemsPerPage)
+
   return (
     <div className="p-4 sm:px-8 lg:px-12">
       <div className="bg-white p-6 shadow rounded max-w-6xl mx-auto">
         {/* Filters */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-white-700">Customer List</h2>
+          <h2 className="text-2xl font-bold text-white-700">Customers</h2>
           <div className="flex flex-wrap justify-end gap-4 w-full md:w-auto">
             <input
               type="text"
@@ -58,9 +67,9 @@ const ListCustomer = () => {
               <option value="">All Types</option>
               <option value="Retail Customer">Retail Customer</option>
               <option value="Wholesale Customer">Wholesale Customer</option>
-              <option value="Distributor">Distributor</option>
+              <option value="Distributor">supplier</option>
               <option value="seller">Seller</option>
-              <option value="vendor">Vendor</option>
+            
             </select>
           </div>
         </div>
@@ -80,7 +89,7 @@ const ListCustomer = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredCustomers.map((cust) => (
+              {paginatedCustomer.map((cust) => (
                 <tr key={cust._id} className="text-sm text-white-700 border-t">
                   <td className="px-4 py-2 border">{cust.name}</td>
                   <td className="px-4 py-2 border">{cust.email}</td>
@@ -112,6 +121,26 @@ const ListCustomer = () => {
               )}
             </tbody>
           </table>
+        </div>
+         {/* pagination button */}
+        <div className="flex items-center justify-center gap-4 my-8">
+          <button 
+            className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+
+            disabled={page === 1}
+            onClick={() => SetPage(page - 1)}
+          >prev</button>
+          <span className="text-gray-700 font-medium">
+            {page} of  {totalPages}
+          </span>
+          <button
+              className="px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+
+            disabled={page === totalPages}
+            onClick={() => SetPage(page + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>
