@@ -4,12 +4,12 @@ import AddSales from './pages/sales/AddSales';
 import ViewSales from './pages/sales/ViewSales';
 import AddPurchase from './pages/purchase/AddPurchase';
 import ViewPurchase from './pages/purchase/ViewPurchase';
-import AddProduct from './pages/product/addProduct/AddProduct'
-import EditProduct from './pages/product/editProduct/EditProduct'
-import ListProduct from './pages/product/listProduct/ListProduct';
-import AddCustomer from './pages/customer/addCustomer/AddCustomer'
-import EditCustomer from './pages/customer/editCustomer/EditCustomer'
-import ListCustomer from './pages/customer/listCustomer/ListCustomer';
+import AddProduct from './pages/product/AddProduct'
+import EditProduct from './pages/product/EditProduct'
+import ListProduct from './pages/product/ListProduct'
+import AddCustomer from './pages/customer/AddCustomer'
+import EditCustomer from './pages/customer/EditCustomer'
+import ListCustomer from './pages/customer/ListCustomer'
 import './css/style.css';
 import './charts/ChartjsConfig';
 
