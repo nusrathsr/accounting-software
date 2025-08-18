@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { GlobalContext } from "../../../context/GlobalContext";
+import { GlobalContext } from "../../context/GlobalContext";
 
 const EditProduct = () => {
   const { id } = useParams(); // product _id from URL

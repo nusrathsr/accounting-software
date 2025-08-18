@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { GlobalContext } from '../../../context/GlobalContext';
+import { GlobalContext } from '../../context/GlobalContext';
 import { MdDeleteForever } from "react-icons/md";
 import { FaRegEdit } from "react-icons/fa";
 
@@ -97,14 +97,7 @@ const totalPages =Math.ceil(filteredCustomers.length/itemsPerPage)
                   <td className="px-4 py-2 border">{cust.type}</td>
                   <td className="px-4 py-2 border">{cust.city}</td>
                   <td className="px-4 py-2 border flex ">
-              {filteredCustomers.map((cust) => (
-                <tr key={cust._id} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-2 py-1">{cust.name}</td>
-                  <td className="border border-gray-300 px-2 py-1">{cust.email}</td>
-                  <td className="border border-gray-300 px-2 py-1">{cust.phone}</td>
-                  <td className="border border-gray-300 px-2 py-1">{cust.type}</td>
-                  <td className="border border-gray-300 px-2 py-1">{cust.city}</td>
-                  <td className="border border-gray-300 px-2 py-1 flex ">
+              
                     <Link
                       to={`/editCustomer/${cust._id}`}
                       className="text-blue-600 hover:underline mr-8"
