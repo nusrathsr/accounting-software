@@ -380,13 +380,7 @@ function Sidebar({
                 }}
               </SidebarLinkGroup>
 
-<<<<<<< HEAD
-
               {/* sales*/}
-=======
-              
-
->>>>>>> 93cb4958bbea8facac07f393a490e1e0355b50d9
               <SidebarLinkGroup activecondition={pathname.includes("sales")}>
                 {(handleClick, open) => {
                   return (
@@ -777,17 +771,11 @@ function Sidebar({
                         </li>
                       </ul>
                     </div>
-<<<<<<< HEAD
                   </React.Fragment>
                 );
               }}
             </SidebarLinkGroup>
           </ul>
-=======
-                  </>
-                )}
-              </SidebarLinkGroup>
-
             {/* Reports and Analytics */}
 
              <SidebarLinkGroup activecondition={pathname.includes("Reports and Analytics")}>
@@ -1022,8 +1010,7 @@ function Sidebar({
                   );
                 }}
               </SidebarLinkGroup>
-            </ul>
-          </div>
+           
           {/* More group */}
           <div>
             <h3 className="text-xs uppercase text-gray-400 dark:text-gray-500 font-semibold pl-3">
@@ -1095,7 +1082,6 @@ function Sidebar({
               </SidebarLinkGroup>
             </ul>
           </div>
->>>>>>> 93cb4958bbea8facac07f393a490e1e0355b50d9
         </div>
         {/* More group */}
         <div>
