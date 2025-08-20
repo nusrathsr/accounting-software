@@ -16,7 +16,7 @@ const fetchCustomer =async()=>{
   try {
     const response =await axios.get(`${baseURL}/customers`)
     setCustomers(response.data)
-    setSuppliers(response.data.filter(cust => cust.type === 'vendor'))
+    setSuppliers(response.data.filter(cust => cust.type === 'seller'))
     setLoading(false)
   } catch (error) {
     console.log('error fetching customer ',error);
@@ -25,6 +25,7 @@ const fetchCustomer =async()=>{
 }
 useEffect(()=>{
   fetchCustomer()
+  
 },[])
 
 

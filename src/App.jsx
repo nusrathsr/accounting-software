@@ -4,6 +4,7 @@ import AddSales from './pages/sales/AddSales';
 import ViewSales from './pages/sales/ViewSales';
 import AddPurchase from './pages/purchase/AddPurchase';
 import ViewPurchase from './pages/purchase/ViewPurchase';
+<<<<<<< HEAD
 import AddProduct from './pages/product/addProduct/AddProduct'
 import EditProduct from './pages/product/editProduct/EditProduct'
 import ListProduct from './pages/product/listProduct/ListProduct';
@@ -14,6 +15,14 @@ import AddTransaction from './pages/payments/AddTransaction';
 import TransactionList from './pages/payments/TransactionList';
 import PurchaseDue from "./pages/purchase/purchaseDue";
 
+=======
+import AddProduct from './pages/product/AddProduct'
+import EditProduct from './pages/product/EditProduct'
+import ListProduct from './pages/product/ListProduct'
+import AddCustomer from './pages/customer/AddCustomer'
+import EditCustomer from './pages/customer/EditCustomer'
+import ListCustomer from './pages/customer/ListCustomer'
+>>>>>>> 93cb4958bbea8facac07f393a490e1e0355b50d9
 import './css/style.css';
 import './charts/ChartjsConfig';
 
@@ -21,6 +30,10 @@ import './charts/ChartjsConfig';
 import Dashboard from './pages/Dashboard';
 import AddExpense from './pages/expense/AddExpense';
 import ListExpenses from './pages/expense/ListExpense';
+import SalesReport from './pages/reports/SalesReport';
+import ExpenseReport from './pages/reports/ExpenseReport';
+import StockReport from './pages/reports/StockReport';
+import PurchaseReport from './pages/reports/PurchaseReport';
 
 function App() {
 
@@ -48,9 +61,23 @@ function App() {
           <Route path='/listCustomer' element={<ListCustomer />} />
           <Route path='/addExpense' element={<AddExpense />} />
           <Route path='/listExpense' element={<ListExpenses />} />
+<<<<<<< HEAD
           <Route path='/payments/add' element={<AddTransaction />} />
           <Route path='/payments/view' element={<TransactionList />} />
           <Route path="/purchase/dues" element={<PurchaseDue />} />
+=======
+          <Route path='sales/report' element={<SalesReport />} />
+          <Route path='expense/report' element={<ExpenseReport />} />
+          <Route path='stock/report' element={<StockReport/>} />
+          <Route path='purchase/report' element={<PurchaseReport />} />
+
+
+
+
+
+
+
+>>>>>>> 93cb4958bbea8facac07f393a490e1e0355b50d9
 
         </Route>
       </Routes>

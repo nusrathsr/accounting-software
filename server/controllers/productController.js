@@ -123,9 +123,13 @@ exports.getProductById = async (req, res) => {
 // @desc    Get all products
 exports.getAllProducts = async (req, res) => {
   try {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
     const products = await Product.find();
-    res.json(products);
-  } catch (err) {
+      return res.json(products);
+    }
+
+   catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch products" });
   }

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { GlobalContext } from '../../../context/GlobalContext';
+import { GlobalContext } from '../../context/GlobalContext';
 import axios from 'axios';
 
 
@@ -14,6 +14,7 @@ const AddProduct = () => {
     { name: 'grocery', subcategories: ['Fruits', 'Vegetables', 'Snacks', 'dairy products','spices',"essentials","cookware","dinnerware"] },
     { name: 'electronics', subcategories: ['Mobiles', 'Laptops', 'Chargers','speaker',"tv","washing machine","mixer grinder","refrigerator","fan","light","vacuum cleaner","headphones","oven","kettle","electric stove","intention cooker",] },
   ]);
+console.log(suppliers);
 
   const [product, setProduct] = useState({
     name: '',
@@ -214,7 +215,7 @@ const AddProduct = () => {
             <option value="">Select</option>
             {suppliers.map((s, i) => <option key={i} value={s.name}>{s.name}</option>)}
           </select>
-        </div>
+        </div> 
 
         {/* Tax Inclusive */}
         <div className="md:col-span-2">

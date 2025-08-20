@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { GlobalContext } from '../../../context/GlobalContext';
+import { GlobalContext } from '../../context/GlobalContext';
 
 const EditCustomer = () => {
   const { id } = useParams();
@@ -96,7 +96,7 @@ const EditCustomer = () => {
                 <option value="Retail Customer">Retail Customer</option>
                 <option value="Wholesale Customer">Wholesale Customer</option>
                 <option value="Supplier">Supplier</option>
-                <option value="Seller">Seller</option>
+                <option value="seller">Seller</option>
                 
               </select>
             </div>
