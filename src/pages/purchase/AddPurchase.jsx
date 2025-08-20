@@ -12,6 +12,7 @@ export default function AddPurchase() {
     unitPrice: "",
     tax: "",
     totalAmount: "",
+    paidAmount: "",
     purchaseDate: "",
   });
 
@@ -21,15 +22,15 @@ export default function AddPurchase() {
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
 
   // Fetch products
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get("http://localhost:4000/api/products");
-        setProducts(res.data);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-      }
-    };
-    useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get("http://localhost:4000/api/products");
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+    }
+  };
+  useEffect(() => {
     fetchProducts();
   }, []);
 
@@ -37,7 +38,7 @@ export default function AddPurchase() {
   useEffect(() => {
     const fetchSellers = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/customer/sellers");
+        const res = await axios.get("http://localhost:4000/api/customers/sellers");
         setSellers(res.data);
       } catch (err) {
         console.error("Error fetching sellers:", err);
@@ -46,7 +47,7 @@ export default function AddPurchase() {
     fetchSellers();
   }, []);
 
-  // Generate purchase order number
+  // Generate PO number
   useEffect(() => {
     generatePONumber();
   }, []);
@@ -64,29 +65,28 @@ export default function AddPurchase() {
     const { name, value } = e.target;
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
+
       if (["quantity", "unitPrice", "tax"].includes(name)) {
         const qty = parseFloat(updated.quantity) || 0;
         const price = parseFloat(updated.unitPrice) || 0;
         const taxPct = parseFloat(updated.tax) || 0;
         updated.totalAmount = (qty * price + (qty * price * taxPct) / 100).toFixed(2);
       }
+
       return updated;
     });
   };
 
-  // Select seller from dropdown
+  // Select seller
   const handleSellerSelect = (name) => {
     setFormData((prev) => ({ ...prev, sellerName: name }));
     setSellerSearch(name);
     setSellerDropdownOpen(false);
   };
 
-  // Select product from dropdown
+  // Select product
   const handleProductSelect = (product) => {
-    setFormData((prev) => ({
-      ...prev,
-      product: product.name, // Send string, not object
-    }));
+    setFormData((prev) => ({ ...prev, product: product.name }));
     setProductSearch(product.name);
     setProductDropdownOpen(false);
     const currentStock = product.sizes && product.sizes.length > 0 ? product.sizes[0].quantity : 0;
@@ -110,10 +110,11 @@ export default function AddPurchase() {
         unitPrice: Number(formData.unitPrice),
         tax: Number(formData.tax) || 0,
         totalAmount: Number(formData.totalAmount),
+        paidAmount: Number(formData.paidAmount) || 0,
         purchaseDate: new Date(formData.purchaseDate),
       };
 
-      await axios.post("http://localhost:4000/api/purchase", payload);
+      await axios.post("http://localhost:4000/api/purchases", payload);
       fetchProducts();
       alert("✅ Purchase saved to MongoDB!");
 
@@ -126,6 +127,7 @@ export default function AddPurchase() {
         unitPrice: "",
         tax: "",
         totalAmount: "",
+        paidAmount: "",
         purchaseDate: "",
       });
       setSellerSearch("");
@@ -141,9 +143,8 @@ export default function AddPurchase() {
     <div className="p-6 w-full max-w-full mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">Add Purchase</h1>
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full">
-        {/* Row 1: Purchase Order & Seller */}
+        {/* Row 1: PO & Seller */}
         <div className="flex flex-wrap space-x-4 mb-4">
-          {/* Purchase Order Number */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-gray-700 text-sm font-bold mb-2">Purchase Order Number</label>
             <input
@@ -155,7 +156,6 @@ export default function AddPurchase() {
             />
           </div>
 
-          {/* Seller */}
           <div className="flex-1 min-w-[200px] relative">
             <label className="block text-gray-700 text-sm font-bold mb-2">Seller Name</label>
             <input
@@ -189,7 +189,6 @@ export default function AddPurchase() {
 
         {/* Row 2: Product & Quantity */}
         <div className="flex flex-wrap space-x-4 mb-4">
-          {/* Product */}
           <div className="flex-1 min-w-[200px] relative">
             <label className="block text-gray-700 text-sm font-bold mb-2">Product</label>
             <input
@@ -220,7 +219,6 @@ export default function AddPurchase() {
             )}
           </div>
 
-          {/* Quantity */}
           <div className="flex-1 min-w-[200px]">
             <label className="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
             <input
@@ -230,6 +228,7 @@ export default function AddPurchase() {
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
               required
+              min={0}
             />
           </div>
         </div>
@@ -245,6 +244,7 @@ export default function AddPurchase() {
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
               required
+              min={0}
             />
           </div>
 
@@ -256,20 +256,35 @@ export default function AddPurchase() {
               value={formData.tax}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
+              min={0}
             />
           </div>
         </div>
 
-        {/* Total Amount */}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Total Amount</label>
-          <input
-            type="number"
-            name="totalAmount"
-            value={formData.totalAmount}
-            readOnly
-            className="shadow appearance-none border bg-gray-100 cursor-not-allowed rounded w-full py-2 px-3 text-gray-700 leading-tight"
-          />
+        {/* Row 4: Total & Paid */}
+        <div className="flex flex-wrap space-x-4 mb-4">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Total Amount</label>
+            <input
+              type="number"
+              name="totalAmount"
+              value={formData.totalAmount}
+              readOnly
+              className="shadow appearance-none border bg-gray-100 cursor-not-allowed rounded w-full py-2 px-3 text-gray-700 leading-tight"
+            />
+          </div>
+
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Paid Amount</label>
+            <input
+              type="number"
+              name="paidAmount"
+              value={formData.paidAmount}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight"
+              min={0}
+            />
+          </div>
         </div>
 
         {/* Purchase Date */}

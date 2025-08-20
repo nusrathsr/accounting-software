@@ -132,7 +132,6 @@ export default function AddSalesInvoice() {
     const salesRecord = {
       invoiceNumber: formData.invoiceNumber,
       customerName: formData.customerName,
-      number: formData.number,
       saleDate: formData.saleDate,
       products: formData.items.map((item) => ({
         productId: item.productId,

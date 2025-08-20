@@ -13,7 +13,7 @@ const EditCustomer = () => {
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
-        const res = await axios.get(`${baseURL}/customer/${id}`);
+        const res = await axios.get(`${baseURL}/customers/${id}`);
         setCustomer(res.data);
       } catch (error) {
         console.error('Error fetching customer:', error);
@@ -31,7 +31,7 @@ const EditCustomer = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${baseURL}/customer/${id}`, customer);
+      await axios.put(`${baseURL}/customers/${id}`, customer);
       alert('Customer updated successfully!');
       navigate('/listCustomer'); // redirect back to customer list
     } catch (error) {

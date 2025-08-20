@@ -14,7 +14,7 @@ export const GlobalProvider = ({ children }) => {
 
 const fetchCustomer =async()=>{
   try {
-    const response =await axios.get(`${baseURL}/customer`)
+    const response =await axios.get(`${baseURL}/customers`)
     setCustomers(response.data)
     setSuppliers(response.data.filter(cust => cust.type === 'vendor'))
     setLoading(false)

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const salesInvoiceSchema = new mongoose.Schema({
   invoiceNumber: { type: String, required: true, unique: true },
-  customerName: { type: String, required: true },
+  customerName: { type: String},
   date: { type: Date, default: Date.now },
   products: [
     {

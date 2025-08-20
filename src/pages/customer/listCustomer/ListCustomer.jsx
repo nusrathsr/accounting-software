@@ -13,7 +13,7 @@ const ListCustomer = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const res = await axios.get(`${baseURL}/customer`);
+        const res = await axios.get(`${baseURL}/customers`);
         setCustomers(res.data); // Assuming backend returns array of customers
       } catch (error) {
         console.error('Error fetching customers:', error);

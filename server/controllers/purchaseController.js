@@ -1,12 +1,13 @@
 const PurchaseInvoice = require("../models/PurchaseInvoice");
 const Product = require("../models/Product");
+const Payment = require("../models/Payment");
 
 // ➕ Add a purchase
 exports.addPurchase = async (req, res) => {
   try {
-    const { purchaseOrderNumber, sellerName, product: productName, quantity, unitPrice, tax, totalAmount, purchaseDate } = req.body;
+    const { purchaseOrderNumber, sellerName, product: productName, quantity, unitPrice, tax, totalAmount,  paidAmount = 0, purchaseDate } = req.body;
 
-    const purchase = new PurchaseInvoice({ purchaseOrderNumber, sellerName, product: productName, quantity, unitPrice, tax, totalAmount, purchaseDate });
+    const purchase = new PurchaseInvoice({ purchaseOrderNumber, sellerName, product: productName, quantity, unitPrice, tax, totalAmount, paidAmount, purchaseDate });
     await purchase.save();
 
     const product = await Product.findOne({ name: productName.trim() });
@@ -34,7 +35,12 @@ exports.getAllPurchases = async (req, res) => {
     // If product is stored as String, keep find()
     // If product is ObjectId ref, you can use .populate("product")
     const purchases = await PurchaseInvoice.find().sort({ createdAt: -1 });
-    res.json(purchases);
+    const purchasesWithPaid = purchases.map(p => ({
+      ...p._doc,           // raw document fields
+      paidAmount: p.paidAmount ?? 0
+    }));
+
+    res.json(purchasesWithPaid);
   } catch (err) {
     console.error("❌ Error fetching purchases:", err);
     res.status(500).json({ error: err.message });
@@ -43,7 +49,7 @@ exports.getAllPurchases = async (req, res) => {
 
 exports.updatePurchase = async (req, res) => {
   try {
-    const { purchaseOrderNumber, sellerName, product: productName, size, quantity, unitPrice, tax, totalAmount, purchaseDate } = req.body;
+    const { purchaseOrderNumber, sellerName, product: productName, size, quantity, unitPrice, tax, totalAmount, paidAmount = 0, purchaseDate } = req.body;
 
     // Validate required fields
     if (!purchaseOrderNumber || !sellerName || !productName || !quantity || !unitPrice || !totalAmount || !purchaseDate) {
@@ -67,6 +73,7 @@ exports.updatePurchase = async (req, res) => {
     existingPurchase.tax = tax;
     existingPurchase.totalAmount = totalAmount;
     existingPurchase.purchaseDate = purchaseDate;
+    existingPurchase.paidAmount = paidAmount;
 
     await existingPurchase.save();
 
@@ -107,5 +114,34 @@ exports.deletePurchase = async (req, res) => {
   } catch (err) {
     console.error("❌ Error deleting purchase:", err);
     res.status(500).json({ error: err.message });
+  }
+};
+
+// Get all pending dues
+// Get all pending purchase dues
+// Get all pending purchase dues
+exports.getPurchaseDues = async (req, res) => {
+  try {
+    // Fetch all purchases
+    const purchases = await PurchaseInvoice.find().lean();
+
+    // Calculate dues based on paidAmount
+    const dues = purchases.map(p => {
+      return {
+        _id: p._id,
+        date: p.purchaseDate,
+        vendor: p.sellerName,
+        invoiceNo: p.purchaseOrderNumber,
+        totalAmount: p.totalAmount,
+        paidAmount: p.paidAmount || 0,
+        balanceDue: p.totalAmount - (p.paidAmount || 0),
+      };
+    });
+
+    // Only return purchases with pending balance
+    res.json(dues.filter(d => d.balanceDue > 0));
+  } catch (err) {
+    console.error("Error fetching purchase dues:", err);
+    res.status(500).json({ error: "Server error" });
   }
 };

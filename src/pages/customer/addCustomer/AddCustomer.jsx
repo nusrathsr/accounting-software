@@ -27,7 +27,7 @@ const AddCustomer = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post(`${baseURL}/customer`, customer); // <-- Backend API endpoint
+      const res = await axios.post(`${baseURL}/customers`, customer); // <-- Backend API endpoint
       console.log('Customer Added:', res.data);
 
       alert('Customer added successfully!');

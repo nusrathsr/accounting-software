@@ -15,8 +15,12 @@ export default function ViewPurchase() {
 
   const fetchPurchases = async () => {
     try {
-      const res = await axios.get('http://localhost:4000/api/purchase');
-      setPurchases(res.data);
+      const res = await axios.get('http://localhost:4000/api/purchases');
+       const purchasesWithPaid = res.data.map(p => ({
+      ...p,
+      paidAmount: p.paidAmount ?? 0
+    }));
+    setPurchases(purchasesWithPaid);
     } catch (err) {
       console.error(err);
       alert('Failed to load purchases.');
@@ -26,7 +30,7 @@ export default function ViewPurchase() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure?')) return;
     try {
-      await axios.delete(`http://localhost:4000/api/purchase/${id}`);
+      await axios.delete(`http://localhost:4000/api/purchases/${id}`);
       setPurchases(purchases.filter(p => p._id !== id));
     } catch (err) {
       console.error(err);
@@ -44,6 +48,7 @@ export default function ViewPurchase() {
       unitPrice: purchase.unitPrice ?? 0,
       tax: purchase.tax ?? 0,
       totalAmount: purchase.totalAmount ?? 0,
+      paidAmount: purchase.paidAmount ?? 0,
     });
   };
 
@@ -57,7 +62,7 @@ export default function ViewPurchase() {
       let tax = prev.tax ?? 0;
       let newVal = value;
 
-      if (['quantity','unitPrice','tax'].includes(name)) {
+      if (['quantity','unitPrice','tax','paidAmount'].includes(name)) {
         newVal = parseFloat(value) || 0;
         if (name === 'quantity') qty = newVal;
         if (name === 'unitPrice') price = newVal;
@@ -73,31 +78,31 @@ export default function ViewPurchase() {
   };
 
   const handleSave = async () => {
-  if (!editData) return;
-  try {
-    const updatedPurchase = {
-      purchaseOrderNumber: editData.purchaseOrderNumber,
-      sellerName: editData.sellerName,
-      product: editData.product,
-      size: editData.size || '',
-      quantity: editData.quantity,
-      unitPrice: editData.unitPrice,
-      tax: editData.tax,
-      totalAmount: editData.totalAmount,
-      purchaseDate: editData.purchaseDate,
-    };
+    if (!editData) return;
+    try {
+      const updatedPurchase = {
+        purchaseOrderNumber: editData.purchaseOrderNumber,
+        sellerName: editData.sellerName,
+        product: editData.product,
+        size: editData.size || '',
+        quantity: editData.quantity,
+        unitPrice: editData.unitPrice,
+        tax: editData.tax,
+        totalAmount: editData.totalAmount,
+        paidAmount: editData.paidAmount,
+        purchaseDate: editData.purchaseDate,
+      };
 
-    const res = await axios.put(`http://localhost:4000/api/purchase/${editData._id}`, updatedPurchase);
+      const res = await axios.put(`http://localhost:4000/api/purchases/${editData._id}`, updatedPurchase);
 
-    setPurchases(purchases.map(p => p._id === editData._id ? res.data.purchase : p));
-    closeEditModal();
-    alert('Purchase updated!');
-  } catch (err) {
-    console.error(err.response?.data || err);
-    alert('Update failed.');
-  }
-};
-
+      setPurchases(purchases.map(p => p._id === editData._id ? res.data.purchase : p));
+      closeEditModal();
+      alert('Purchase updated!');
+    } catch (err) {
+      console.error(err.response?.data || err);
+      alert('Update failed.');
+    }
+  };
 
   const filtered = purchases.filter(p =>
     Object.values(p).some(val => String(val).toLowerCase().includes(searchQuery.toLowerCase()))
@@ -130,6 +135,7 @@ export default function ViewPurchase() {
                 <th className="border px-2 py-1">Price</th>
                 <th className="border px-2 py-1">Tax</th>
                 <th className="border px-2 py-1">Total</th>
+                <th className="border px-2 py-1">Paid Amount</th>
                 <th className="border px-2 py-1">Date</th>
                 <th className="border px-2 py-1">Actions</th>
               </tr>
@@ -144,6 +150,7 @@ export default function ViewPurchase() {
                   <td className="border px-2 py-1">₹{p.unitPrice}</td>
                   <td className="border px-2 py-1">{p.tax}%</td>
                   <td className="border px-2 py-1">₹{p.totalAmount}</td>
+                  <td className="border px-2 py-1">₹{p.paidAmount ?? 0}</td>
                   <td className="border px-2 py-1">{new Date(p.purchaseDate).toLocaleDateString()}</td>
                   <td className="border px-2 py-1 flex space-x-2">
                     <button onClick={() => openEditModal(p)} className="text-blue-600 hover:text-blue-800"><FiEdit size={18}/></button>
@@ -174,7 +181,7 @@ export default function ViewPurchase() {
           <div className="relative bg-white rounded-lg shadow-lg max-w-xl w-full max-h-[90vh] p-6 z-50 overflow-y-auto" onClick={e=>e.stopPropagation()}>
             <h2 className="text-xl font-semibold mb-4">Edit Purchase</h2>
             <form onSubmit={e=>{e.preventDefault(); handleSave();}} className="space-y-4">
-              {[ 
+              {[
                 {label:'PO Number',name:'purchaseOrderNumber',type:'text',readOnly:true},
                 {label:'Seller Name',name:'sellerName',type:'text'},
                 {label:'Product',name:'product',type:'text'},
@@ -182,6 +189,7 @@ export default function ViewPurchase() {
                 {label:'Purchased Price',name:'unitPrice',type:'number'},
                 {label:'Tax (%)',name:'tax',type:'number'},
                 {label:'Total Amount',name:'totalAmount',type:'number',readOnly:true},
+                {label:'Paid Amount',name:'paidAmount',type:'number'},
                 {label:'Purchase Date',name:'purchaseDate',type:'date'},
               ].map(f=>(
                 <div key={f.name}>
@@ -192,7 +200,7 @@ export default function ViewPurchase() {
                     value={editData[f.name]??''}
                     onChange={handleChange}
                     readOnly={f.readOnly}
-                    min={['quantity','unitPrice','tax'].includes(f.name)?0:undefined}
+                    min={['quantity','unitPrice','tax','paidAmount'].includes(f.name)?0:undefined}
                     className="mt-1 block w-full border rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>

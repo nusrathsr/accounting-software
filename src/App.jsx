@@ -10,6 +10,10 @@ import ListProduct from './pages/product/listProduct/ListProduct';
 import AddCustomer from './pages/customer/addCustomer/AddCustomer'
 import EditCustomer from './pages/customer/editCustomer/EditCustomer'
 import ListCustomer from './pages/customer/listCustomer/ListCustomer';
+import AddTransaction from './pages/payments/AddTransaction';
+import TransactionList from './pages/payments/TransactionList';
+import PurchaseDue from "./pages/purchase/purchaseDue";
+
 import './css/style.css';
 import './charts/ChartjsConfig';
 
@@ -34,7 +38,6 @@ function App() {
         <Route path="/" element={<Dashboard />} >
           <Route path="sales/add" element={<AddSales />} />
           <Route path="sales/view" element={<ViewSales />} />
-
           <Route path="purchase/add" element={<AddPurchase />} />
           <Route path="purchase/view" element={<ViewPurchase />} />
           <Route path='/addProduct' element={<AddProduct />} />
@@ -45,9 +48,9 @@ function App() {
           <Route path='/listCustomer' element={<ListCustomer />} />
           <Route path='/addExpense' element={<AddExpense />} />
           <Route path='/listExpense' element={<ListExpenses />} />
-
-
-
+          <Route path='/payments/add' element={<AddTransaction />} />
+          <Route path='/payments/view' element={<TransactionList />} />
+          <Route path="/purchase/dues" element={<PurchaseDue />} />
 
         </Route>
       </Routes>

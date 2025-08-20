@@ -9,6 +9,7 @@ const customerRoutes =require('./routes/customerRoutes');
 const expenseRoutes =require('./routes/expenseRoutes');
 const salesRoutes = require("./routes/salesRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 // Load env variables
 dotenv.config();
 
@@ -28,11 +29,12 @@ mongoose.connect(process.env.MONGO_URL,{
 .catch((error)=>console.error('❌ MongoDB connection failed:', error));
 
 //Routes
-app.use('/api/products',productRoutes)
-app.use('/api/customer',customerRoutes)
-app.use('/api/expense',expenseRoutes)
+app.use('/api/products', productRoutes)
+app.use('/api/customers', customerRoutes)
+app.use('/api/expense', expenseRoutes)
 app.use("/api/sales", salesRoutes);
-app.use("/api/purchase", purchaseRoutes);
+app.use("/api/purchases", purchaseRoutes);
+app.use("/api/payments", paymentRoutes);
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')
