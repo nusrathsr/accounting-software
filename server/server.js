@@ -9,11 +9,8 @@ const customerRoutes =require('./routes/customerRoutes');
 const expenseRoutes =require('./routes/expenseRoutes');
 const salesRoutes = require("./routes/salesRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
-<<<<<<< HEAD
 const paymentRoutes = require("./routes/paymentRoutes");
-=======
 const reportRouters =require("./routes/reportRoutes")
->>>>>>> 93cb4958bbea8facac07f393a490e1e0355b50d9
 // Load env variables
 dotenv.config();
 
@@ -37,13 +34,10 @@ app.use('/api/products', productRoutes)
 app.use('/api/customers', customerRoutes)
 app.use('/api/expense', expenseRoutes)
 app.use("/api/sales", salesRoutes);
-<<<<<<< HEAD
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/payments", paymentRoutes);
-=======
 app.use("/api/purchase", purchaseRoutes);
 app.use("/api/reports",reportRouters)
->>>>>>> 93cb4958bbea8facac07f393a490e1e0355b50d9
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')
