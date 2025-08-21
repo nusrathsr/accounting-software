@@ -44,7 +44,7 @@ export default function AddSalesInvoice() {
       },
     ],
     paymentMode: "cash",
-    paymentStatus: false,
+    paymentStatus: "",
   });
 
   const [dropdownState, setDropdownState] = useState([{ open: false, searchTerm: "" }]);
@@ -169,6 +169,7 @@ export default function AddSalesInvoice() {
     const salesRecord = {
       invoiceNumber: formData.invoiceNumber,
       customerName: formData.customerName,
+      number: formData.number,
       saleDate: formData.saleDate,
       paymentMode: formData.paymentMode,
       paymentStatus: formData.paymentStatus,

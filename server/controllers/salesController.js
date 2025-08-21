@@ -2,7 +2,6 @@ const SalesInvoice = require("../models/SalesInvoice");
 const Product = require("../models/Product");
 
 // Add a sale
-// Add a sale
 exports.addSale = async (req, res) => {
   const session = await Product.startSession();
   session.startTransaction();
@@ -47,7 +46,20 @@ exports.addSale = async (req, res) => {
     }
 
     // Save the sale
-    const sale = new SalesInvoice(req.body);
+    const { invoiceNumber, customerName, number, saleDate, subtotal, tax, totalAmount, paymentMode, paymentStatus } = req.body;
+    const sale = new SalesInvoice({
+  invoiceNumber,
+  customerName,
+  number,
+  saleDate,
+  products,
+  subtotal,
+  tax,
+  totalAmount,
+  paymentMode: paymentMode || "cash",       // default to cash
+  paymentStatus: !!paymentStatus,           // convert to Boolean
+});
+   
     await sale.save({ session });
 
     await session.commitTransaction();
