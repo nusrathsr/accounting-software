@@ -8,32 +8,43 @@ export default function AddSalesInvoice() {
 
   const [productOptions, setProductOptions] = useState([]);
   useEffect(() => {
-      const fetchProducts = async () => {
-        try {
-          const res = await axios.get("http://localhost:4000/api/products");
-          const products = res.data.map((p) => ({
-            id: p._id,
-            name: p.name || "Unnamed Product",
-            price: Number(p.sellingPrice) || 0,
-            taxRate: Number(p.taxPercentage) || 0,
-            isTaxInclusive: p.taxType === "GST IN",
-            sizes: (p.sizes || []).map(s => s?.size?.trim() || ""),
-          }));
-          setProductOptions(products);
-        } catch (err) {
-          console.error("Error fetching products:", err);
-        }
-      };
-      fetchProducts();
-    }, []);
-  
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get("http://localhost:4000/api/products");
+        const products = res.data.map((p) => ({
+          id: p._id,
+          name: p.name || "Unnamed Product",
+          price: Number(p.sellingPrice) || 0,
+          taxRate: Number(p.taxPercentage) || 0,
+          isTaxInclusive: p.taxType === "GST IN",
+          sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
+        }));
+        setProductOptions(products);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const [formData, setFormData] = useState({
     invoiceNumber: "",
     customerName: "",
     number: "",
     saleDate: new Date().toISOString().slice(0, 10),
-    items: [{ productId: null, productName: "", size: "", quantity: "", unitPrice: "", tax: "" }],
+    items: [
+      {
+        productId: null,
+        productName: "",
+        size: "",
+        quantity: "",
+        unitPrice: "",
+        discount: "",
+        tax: "",
+      },
+    ],
+    paymentMode: "cash",
+    paymentStatus: false,
   });
 
   const [dropdownState, setDropdownState] = useState([{ open: false, searchTerm: "" }]);
@@ -63,6 +74,7 @@ export default function AddSalesInvoice() {
       productName: product.name,
       quantity: "",
       unitPrice: product.price.toFixed(2),
+      discount: "0",
       tax: product.taxRate.toFixed(2),
     };
     setFormData((prev) => ({ ...prev, items: updatedItems }));
@@ -78,10 +90,18 @@ export default function AddSalesInvoice() {
     setFormData((prev) => ({ ...prev, items: updatedItems }));
   };
 
+  const handleCheckboxChange = (e) => {
+  const { name, checked } = e.target;
+  setFormData((prev) => ({ ...prev, [name]: checked }));
+};
+
   const addItem = () => {
     setFormData((prev) => ({
       ...prev,
-      items: [...prev.items, { productId: null, productName: "",size: "", quantity: "", unitPrice: "", tax: "" }],
+      items: [
+        ...prev.items,
+        { productId: null, productName: "", size: "", quantity: "", unitPrice: "", discount: "0", tax: "" },
+      ],
     }));
     setDropdownState((prev) => [...prev, { open: false, searchTerm: "" }]);
   };
@@ -110,39 +130,68 @@ export default function AddSalesInvoice() {
     setFormData((prev) => ({ ...prev, items: updatedItems }));
   };
 
+  const getEffectiveUnitPrice = (item) => {
+    const basePrice = n(item.unitPrice);
+    const discountAmount = (basePrice * n(item.discount)) / 100;
+    return basePrice - discountAmount;
+  };
+
+  const calculateLineTotal = (item) => {
+    const effectivePrice = getEffectiveUnitPrice(item);
+    const lineTotal = n(item.quantity) * effectivePrice;
+    const taxAmount = (lineTotal * n(item.tax)) / 100;
+    return lineTotal + taxAmount;
+  };
+
   const calculateSubtotal = () =>
-    formData.items.reduce((sum, item) => sum + n(item.quantity) * n(item.unitPrice), 0);
+    formData.items.reduce((sum, item) => sum + n(item.quantity) * getEffectiveUnitPrice(item), 0);
 
   const calculateTaxTotal = () =>
-    formData.items.reduce((sum, item) => sum + (n(item.quantity) * n(item.unitPrice) * n(item.tax)) / 100, 0);
+    formData.items.reduce((sum, item) => {
+      const lineTotal = n(item.quantity) * getEffectiveUnitPrice(item);
+      return sum + (lineTotal * n(item.tax)) / 100;
+    }, 0);
+    const calculateDiscountTotal = () =>
+  formData.items.reduce((sum, item) => {
+    return sum + (n(item.unitPrice) * n(item.quantity) * n(item.discount)) / 100;
+  }, 0);
 
   const calculateTotal = () => calculateSubtotal() + calculateTaxTotal();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const validItems = formData.items.filter((item) => item.productId && n(item.quantity) > 0);
+    if (validItems.length === 0) {
+      alert("Please add at least one product with quantity > 0");
+      return;
+    }
 
-    const validItems = formData.items.filter(
-    (item) => item.productId && n(item.quantity) > 0
-  );
-
-  if (validItems.length === 0) {
-    alert("Please add at least one product with quantity > 0");
-    return;
-  }
     const salesRecord = {
       invoiceNumber: formData.invoiceNumber,
       customerName: formData.customerName,
       saleDate: formData.saleDate,
-      products: formData.items.map((item) => ({
-        productId: item.productId,
-        name: item.productName,
-        size: item.size,
-        quantity: n(item.quantity),
-        unitPrice: n(item.unitPrice),
-        tax: n(item.tax),
-        total: n(item.quantity) * n(item.unitPrice) + (n(item.quantity) * n(item.unitPrice) * n(item.tax)) / 100,
-      })),
+      paymentMode: formData.paymentMode,
+      paymentStatus: formData.paymentStatus,
+      products: formData.items.map((item) => {
+        const basePrice = n(item.unitPrice);
+        const discountAmount = (basePrice * n(item.discount)) / 100;
+        const effectivePrice = basePrice - discountAmount;
+        const lineTotal = n(item.quantity) * effectivePrice;
+        const taxAmount = (lineTotal * n(item.tax)) / 100;
+
+        return {
+          productId: item.productId,
+          name: item.productName,
+          size: item.size,
+          quantity: n(item.quantity),
+          unitPrice: basePrice,
+          discount: n(item.discount),
+          tax: n(item.tax),
+          lineTotal: lineTotal + taxAmount,
+        };
+      }),
       subtotal: calculateSubtotal(),
+      discountTotal: calculateDiscountTotal(),
       tax: calculateTaxTotal(),
       totalAmount: calculateTotal(),
     };
@@ -155,7 +204,7 @@ export default function AddSalesInvoice() {
         customerName: "",
         number: "",
         saleDate: new Date().toISOString().slice(0, 10),
-        items: [{ productId: null, productName: "", quantity: "", unitPrice: "", tax: "" }],
+        items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
       });
       setDropdownState([{ open: false, searchTerm: "" }]);
     } catch (err) {
@@ -165,91 +214,140 @@ export default function AddSalesInvoice() {
   };
 
   const handleDownload = async () => {
-  try {
-    const res = await axios.get("http://localhost:4000/api/sales/latest");
-    const invoice = res.data;
+    try {
+      const res = await axios.get("http://localhost:4000/api/sales/latest");
+      const invoice = res.data;
+      if (!invoice) return alert("No invoice found!");
+      const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
+      const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
 
-    if (!invoice) {
-      alert("No invoice found!");
-      return;
-    }
-    const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
-    const formattedDate = isNaN(invoiceDate.getTime())
-      ? new Date().toLocaleDateString()
-      : invoiceDate.toLocaleDateString();
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+      let y = 40;
 
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    let y = 40;
+      doc.setFontSize(18);
+      doc.text("Shop Name", 40, y);
+      doc.setFontSize(11);
+      doc.text("Phone: +1234567890", 40, y + 25);
+      doc.text("Email: shop@example.com", 40, y + 40);
 
-    doc.setFontSize(18);
-    doc.text("Shop Name", 40, y);
-    doc.setFontSize(11);
-    doc.text("Phone: +1234567890", 40, y + 25);
-    doc.text("Email: shop@example.com", 40, y + 40);
-
-    y += 70;
-    doc.setFontSize(16);
-    doc.text("Sales Invoice", 40, y);
-    y += 20;
-    doc.setFontSize(11);
-    doc.text(`Invoice No: ${invoice.invoiceNumber}`, 40, y);
-    doc.text(`Date: ${formattedDate}`, 300, y);
-    y += 20;
-    doc.text(`Bill To: ${invoice.customerName}`, 40, y);
-    doc.text(`Mobile: ${invoice.number}`, 40, y + 15);
-
-    y += 20;
-    doc.setFontSize(12);
-    doc.setFont(undefined, "bold");
-    doc.text("Product", 40, y);
-    doc.text("Qty", 200, y);
-    doc.text("Unit (Rs.)", 260, y);
-    doc.text("Tax %", 340, y);
-    doc.text("Line Total (Rs.)", 420, y);
-    doc.setFont(undefined, "normal");
-    y += 10;
-    doc.line(40, y, 550, y);
-    y += 15;
-
-    invoice.products.forEach((item) => {
-      const lineTotal = item.quantity * item.unitPrice;
-      // const lineWithTax = lineTotal + (lineTotal * item.tax) / 100 || lineTotal;
-      const lineWithTax = lineTotal + (lineTotal * (item.tax || 0)) / 100;
-
-      doc.text(item.name || "N/A", 40, y);
-      doc.text(String(item.quantity), 200, y);
-      doc.text(item.unitPrice.toFixed(2), 260, y);
-      doc.text(String(item.tax || 0), 340, y);
-      doc.text(lineWithTax.toFixed(2), 420, y);
+      y += 70;
+      doc.setFontSize(16);
+      doc.text("Sales Invoice", 40, y);
       y += 20;
-    });
+      doc.setFontSize(11);
+      doc.text(`Invoice No: ${invoice.invoiceNumber}`, 40, y);
+      doc.text(`Date: ${formattedDate}`, 300, y);
+      y += 20;
+      doc.text(`Bill To: ${invoice.customerName}`, 40, y);
+      doc.text(`Mobile: ${invoice.number || "—"}`, 40, y + 15);
+      y += 20;
+      doc.text(`Payment Mode: ${invoice.paymentMode || "—"}`, 40, y);
+      doc.text(`Payment Status: ${invoice.paymentStatus ? "Paid" : "Unpaid"}`, 300, y);
 
-    y += 10;
-    doc.line(40, y, 550, y);
-    y += 20;
-    doc.text(`Subtotal: Rs.${invoice.subtotal.toFixed(2)}`, 300, y);
-    y += 15;
-    doc.text(`Tax Total: Rs.${invoice.tax.toFixed(2)}`, 300, y);
-    y += 15;
-    doc.setFont(undefined, "bold");
-    doc.text(`Total Amount: Rs.${invoice.totalAmount.toFixed(2)}`, 300, y);
+      y += 20;
+      doc.setFontSize(12);
+      doc.setFont(undefined, "bold");
+      doc.text("Product", 40, y);
+      doc.text("Qty", 200, y);
+      doc.text("Unit (Rs.)", 260, y);
+      doc.text("Disc %", 340, y); 
+      doc.text("GST %", 400, y);
+      doc.text("Line Total (Rs.)", 470, y);
+      doc.setFont(undefined, "normal");
+      y += 10;
+      doc.line(40, y, 550, y);
+      y += 15;
 
-    doc.save(`invoice-${invoice.invoiceNumber}.pdf`);
-  } catch (err) {
-    console.error(err);
-    alert("Error fetching the latest invoice.");
-  }
-};
+      invoice.products.forEach((item) => {
+        const basePrice = n(item.unitPrice);
+        const discountAmount = (basePrice * n(item.discount)) / 100;
+        const effectivePrice = basePrice - discountAmount;
+        const lineTotal = n(item.quantity) * effectivePrice;
+        const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
 
+        doc.text(item.name || "N/A", 40, y);
+        doc.text(String(item.quantity), 200, y);
+        doc.text(basePrice.toFixed(2), 260, y);
+        doc.text(String(item.discount || 0), 340, y);
+        doc.text(String(item.tax || 0), 400, y);
+        doc.text(lineWithTax.toFixed(2), 470, y);
+        y += 20;
+      });
 
-  const handlePrint = () => {
-    if (!invoiceRef.current) return;
-    const printContents = invoiceRef.current.innerHTML;
-    const originalContents = document.body.innerHTML;
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload();
+      y += 10;
+      doc.line(40, y, 550, y);
+      y += 20;
+      doc.text(`Subtotal: Rs.${invoice.subtotal.toFixed(2)}`, 300, y);
+      y += 15;
+      doc.text(`Tax Total: Rs.${invoice.tax.toFixed(2)}`, 300, y);
+      y += 15;
+      doc.setFont(undefined, "bold");
+      doc.text(`Total Amount: Rs.${invoice.totalAmount.toFixed(2)}`, 300, y);
+
+      doc.save(`invoice-${invoice.invoiceNumber}.pdf`);
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching the latest invoice.");
+    }
+  };
+
+  const handlePrint = async () => {
+    try {
+      const res = await axios.get("http://localhost:4000/api/sales/latest");
+      const invoice = res.data;
+      if (!invoice) return alert("No invoice found!");
+      const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
+      const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
+
+      const printableContent = `
+      <div>
+        <h2 style="text-align:center;">Sales Invoice</h2>
+        <p><strong>Invoice No:</strong> ${invoice.invoiceNumber}</p>
+        <p><strong>Date:</strong> ${formattedDate}</p>
+        <p><strong>Customer:</strong> ${invoice.customerName || "—"}</p>
+        <p><strong>Mobile:</strong> ${invoice.number || "—"}</p>
+        <p><strong>Payment Mode:</strong> ${invoice.paymentMode || "—"}</p>
+        <p><strong>Payment Status:</strong> ${invoice.paymentStatus ? "Paid" : "Unpaid"}</p>
+        <table border="1" cellspacing="0" cellpadding="5" width="100%" style="border-collapse:collapse; margin-top:10px;">
+          <thead>
+            <tr>
+              <th>Product</th><th>Qty</th><th>Unit ₹</th><th>Disc %</th><th>GST %</th><th>Total ₹</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${invoice.products
+              .map((item) => {
+                const basePrice = n(item.unitPrice);
+                const discountAmount = (basePrice * n(item.discount)) / 100;
+                const effectivePrice = basePrice - discountAmount;
+                const lineTotal = n(item.quantity) * effectivePrice;
+                const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
+                return `<tr>
+                  <td>${item.name || "N/A"}</td>
+                  <td style="text-align:center;">${item.quantity}</td>
+                  <td style="text-align:right;">${basePrice.toFixed(2)}</td>
+                  <td style="text-align:center;">${item.discount || 0}</td>
+                  <td style="text-align:center;">${item.tax || 0}</td>
+                  <td style="text-align:right;">${lineWithTax.toFixed(2)}</td>
+                </tr>`;
+              })
+              .join("")}
+          </tbody>
+        </table>
+        <p style="text-align:right; margin-top:10px;">Subtotal: ₹${invoice.subtotal.toFixed(2)}</p>
+        <p style="text-align:right;">Tax Total: ₹${invoice.tax.toFixed(2)}</p>
+        <p style="text-align:right; font-weight:bold;">Total: ₹${invoice.totalAmount.toFixed(2)}</p>
+      </div>
+    `;
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`<html><head><title>Invoice</title></head><body>${printableContent}</body></html>`);
+      printWindow.document.close();
+      printWindow.print();
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching the latest invoice for printing.");
+    }
   };
 
   return (
@@ -276,21 +374,50 @@ export default function AddSalesInvoice() {
             <input type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
           </div>
           <div className="flex-1">
-    <label>Mobile Number(optional)</label>
-    <input
-      type="tel"
-      name="number"
-      value={formData.number}
-      onChange={handleChange}
-      className="w-full border px-3 py-2 rounded"
-      placeholder="Enter mobile number"
-    />
-  </div>
+            <label>Mobile Number(optional)</label>
+            <input
+              type="tel"
+              name="number"
+              value={formData.number}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded"
+              placeholder="Enter mobile number"
+            />
+          </div>
         </div>
         <div>
           <label>Sale Date</label>
           <input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
         </div>
+        <div className="flex space-x-4">
+  <div className="flex-1">
+    <label>Payment Mode</label>
+    <select
+      name="paymentMode"
+      value={formData.paymentMode}
+      onChange={handleChange}
+      className="w-full border px-3 py-2 rounded"
+    >
+      <option value="cash">Cash</option>
+      <option value="upi">UPI</option>
+      <option value="card">Card</option>
+      <option value="wallet">Wallet</option>
+      <option value="credit">Credit</option>
+    </select>
+  </div>
+
+  <div className="flex-1 flex items-center space-x-2 mt-6">
+    <input
+      type="checkbox"
+      name="paymentStatus"
+      checked={formData.paymentStatus}
+      onChange={handleCheckboxChange}
+      className="w-5 h-5"
+    />
+    <label>Paid</label>
+  </div>
+</div>
+
 
         <div>
           <label>Items</label>
@@ -337,85 +464,41 @@ export default function AddSalesInvoice() {
                 )}
 
                 {item.productId && productOptions.find(p => p.id === item.productId)?.sizes && (
-  <select
-    value={item.size}
-    onChange={(e) => handleItemChange(index, "size", e.target.value)}
-    className="border px-2 py-1 rounded"
-  >
-    <option value="">Select Size</option>
-    {productOptions
-      .find(p => p.id === item.productId)
-      .sizes.map((s, i) => (
-        <option key={i} value={s}>{s}</option>
-    ))}
-  </select>
-)}
-                <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-20 border px-3 py-2 rounded text-center" />
-                <input type="number" placeholder="Unit Price" value={item.unitPrice} onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)} className="w-28 border px-3 py-2 rounded text-right" />
-                <input type="number" placeholder="Tax %" value={item.tax} onChange={(e) => handleItemChange(index, "tax", e.target.value)} className="w-20 border px-3 py-2 rounded text-center" />
-                {formData.items.length > 1 && (
-                  <button type="button" onClick={() => removeItem(index)} className="text-red-600 px-2">
-                    ✖
-                  </button>
+                  <select
+                    value={item.size}
+                    onChange={(e) => handleItemChange(index, "size", e.target.value)}
+                    className="w-24 border px-2 py-1 rounded"
+                  >
+                    <option value="">Select Size</option>
+                    {productOptions.find(p => p.id === item.productId).sizes.map((s, i) => (
+                      <option key={i} value={s}>{s}</option>
+                    ))}
+                  </select>
                 )}
+                <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-20 border px-2 py-1 rounded" />
+                <input type="number" placeholder="Unit ₹" value={item.unitPrice} onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)} className="w-24 border px-2 py-1 rounded" />
+                <input type="number" placeholder="Disc %" value={item.discount} onChange={(e) => handleItemChange(index, "discount", e.target.value)} className="w-20 border px-2 py-1 rounded" />
+                <input type="number" placeholder="GST %" value={item.tax} onChange={(e) => handleItemChange(index, "tax", e.target.value)} className="w-20 border px-2 py-1 rounded" />
+                {/* <span className="w-24">{calculateLineTotal(item).toFixed(2)}</span> */}
+                 <span className="w-24 font-medium text-right">
+          ₹{getEffectiveUnitPrice(item).toFixed(2)}
+        </span>
+                <button type="button" onClick={() => removeItem(index)} className="text-red-500 px-2">X</button>
               </div>
             );
           })}
-          <button type="button" onClick={addItem} className="bg-blue-600 text-white px-4 py-2 rounded">
-            + Add Item
-          </button>
+          <button type="button" onClick={addItem} className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Item</button>
         </div>
 
-        <div className="text-right font-semibold space-y-1">
-          <p>Subtotal: Rs.{calculateSubtotal().toFixed(2)}</p>
-          <p>Tax Total: Rs.{calculateTaxTotal().toFixed(2)}</p>
-          <p className="text-lg">Total: ₹{calculateTotal().toFixed(2)}</p>
-        </div>
+        <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 mt-4">Save Invoice</button>
+       <div className="flex flex-col items-end space-y-1 mt-6">
+  <div>Subtotal: ₹{calculateSubtotal().toFixed(2)}</div>
+  <div>Discount: ₹{calculateDiscountTotal().toFixed(2)}</div>
+  <div>GST: ₹{calculateTaxTotal().toFixed(2)}</div>
+  <div className="font-bold">Total: ₹{calculateTotal().toFixed(2)}</div>
+</div>
 
-        <button type="submit" className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-          Save Invoice
-        </button>
       </form>
-
-      <div ref={invoiceRef} className="mt-10 p-6 border rounded bg-gray-50">
-        <h2 className="text-2xl font-bold mb-4">Invoice Preview</h2>
-        <p>Invoice No: {formData.invoiceNumber}</p>
-        <p>Date: {formData.saleDate}</p>
-        <p>Customer: {formData.customerName || "—"}</p>
-        <p>Mobile: {formData.number || "—"}</p>
-        <table className="w-full mt-4 border-collapse border">
-          <thead>
-            <tr className="border">
-              <th className="border px-2 py-1">Product</th>
-              <th className="border px-2 py-1">Qty</th>
-              <th className="border px-2 py-1">Unit ₹</th>
-              <th className="border px-2 py-1">Tax %</th>
-              <th className="border px-2 py-1">Total ₹</th>
-            </tr>
-          </thead>
-          <tbody>
-            {formData.items.map((item, index) => {
-              const lineTotal = n(item.quantity) * n(item.unitPrice);
-              const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
-              return (
-                <tr key={index}>
-                  <td className="border px-2 py-1">{item.productName || "N/A"}</td>
-                  <td className="border px-2 py-1 text-center">{n(item.quantity)}</td>
-                  <td className="border px-2 py-1 text-right">{n(item.unitPrice).toFixed(2)}</td>
-                  <td className="border px-2 py-1 text-center">{n(item.tax)}</td>
-                  <td className="border px-2 py-1 text-right">{lineWithTax.toFixed(2)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        <div className="text-right mt-4 space-y-1">
-          <p>Subtotal: Rs.{calculateSubtotal().toFixed(2)}</p>
-          <p>Tax Total: Rs.{calculateTaxTotal().toFixed(2)}</p>
-          <p className="font-bold">Total: Rs.{calculateTotal().toFixed(2)}</p>
-        </div>
-      </div>
     </div>
   );
 }
-

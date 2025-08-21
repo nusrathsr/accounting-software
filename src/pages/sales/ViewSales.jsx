@@ -77,8 +77,10 @@ export default function ViewSalesInvoices() {
               <th className="border border-gray-300 px-2 py-1">Date</th>
               <th className="border border-gray-300 px-2 py-1">Items</th>
               <th className="border border-gray-300 px-2 py-1 text-right">Subtotal</th>
-              <th className="border border-gray-300 px-2 py-1 text-right">Tax Amount (₹)</th>
+              <th className="border border-gray-300 px-2 py-1 text-right">GST Amount (₹)</th>
               <th className="border border-gray-300 px-2 py-1 text-right">Total</th>
+              <th className="border border-gray-300 px-2 py-1">Payment Mode</th>
+              <th className="border border-gray-300 px-2 py-1">Payment Status</th>
               <th className="border border-gray-300 px-2 py-1">Action</th>
             </tr>
           </thead>
@@ -91,7 +93,7 @@ export default function ViewSalesInvoices() {
                   <td className="border border-gray-300 px-2 py-1">{sale.customerName || "—"}</td>
                   <td className="border border-gray-300 px-2 py-1">{sale.date?.slice(0, 10)}</td>
                   <td className="border border-gray-300 px-2 py-1 max-w-xs">
-                    <ul className="list-disc pl-5 max-h-24 overflow-y-auto">
+                    <ul className="list-disc pl-5 space-y-1">
                       {(sale.products || []).map((item, j) => (
                         <li key={j}>
                           {item.name || "Unnamed Product"} — Qty: {item.quantity || 0}, Price: ₹{parseFloat(item.unitPrice || 0).toFixed(2)}
@@ -102,6 +104,8 @@ export default function ViewSalesInvoices() {
                   <td className="border border-gray-300 px-2 py-1 text-right">₹{parseFloat(sale.subtotal || 0).toFixed(2)}</td>
                   <td className="border border-gray-300 px-2 py-1 text-right">₹{parseFloat(sale.tax || 0).toFixed(2)}</td>
                   <td className="border border-gray-300 px-2 py-1 text-right font-semibold">₹{parseFloat(sale.totalAmount || 0).toFixed(2)}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-center">{sale.paymentMode || "—"}</td>
+                  <td className="border border-gray-300 px-2 py-1 text-center">{sale.paymentStatus ? "Paid" : "Unpaid"}</td>
                   <td className="border border-gray-300 px-2 py-1 text-center">
                     <button
                       onClick={() => deleteSale(sale._id)}

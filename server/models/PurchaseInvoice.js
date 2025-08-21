@@ -4,7 +4,7 @@ const purchaseInvoiceSchema = new mongoose.Schema(
   {
     purchaseOrderNumber: { type: String, required: true, unique: true },
     sellerName: { type: String, required: true, trim: true },
-    vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true }, // <-- Add this
+     vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Customer"}, // <-- Add this
     product: { type: String, required: true, trim: true },
     size: { type: String },
     quantity: { type: Number, required: true, min: 1 },
