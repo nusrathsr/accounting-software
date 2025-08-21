@@ -22,20 +22,23 @@ const PurchaseDue = () => {
 
   return (
     <div className="p-6 bg-white shadow rounded-lg w-full overflow-x-auto relative">
-      {/* Modal above the table */}
+      {/* Modal Popup */}
       {showModal && (
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 p-6 border rounded shadow bg-white w-64 z-10">
-          <h3 className="text-lg font-bold mb-2">Total Pending Dues</h3>
-          <p className="text-2xl font-semibold mb-4">₹{totalDues.toLocaleString()}</p>
-          <button
-            onClick={() => setShowModal(false)}
-            className="mt-3 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-          >
-            Close
-          </button>
+        <div className="fixed inset-0 flex items-start justify-center z-50 pt-20">
+          <div className="p-6 border rounded shadow bg-white w-64">
+            <h3 className="text-lg font-bold mb-2">Total Pending Dues</h3>
+            <p className="text-2xl font-semibold mb-4">₹{totalDues.toLocaleString()}</p>
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-3 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 
+      {/* Header and Button */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Pending Purchase Dues</h2>
         <button
@@ -46,6 +49,7 @@ const PurchaseDue = () => {
         </button>
       </div>
 
+      {/* Table */}
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-gray-100">
