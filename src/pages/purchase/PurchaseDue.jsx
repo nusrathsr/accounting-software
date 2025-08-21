@@ -86,3 +86,4 @@ const PurchaseDue = () => {
 };
 
 export default PurchaseDue;
+
