@@ -3,6 +3,26 @@ import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { GlobalContext } from '../../context/GlobalContext';
+import { 
+  MdDeleteForever, 
+  MdSearch,
+  MdFilterList,
+  MdDownload,
+  MdDateRange,
+  MdAttachMoney
+} from "react-icons/md";
+import { 
+  FaRegEdit, 
+  FaPlus, 
+  FaChevronLeft, 
+  FaChevronRight,
+  FaCalendarAlt,
+  FaReceipt,
+  FaCreditCard,
+  FaWallet,
+  FaMobile,
+  FaUniversity
+} from "react-icons/fa";
 
 const ListExpenses = () => {
   const { baseURL } = useContext(GlobalContext);
@@ -10,18 +30,23 @@ const ListExpenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [filter, setFilter] = useState({ startDate: '', endDate: '' });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(null);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchExpenses();
-  }, []);
+  }, [baseURL]);
 
   const fetchExpenses = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await axios.get(`${baseURL}/expense`);
       setExpenses(res.data);
     } catch (err) {
       console.error(err);
+      setError("Failed to fetch expenses");
     } finally {
       setLoading(false);
     }
@@ -30,12 +55,27 @@ const ListExpenses = () => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilter(prev => ({ ...prev, [name]: value }));
-    setPage(1);
+    setPage(1); // Reset to first page when filtering
   };
 
   const clearFilters = () => {
     setFilter({ startDate: '', endDate: '' });
     setPage(1);
+  };
+
+  // Delete expense from backend
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+    try {
+      setDeleteLoading(id);
+      await axios.delete(`${baseURL}/expense/${id}`);
+      setExpenses((prev) => prev.filter((exp) => exp._id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete expense");
+    } finally {
+      setDeleteLoading(null);
+    }
   };
 
   const filteredExpenses = expenses.filter((exp) => {
@@ -123,10 +163,9 @@ const ListExpenses = () => {
     doc.output('dataurlnewwindow');
   };
 
-  // Pagination
-  const itemsPerPage = 8;
+  // Fixed pagination calculations
   const startIndex = (page - 1) * itemsPerPage;
-  const paginatedExpense = filteredExpenses.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedExpenses = filteredExpenses.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
 
   const getCategoryColor = (category) => {
@@ -147,92 +186,107 @@ const ListExpenses = () => {
   const getPaymentMethodIcon = (method) => {
     switch (method?.toLowerCase()) {
       case 'cash':
-        return '💵';
+        return <FaWallet className="w-4 h-4 text-green-600" />;
       case 'card':
       case 'credit card':
       case 'debit card':
-        return '💳';
+        return <FaCreditCard className="w-4 h-4 text-blue-600" />;
       case 'upi':
-        return '📱';
+        return <FaMobile className="w-4 h-4 text-purple-600" />;
       case 'bank transfer':
-        return '🏦';
+        return <FaUniversity className="w-4 h-4 text-indigo-600" />;
       default:
-        return '💰';
+        return <MdAttachMoney className="w-4 h-4 text-gray-600" />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="bg-white backdrop-blur-sm bg-opacity-90 shadow-xl rounded-2xl p-6 mb-6 border border-white/20">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-            {/* Title and Stats */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <div>
-                <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  Expense Tracker
-                </h1>
-                <p className="text-gray-600 mt-1">Manage and track your expenses efficiently</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-full mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                  <FaReceipt className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-white">Expense Management</h1>
+                  <p className="text-blue-100 text-sm">Track and manage your business expenses</p>
+                </div>
               </div>
-              <div className="flex gap-4">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-xl shadow-lg">
-                  <div className="text-xs font-medium opacity-90">Total Records</div>
-                  <div className="text-xl font-bold">{filteredExpenses.length}</div>
+              <div className="flex items-center gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3">
+                  <div className="text-blue-100 text-xs font-medium">Total Records</div>
+                  <div className="text-white text-xl font-bold">{filteredExpenses.length}</div>
                 </div>
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl shadow-lg">
-                  <div className="text-xs font-medium opacity-90">Total Amount</div>
-                  <div className="text-xl font-bold">₹{totalMonthlyExpense.toFixed(0)}</div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3">
+                  <div className="text-blue-100 text-xs font-medium">Total Amount</div>
+                  <div className="text-white text-xl font-bold">₹{totalMonthlyExpense.toLocaleString('en-IN')}</div>
                 </div>
+                <button
+                  onClick={generatePDF}
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  <MdDownload className="w-4 h-4" />
+                  Export PDF
+                </button>
               </div>
             </div>
-
-            {/* Export Button */}
-            <button
-              onClick={generatePDF}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 hover:from-red-600 hover:to-pink-600"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Export PDF
-            </button>
           </div>
         </div>
 
         {/* Filters Section */}
-        <div className="bg-white backdrop-blur-sm bg-opacity-90 shadow-xl rounded-2xl p-6 mb-6 border border-white/20">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-            <div className="flex flex-wrap gap-3 flex-1">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-6 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <MdFilterList className="w-5 h-5 text-blue-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Filters & Date Range</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Start Date */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Start Date</label>
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="date"
                   name="startDate"
                   value={filter.startDate}
                   onChange={handleFilterChange}
-                  className="px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white shadow-sm"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
                 />
               </div>
+            </div>
+
+            {/* End Date */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">End Date</label>
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <FaCalendarAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="date"
                   name="endDate"
                   value={filter.endDate}
                   onChange={handleFilterChange}
-                  className="px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white shadow-sm"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
                 />
               </div>
+            </div>
+
+            {/* Quick Filter */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Quick Filter</label>
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Quick Filter</label>
+                <MdDateRange className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <select
                   value=""
                   onChange={(e) => {
                     if (e.target.value === 'lastMonth') quickFilter('lastMonth');
                     if (e.target.value === 'thisMonth') quickFilter('thisMonth');
                   }}
-                  className="px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white shadow-sm min-w-[140px]"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none"
                 >
                   <option value="">Select Period</option>
                   <option value="thisMonth">This Month</option>
@@ -240,238 +294,245 @@ const ListExpenses = () => {
                 </select>
               </div>
             </div>
-            
-            {(filter.startDate || filter.endDate) && (
+
+            {/* Clear Filters Button */}
+            <div className="flex items-end">
               <button
                 onClick={clearFilters}
-                className="px-4 py-2.5 text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2"
+                className="w-full px-4 py-3 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition-all duration-200"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
                 Clear Filters
               </button>
-            )}
+            </div>
           </div>
         </div>
 
-        {/* Table Section */}
-        <div className="bg-white backdrop-blur-sm bg-opacity-90 shadow-xl rounded-2xl border border-white/20 overflow-hidden">
-          {loading ? (
-            <div className="flex justify-center items-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        {/* Results Summary */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              Showing {paginatedExpenses.length} of {filteredExpenses.length} expenses
+            </p>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-500">
+                Page {page} of {totalPages || 1}
+              </span>
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">ID</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Category</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Paid To</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Payment</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-100">
-                    {filteredExpenses.length > 0 ? (
-                      paginatedExpense.map((exp, index) => (
-                        <tr 
-                          key={exp._id} 
-                          className={`transition-colors duration-150 hover:bg-blue-50 ${
-                            index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                          }`}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                              {exp.expenseId}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Loading expenses...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="p-6 text-center">
+              <p className="text-red-600 bg-red-50 px-4 py-3 rounded-xl">{error}</p>
+            </div>
+          )}
+
+          {!loading && !error && (
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <FaReceipt className="w-4 h-4" />
+                        Expense ID
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <FaCalendarAlt className="w-4 h-4" />
+                        Date
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <MdAttachMoney className="w-4 h-4" />
+                        Amount
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Paid To
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Payment Method
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {paginatedExpenses.length > 0 ? (
+                    paginatedExpenses.map((exp, index) => (
+                      <tr key={exp._id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                            {exp.expenseId}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-medium text-gray-900">
                             {new Date(exp.date).toLocaleDateString('en-IN', {
                               day: '2-digit',
                               month: 'short',
                               year: 'numeric'
                             })}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(exp.category)}`}>
-                              {exp.category}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-lg font-semibold text-green-600">
-                              ₹{Number(exp.amount).toLocaleString('en-IN')}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                            {exp.paidTo}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg">{getPaymentMethodIcon(exp.paymentMethod)}</span>
-                              <span className="text-sm text-gray-600 font-medium">{exp.paymentMethod}</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="px-6 py-16 text-center">
-                          <div className="flex flex-col items-center justify-center">
-                            <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p className="text-gray-500 text-lg font-medium">No expenses found</p>
-                            <p className="text-gray-400 text-sm mt-1">Try adjusting your filters or add some expenses</p>
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(exp.category)}`}>
+                            {exp.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-lg font-semibold text-green-600">
+                            ₹{Number(exp.amount).toLocaleString('en-IN')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="text-sm font-medium text-gray-900">{exp.paidTo}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            {getPaymentMethodIcon(exp.paymentMethod)}
+                            <span className="text-sm text-gray-600 font-medium">{exp.paymentMethod}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleDelete(exp._id)}
+                              disabled={deleteLoading === exp._id}
+                              className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all duration-200 hover:scale-110 disabled:opacity-50"
+                              title="Delete Expense"
+                            >
+                              {deleteLoading === exp._id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                              ) : (
+                                <MdDeleteForever className="w-4 h-4" />
+                              )}
+                            </button>
                           </div>
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center py-12">
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                            <FaReceipt className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses found</h3>
+                            <p className="text-gray-500 mb-4">
+                              {filter.startDate || filter.endDate 
+                                ? "Try adjusting your date filters" 
+                                : "Get started by adding your first expense"}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-              {/* Pagination - Always show when there are expenses */}
-              {filteredExpenses.length > 0 && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-6 border-t border-gray-200">
-                  {/* Mobile Pagination */}
-                  <div className="flex justify-center items-center gap-4 sm:hidden mb-4">
-                    <button
-                      onClick={() => setPage(page - 1)}
-                      disabled={page === 1}
-                      className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all duration-200"
-                    >
-                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                      Previous
-                    </button>
-                    
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">
-                        Page {page} of {Math.max(totalPages, 1)}
-                      </span>
-                    </div>
-                    
-                    <button
-                      onClick={() => setPage(page + 1)}
-                      disabled={page >= totalPages || totalPages <= 1}
-                      className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all duration-200"
-                    >
-                      Next
-                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </button>
+          {/* Pagination */}
+          {!loading && filteredExpenses.length > 0 && (
+            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-gray-700">
+                    Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredExpenses.length)} of {filteredExpenses.length} results
                   </div>
-                  
-                  {/* Desktop Pagination */}
-                  <div className="hidden sm:flex sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-4">
-                      <p className="text-sm text-gray-700 bg-white px-3 py-2 rounded-lg shadow-sm">
-                        Showing <span className="font-semibold text-blue-600">{Math.min(startIndex + 1, filteredExpenses.length)}</span> to{' '}
-                        <span className="font-semibold text-blue-600">{Math.min(startIndex + itemsPerPage, filteredExpenses.length)}</span> of{' '}
-                        <span className="font-semibold text-blue-600">{filteredExpenses.length}</span> results
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setPage(page - 1)}
-                        disabled={page === 1}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 disabled:hover:text-gray-700 shadow-sm transition-all duration-200"
-                      >
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        Previous
-                      </button>
-                      
-                      <div className="flex items-center gap-1">
-                        {[...Array(Math.max(totalPages, 1))].map((_, i) => {
-                          const pageNum = i + 1;
-                          if (totalPages <= 1) {
-                            return (
-                              <button
-                                key={pageNum}
-                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-medium rounded-lg shadow-sm"
-                              >
-                                1
-                              </button>
-                            );
-                          }
-                          if (pageNum === page) {
-                            return (
-                              <button
-                                key={pageNum}
-                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-medium rounded-lg shadow-sm"
-                              >
-                                {pageNum}
-                              </button>
-                            );
-                          }
-                          if (
-                            pageNum === 1 ||
-                            pageNum === totalPages ||
-                            (pageNum >= page - 1 && pageNum <= page + 1)
-                          ) {
-                            return (
-                              <button
-                                key={pageNum}
-                                onClick={() => setPage(pageNum)}
-                                className="px-4 py-2 bg-white border border-gray-300 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 rounded-lg shadow-sm transition-all duration-200"
-                              >
-                                {pageNum}
-                              </button>
-                            );
-                          }
-                          if (pageNum === page - 2 || pageNum === page + 2) {
-                            return <span key={pageNum} className="px-2 py-2 text-gray-500">...</span>;
-                          }
-                          return null;
-                        })}
-                      </div>
-                      
-                      <button
-                        onClick={() => setPage(page + 1)}
-                        disabled={page >= totalPages || totalPages <= 1}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-sm font-medium rounded-lg text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 disabled:hover:text-gray-700 shadow-sm transition-all duration-200"
-                      >
-                        Next
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {/* Items per page selector */}
-                  <div className="mt-4 pt-4 border-t border-gray-200 flex justify-center">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600">Items per page:</span>
-                      <select
-                        value={itemsPerPage}
-                        onChange={(e) => {
-                          const newItemsPerPage = parseInt(e.target.value);
-                          // You would need to add setItemsPerPage to state if you want this to be dynamic
-                          // For now, it shows the current value
-                        }}
-                        className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value={5}>5</option>
-                        <option value={8}>8</option>
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                        <option value={50}>50</option>
-                      </select>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Items per page:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(parseInt(e.target.value));
+                        setPage(1); // Reset to first page
+                      }}
+                      className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
                   </div>
                 </div>
-              )}
-            </>
+                <div className="flex items-center gap-2">
+                  <button 
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    <FaChevronLeft className="w-3 h-3" />
+                    Previous
+                  </button>
+                  
+                  <div className="flex items-center gap-1">
+                    {totalPages > 0 && [...Array(Math.min(5, totalPages))].map((_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        // If 5 or fewer pages, show all
+                        pageNum = i + 1;
+                      } else {
+                        // If more than 5 pages, show smart pagination
+                        if (page <= 3) {
+                          pageNum = i + 1;
+                        } else if (page >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = page - 2 + i;
+                        }
+                      }
+                      
+                      if (pageNum < 1 || pageNum > totalPages) return null;
+                      
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                            page === pageNum
+                              ? 'bg-blue-600 text-white'
+                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Next
+                    <FaChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>

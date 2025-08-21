@@ -25,12 +25,13 @@ import { HiOutlineOfficeBuilding, HiOutlineUser } from "react-icons/hi";
 
 const ListCustomer = () => {
   const { baseURL } = useContext(GlobalContext)
-  const [page, SetPage] = useState(1);
+  const [page, setPage] = useState(1); // Fixed: Changed SetPage to setPage
   const [customers, setCustomers] = useState([]);
   const [filter, setFilter] = useState({ search: '', type: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null);
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Added items per page state
 
   const customerTypes = ['Retail Customer', 'Wholesale Customer', 'Distributor', 'supplier', 'Seller'];
 
@@ -54,7 +55,7 @@ const ListCustomer = () => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilter((prev) => ({ ...prev, [name]: value }));
-    SetPage(1); // Reset to first page when filtering
+    setPage(1); // Reset to first page when filtering
   };
 
   const clearFilters = () => {
@@ -62,7 +63,7 @@ const ListCustomer = () => {
       search: '',
       type: ''
     });
-    SetPage(1);
+    setPage(1);
   };
 
   // Delete customer from backend
@@ -88,10 +89,9 @@ const ListCustomer = () => {
     return matchesSearch && matchesType;
   });
 
-  // Pagination
-  const itemsPerPage = 6;
+  // Fixed pagination calculations
   const startIndex = (page - 1) * itemsPerPage;
-  const paginatedCustomer = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
 
   const getCustomerTypeIcon = (type) => {
@@ -215,11 +215,11 @@ const ListCustomer = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-600">
-              Showing {paginatedCustomer.length} of {filteredCustomers.length} customers
+              Showing {paginatedCustomers.length} of {filteredCustomers.length} customers
             </p>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">
-                Page {page} of {totalPages}
+                Page {page} of {totalPages || 1}
               </span>
             </div>
           </div>
@@ -281,7 +281,7 @@ const ListCustomer = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {paginatedCustomer.map((cust) => (
+                  {paginatedCustomers.map((cust) => (
                     <tr key={cust._id} className="hover:bg-gray-50 transition-colors duration-150">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -376,31 +376,64 @@ const ListCustomer = () => {
             </div>
           )}
 
-          {/* Pagination */}
+          {/* Pagination - Fixed */}
           {!loading && filteredCustomers.length > 0 && (
             <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredCustomers.length)} of {filteredCustomers.length} results
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-gray-700">
+                    Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredCustomers.length)} of {filteredCustomers.length} results
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Items per page:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(parseInt(e.target.value));
+                        setPage(1); // Reset to first page
+                      }}
+                      className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button 
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                     disabled={page === 1}
-                    onClick={() => SetPage(page - 1)}
+                    onClick={() => setPage(page - 1)}
                   >
                     <FaChevronLeft className="w-3 h-3" />
                     Previous
                   </button>
                   
                   <div className="flex items-center gap-1">
-                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                      const pageNum = Math.max(1, Math.min(page - 2 + i, totalPages - 4 + i));
-                      if (pageNum > totalPages) return null;
+                    {totalPages > 0 && [...Array(Math.min(5, totalPages))].map((_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        // If 5 or fewer pages, show all
+                        pageNum = i + 1;
+                      } else {
+                        // If more than 5 pages, show smart pagination
+                        if (page <= 3) {
+                          pageNum = i + 1;
+                        } else if (page >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = page - 2 + i;
+                        }
+                      }
+                      
+                      if (pageNum < 1 || pageNum > totalPages) return null;
+                      
                       return (
                         <button
                           key={pageNum}
-                          onClick={() => SetPage(pageNum)}
+                          onClick={() => setPage(pageNum)}
                           className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                             page === pageNum
                               ? 'bg-blue-600 text-white'
@@ -415,8 +448,8 @@ const ListCustomer = () => {
 
                   <button
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                    disabled={page === totalPages}
-                    onClick={() => SetPage(page + 1)}
+                    disabled={page === totalPages || totalPages === 0}
+                    onClick={() => setPage(page + 1)}
                   >
                     Next
                     <FaChevronRight className="w-3 h-3" />

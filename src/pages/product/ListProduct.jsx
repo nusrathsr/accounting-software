@@ -32,6 +32,7 @@ const ListProduct = () => {
     category: "",
     brand: "",
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null);
@@ -72,6 +73,10 @@ const ListProduct = () => {
     fetchProducts();
   }, [page]);
 
+  useEffect(() => {
+    fetchProducts();
+  }, [page]);
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilter((prev) => ({ ...prev, [name]: value }));
@@ -95,11 +100,12 @@ const ListProduct = () => {
 
     const categoryMatch = filter.category ? prod.category === filter.category : true;
 
+
     return searchMatch && categoryMatch;
   });
 
   // pagination
-  const itemsPerPage = 10;
+  const itemsPerPage = 4;
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedProducts = filterProducts.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(filterProducts.length / itemsPerPage);
@@ -295,7 +301,7 @@ const ListProduct = () => {
                           <img 
                             src={prod.image} 
                             alt={prod.name}
-                            className="w-12 h-12 object-cover rounded-lg border border-gray-200 shadow-sm"
+                            className="w-12  object-cover rounded-lg border border-gray-200 shadow-sm"
                           />
                         ) : (
                           <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -461,3 +467,6 @@ const ListProduct = () => {
 };
 
 export default ListProduct;
+
+
+
