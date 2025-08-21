@@ -47,6 +47,7 @@ function App() {
           <Route path='/addCustomer' element={<AddCustomer />} />
           <Route path='/editCustomer/:id' element={<EditCustomer />} />
           <Route path='/listCustomer' element={<ListCustomer />} />
+
           <Route path='/addExpense' element={<AddExpense />} />
           <Route path='/listExpense' element={<ListExpenses />} />
           <Route path='sales/report' element={<SalesReport />} />
@@ -67,6 +68,7 @@ function App() {
 
 
   );
+
 }
 
 export default App;
