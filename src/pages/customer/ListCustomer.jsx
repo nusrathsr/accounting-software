@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import axios from 'axios';
 import { GlobalContext } from '../../context/GlobalContext';
 import { 
@@ -33,7 +34,7 @@ const ListCustomer = () => {
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [itemsPerPage, setItemsPerPage] = useState(10); // Added items per page state
 
-  const customerTypes = ['Retail Customer', 'Wholesale Customer', 'Distributor', 'supplier', 'Seller'];
+  const customerTypes = ['Retail Customer', 'Wholesale Customer',  'supplier', 'seller'];
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -67,19 +68,33 @@ const ListCustomer = () => {
   };
 
   // Delete customer from backend
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this customer?")) return;
-    try {
-      setDeleteLoading(id);
-      await axios.delete(`${baseURL}/customer/${id}`);
-      setCustomers((prev) => prev.filter((cust) => cust._id !== id));
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete customer");
-    } finally {
-      setDeleteLoading(null);
-    }
-  };
+ const handleDelete = async (id) => {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    setDeleteLoading(id);
+    await axios.delete(`${baseURL}/customer/${id}`);
+    setCustomers((prev) => prev.filter((cust) => cust._id !== id));
+
+    Swal.fire('Deleted!', 'The customer has been deleted.', 'success');
+  } catch (err) {
+    console.error(err);
+    Swal.fire('Error!', 'Failed to delete customer.', 'error');
+  } finally {
+    setDeleteLoading(null);
+  }
+};
+
 
   const filteredCustomers = customers.filter((cust) => {
     const matchesSearch = cust.name.toLowerCase().includes(filter.search.toLowerCase()) ||
@@ -100,10 +115,10 @@ const ListCustomer = () => {
         return <HiOutlineUser className="w-4 h-4" />;
       case 'Wholesale Customer':
         return <FaStore className="w-4 h-4" />;
-      case 'Distributor':
+     
       case 'supplier':
         return <HiOutlineOfficeBuilding className="w-4 h-4" />;
-      case 'Seller':
+      case 'seller':
         return <FaUserTie className="w-4 h-4" />;
       default:
         return <MdPerson className="w-4 h-4" />;
@@ -116,11 +131,10 @@ const ListCustomer = () => {
         return "bg-blue-100 text-blue-800";
       case 'Wholesale Customer':
         return "bg-green-100 text-green-800";
-      case 'Distributor':
-        return "bg-purple-100 text-purple-800";
+      
       case 'supplier':
         return "bg-orange-100 text-orange-800";
-      case 'Seller':
+      case 'seller':
         return "bg-indigo-100 text-indigo-800";
       default:
         return "bg-gray-100 text-gray-800";

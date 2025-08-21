@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import Swal from 'sweetalert2';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -65,14 +66,26 @@ const ListExpenses = () => {
 
   // Delete expense from backend
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  });
+
+  if (!result.isConfirmed) return;  
+
     try {
       setDeleteLoading(id);
       await axios.delete(`${baseURL}/expense/${id}`);
       setExpenses((prev) => prev.filter((exp) => exp._id !== id));
+      Swal.fire('Deleted!', 'The expense has been deleted.', 'success');
     } catch (err) {
       console.error(err);
-      alert("Failed to delete expense");
+     Swal.fire('Error!', 'Failed to delete expense.', 'error');
     } finally {
       setDeleteLoading(null);
     }
@@ -95,21 +108,35 @@ const ListExpenses = () => {
   );
 
   const quickFilter = (type) => {
-    const today = new Date();
-    let start, end;
-    if (type === 'lastMonth') {
-      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      end = new Date(today.getFullYear(), today.getMonth(), 0);
-    } else if (type === 'thisMonth') {
-      start = new Date(today.getFullYear(), today.getMonth(), 1);
-      end = today;
-    }
-    setFilter({
-      startDate: start.toISOString().slice(0, 10),
-      endDate: end.toISOString().slice(0, 10),
-    });
-    setPage(1);
-  };
+  const today = new Date();
+  let start, end;
+
+  if (type === 'lastMonth') {
+    // First and last day of the previous month
+    start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    end = new Date(today.getFullYear(), today.getMonth(), 0);
+  } else if (type === 'thisMonth') {
+    // From start of this month to today
+    start = new Date(today.getFullYear(), today.getMonth(), 1);
+    end = today;
+  } else if (type === 'lastWeek') {
+    // Last week = previous 7 days
+    end = new Date(today); 
+    start = new Date(today);
+    start.setDate(today.getDate() - 7);
+  } else if (type === 'lastYear') {
+    // Whole last year
+    start = new Date(today.getFullYear() - 1, 0, 1);
+    end = new Date(today.getFullYear() - 1, 11, 31);
+  }
+
+  setFilter({
+    startDate: start.toISOString().slice(0, 10),
+    endDate: end.toISOString().slice(0, 10),
+  });
+  setPage(1);
+};
+
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -223,7 +250,7 @@ const ListExpenses = () => {
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3">
                   <div className="text-blue-100 text-xs font-medium">Total Amount</div>
-                  <div className="text-white text-xl font-bold">₹{totalMonthlyExpense.toLocaleString('en-IN')}</div>
+                  <div className="text-white text-xl font-bold">INR {totalMonthlyExpense.toLocaleString('en-IN')}</div>
                 </div>
                 <button
                   onClick={generatePDF}
@@ -285,12 +312,18 @@ const ListExpenses = () => {
                   onChange={(e) => {
                     if (e.target.value === 'lastMonth') quickFilter('lastMonth');
                     if (e.target.value === 'thisMonth') quickFilter('thisMonth');
+                    if(e.target.value === 'lastWeek') quickFilter('lastWeek');
+                    if (e.target.value === 'lastWeek') quickFilter('lastWeek');
+                    if(e.target.value === 'lastYear') quickFilter('lastYear');
+                    
                   }}
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none"
                 >
                   <option value="">Select Period</option>
                   <option value="thisMonth">This Month</option>
                   <option value="lastMonth">Last Month</option>
+                  <option value="thisMonth">Last Week</option>
+                  <option value="lastMonth">Last Year</option>
                 </select>
               </div>
             </div>
@@ -398,7 +431,7 @@ const ListExpenses = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="text-lg font-semibold text-green-600">
-                            ₹{Number(exp.amount).toLocaleString('en-IN')}
+                            INR {Number(exp.amount).toLocaleString('en-IN')}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -541,3 +574,4 @@ const ListExpenses = () => {
 };
 
 export default ListExpenses;
+

@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { GlobalContext } from '../../context/GlobalContext';
@@ -26,7 +27,9 @@ import {
 const ListProduct = () => {
   const { baseURL } = useContext(GlobalContext)
   const [products, setProducts] = useState([]);
-  const [page, SetPage] = useState(1);
+  const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(4); // Added items per page state
+  
   const [filter, setFilter] = useState({
     search: "",
     category: "",
@@ -55,19 +58,44 @@ const ListProduct = () => {
   };
 
   // Delete product from backend
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-    try {
-      setDeleteLoading(id);
-      await axios.delete(`${baseURL}/products/${id}`);
-      setProducts((prev) => prev.filter((prod) => prod._id !== id));
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete product");
-    } finally {
-      setDeleteLoading(null);
-    }
-  };
+const handleDelete = async (id) => {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "This product will be permanently deleted.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    setDeleteLoading(id);
+    await axios.delete(`${baseURL}/products/${id}`);
+    setProducts((prev) => prev.filter((prod) => prod._id !== id));
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Deleted!',
+      text: 'The product has been removed.',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Failed!',
+      text: 'Could not delete this product. Try again later.',
+    });
+  } finally {
+    setDeleteLoading(null);
+  }
+};
+
 
   useEffect(() => {
     fetchProducts();
@@ -105,7 +133,7 @@ const ListProduct = () => {
   });
 
   // pagination
-  const itemsPerPage = 4;
+  // const itemsPerPage = 4;
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedProducts = filterProducts.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(filterProducts.length / itemsPerPage);
@@ -411,55 +439,89 @@ const ListProduct = () => {
             </div>
           )}
 
-          {/* Pagination */}
-          {!loading && filterProducts.length > 0 && (
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filterProducts.length)} of {filterProducts.length} results
-                </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                    disabled={page === 1}
-                    onClick={() => SetPage(page - 1)}
-                  >
-                    <FaChevronLeft className="w-3 h-3" />
-                    Previous
-                  </button>
-                  
-                  <div className="flex items-center gap-1">
-                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                      const pageNum = Math.max(1, Math.min(page - 2 + i, totalPages - 4 + i));
-                      if (pageNum > totalPages) return null;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => SetPage(pageNum)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                            page === pageNum
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <button
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                    disabled={page === totalPages}
-                    onClick={() => SetPage(page + 1)}
-                  >
-                    Next
-                    <FaChevronRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+       
+                 {/* Pagination - Fixed */}
+                 {!loading && filterProducts.length > 0 && (
+                   <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                     <div className="flex items-center justify-between">
+                       <div className="flex items-center gap-4">
+                         <div className="text-sm text-gray-700">
+                           Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filterProducts.length)} of {filterProducts.length} results
+                         </div>
+                         <div className="flex items-center gap-2">
+                           <span className="text-sm text-gray-600">Items per page:</span>
+                           <select
+                             value={itemsPerPage}
+                             onChange={(e) => {
+                               setItemsPerPage(parseInt(e.target.value));
+                               setPage(1); // Reset to first page
+                             }}
+                             className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           >
+                             <option value={5}>5</option>
+                             <option value={10}>10</option>
+                             <option value={20}>20</option>
+                             <option value={50}>50</option>
+                           </select>
+                         </div>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <button 
+                           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                           disabled={page === 1}
+                           onClick={() => setPage(page - 1)}
+                         >
+                           <FaChevronLeft className="w-3 h-3" />
+                           Previous
+                         </button>
+                         
+                         <div className="flex items-center gap-1">
+                           {totalPages > 0 && [...Array(Math.min(5, totalPages))].map((_, i) => {
+                             let pageNum;
+                             if (totalPages <= 5) {
+                               // If 5 or fewer pages, show all
+                               pageNum = i + 1;
+                             } else {
+                               // If more than 5 pages, show smart pagination
+                               if (page <= 3) {
+                                 pageNum = i + 1;
+                               } else if (page >= totalPages - 2) {
+                                 pageNum = totalPages - 4 + i;
+                               } else {
+                                 pageNum = page - 2 + i;
+                               }
+                             }
+                             
+                             if (pageNum < 1 || pageNum > totalPages) return null;
+                             
+                             return (
+                               <button
+                                 key={pageNum}
+                                 onClick={() => setPage(pageNum)}
+                                 className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                   page === pageNum
+                                     ? 'bg-blue-600 text-white'
+                                     : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                 }`}
+                               >
+                                 {pageNum}
+                               </button>
+                             );
+                           })}
+                         </div>
+       
+                         <button
+                           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                           disabled={page === totalPages || totalPages === 0}
+                           onClick={() => setPage(page + 1)}
+                         >
+                           Next
+                           <FaChevronRight className="w-3 h-3" />
+                         </button>
+                       </div>
+                     </div>
+                   </div>
+                 )}
         </div>
       </div>
     </div>
@@ -467,6 +529,9 @@ const ListProduct = () => {
 };
 
 export default ListProduct;
+
+
+
 
 
 

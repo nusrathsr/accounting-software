@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import Swal from 'sweetalert2';
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GlobalContext } from "../../context/GlobalContext";
@@ -158,11 +159,25 @@ const EditProduct = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Product updated successfully!");
+        Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: 'Product updated successfully!',
+            timer: 2000,
+            showConfirmButton: false
+          });
+
+      
       navigate("/listProduct"); // redirect after update
     } catch (error) {
       console.error("Error updating product:", error);
-      alert("Failed to update product.");
+
+      Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.response?.data?.message || 'Failed to update product.',
+          });
+
     } finally {
       setIsSubmitting(false);
     }

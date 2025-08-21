@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
+import Swal from 'sweetalert2'; 
 import { useNavigate } from 'react-router-dom';
-import { 
-  FaBox, 
-  FaTag, 
-  FaPalette, 
-  FaDollarSign, 
-  FaCalendarAlt, 
+import {
+  FaBox,
+  FaTag,
+  FaPalette,
+  FaDollarSign,
+  FaCalendarAlt,
   FaTruck,
   FaImage,
   FaPlus,
@@ -17,6 +18,8 @@ import {
   FaRulerCombined
 } from 'react-icons/fa';
 import { MdCategory, MdBrandingWatermark } from 'react-icons/md';
+import { GlobalContext } from '../../context/GlobalContext';
+import axios from 'axios';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -25,19 +28,14 @@ const AddProduct = () => {
   const [productId, setProductId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mock suppliers and context data for demo
-  const suppliers = [
-    { name: 'ABC Suppliers' },
-    { name: 'XYZ Distributors' },
-    { name: 'Global Wholesale' }
-  ];
-  const baseURL = 'https://api.example.com';
+ 
+ const {baseURL,suppliers} =useContext(GlobalContext)
   const loading = false;
 
   const [categories, setCategories] = useState([
-    { name: 'clothing', subcategories: ['Shirts', 'T-Shirts', 'Pants', 'Kids Wear','top','dress','shawls'] },
-    { name: 'grocery', subcategories: ['Fruits', 'Vegetables', 'Snacks', 'dairy products','spices',"essentials","cookware","dinnerware"] },
-    { name: 'electronics', subcategories: ['Mobiles', 'Laptops', 'Chargers','speaker',"tv","washing machine","mixer grinder","refrigerator","fan","light","vacuum cleaner","headphones","oven","kettle","electric stove","intention cooker"] },
+    { name: 'clothing', subcategories: ['Shirts', 'T-Shirts', 'Pants', 'Kids Wear', 'top', 'dress', 'shawls'] },
+    { name: 'grocery', subcategories: ['Fruits', 'Vegetables', 'Snacks', 'dairy products', 'spices', "essentials", "cookware", "dinnerware"] },
+    { name: 'electronics', subcategories: ['Mobiles', 'Laptops', 'Chargers', 'speaker', "tv", "washing machine", "mixer grinder", "refrigerator", "fan", "light", "vacuum cleaner", "headphones", "oven", "kettle", "electric stove", "intention cooker"] },
   ]);
 
   const [product, setProduct] = useState({
@@ -109,14 +107,29 @@ const AddProduct = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
+      const formData = new FormData();
+      for (const key in product) {
+        if (key === "sizes") {
+          formData.append(key, JSON.stringify(product.sizes));
+        } else if (key === "image") {
+          if (product.image) formData.append("image", product.image);
+        } else {
+          formData.append(key, product[key]);
+        }
+      }
+
+      const response = await axios.post(
+        `${baseURL}/products`, // replace with your backend route
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       console.log("Product added successfully!", {
         ...product,
         image: product.image ? product.image.name : null
       });
-      
+
       // Reset form
       const newId = generateProductId();
       setProduct({
@@ -139,12 +152,25 @@ const AddProduct = () => {
       setProductId(newId);
       setSubcategories([]);
       setTaxInclusive(false);
-      alert("Product added successfully!");
+      // ✅ Success alert with SweetAlert2
+      Swal.fire({
+        icon: 'success',
+        title: 'Product added!',
+        text: 'Your product has been added successfully.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
       navigate('/listProduct');
 
     } catch (error) {
       console.error(error);
-      alert("Failed to add product. Please try again.");
+      // ✅ Error alert with SweetAlert2
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text: 'Failed to add product. Please try again.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -444,7 +470,7 @@ const AddProduct = () => {
                     <FaTruck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <select
                       name="supplier"
-                      value={product.supplier}
+                      value={product.seller}
                       onChange={handleChange}
                       required
                       className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none"

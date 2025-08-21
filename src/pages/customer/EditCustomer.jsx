@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { GlobalContext } from '../../context/GlobalContext';
@@ -51,21 +52,34 @@ const EditCustomer = () => {
     setCustomer((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setSaving(true);
 
-    try {
-      await axios.put(`${baseURL}/customer/${id}`, customer);
-      alert('Customer updated successfully!');
-      navigate('/listCustomer');
-    } catch (error) {
-      console.error('Error updating customer:', error);
-      alert(error.response?.data?.message || 'Failed to update customer');
-    } finally {
-      setSaving(false);
-    }
-  };
+  try {
+    await axios.put(`${baseURL}/customer/${id}`, customer);
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Updated!',
+      text: 'Customer updated successfully!',
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+    navigate('/listCustomer');
+  } catch (error) {
+    console.error('Error updating customer:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: error.response?.data?.message || 'Failed to update customer',
+    });
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   const handleCancel = () => {
     navigate('/listCustomer');
@@ -75,10 +89,10 @@ const EditCustomer = () => {
     { value: 'Retail Customer', label: 'Retail Customer', color: 'blue' },
     { value: 'Wholesale Customer', label: 'Wholesale Customer', color: 'green' },
     { value: 'Supplier', label: 'Supplier', color: 'purple' },
-    { value: 'Seller', label: 'Seller', color: 'orange' },
+    { value: 'seller', label: 'Seller', color: 'orange' },
   ];
 
-  const showGSTField = customer && ['Wholesale Customer', 'Supplier', 'Seller'].includes(customer.type);
+  const showGSTField = customer && ['Wholesale Customer', 'Supplier', 'seller'].includes(customer.type);
 
   if (loading) {
     return (
@@ -109,7 +123,7 @@ const EditCustomer = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">

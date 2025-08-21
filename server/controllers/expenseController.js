@@ -31,3 +31,24 @@ exports.getExpenses = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+// Delete Expense
+exports.deleteExpense = async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) {
+      return res.status(404).json({ message: "Expense not found" });
+    }
+
+    // If attachment exists, remove it from Cloudinary
+    if (expense.attachment && expense.attachment.publicId) {
+      await cloudinary.uploader.destroy(expense.attachment.publicId);
+    }
+
+    await expense.deleteOne();
+    res.json({ message: "Expense deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
