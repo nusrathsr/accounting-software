@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function AddPurchase() {
   const [sellers, setSellers] = useState([]);
@@ -89,17 +90,21 @@ export default function AddPurchase() {
     setFormData((prev) => ({ ...prev, product: product.name }));
     setProductSearch(product.name);
     setProductDropdownOpen(false);
-    const currentStock = product.sizes && product.sizes.length > 0 ? product.sizes[0].quantity : 0;
-    alert(`Current stock of ${product.name}: ${currentStock}`);
+    // const currentStock = product.sizes && product.sizes.length > 0 ? product.sizes[0].quantity : 0;
+    // alert(`Current stock of ${product.name}: ${currentStock}`);
   };
 
   // Submit form
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.sellerName || !formData.product) {
-      alert("Please select a seller and a product.");
-      return;
-    }
+  e.preventDefault();
+  if (!formData.sellerName || !formData.product) {
+    Swal.fire({
+      icon: "warning",
+      title: "Oops...",
+      text: "Please select a seller and a product.",
+    });
+    return;
+  }
 
     try {
       const payload = {
@@ -116,7 +121,14 @@ export default function AddPurchase() {
 
       await axios.post("http://localhost:4000/api/purchases", payload);
       fetchProducts();
-      alert("✅ Purchase saved to MongoDB!");
+
+      Swal.fire({
+      icon: "success",
+      title: "Purchase Saved!",
+      text: `Purchase of ${formData.product} saved successfully!`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
 
       // Reset form
       setFormData({
@@ -135,7 +147,11 @@ export default function AddPurchase() {
       generatePONumber();
     } catch (err) {
       console.error("❌ Error saving purchase:", err.response?.data || err);
-      alert("Failed to save purchase.");
+      Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to save purchase. Please try again!",
+    });
     }
   };
 

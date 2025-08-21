@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 import jsPDF from "jspdf";
 
 export default function AddSalesInvoice() {
@@ -91,9 +92,9 @@ export default function AddSalesInvoice() {
   };
 
   const handleCheckboxChange = (e) => {
-  const { name, checked } = e.target;
-  setFormData((prev) => ({ ...prev, [name]: checked }));
-};
+    const { name, checked } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: checked }));
+  };
 
   const addItem = () => {
     setFormData((prev) => ({
@@ -118,18 +119,24 @@ export default function AddSalesInvoice() {
   };
 
   const onSearchChange = (index, value) => {
+    const product = productOptions.find(p => p.name.toLowerCase() === value.toLowerCase());
+
+    const updatedItems = [...formData.items];
+    updatedItems[index].productName = value;
+    if (product) {
+      updatedItems[index].productId = product.id;
+      updatedItems[index].size = ""; // reset size if needed
+    } else {
+      updatedItems[index].productId = null;
+      updatedItems[index].size = "";
+    }
+    setFormData((prev) => ({ ...prev, items: updatedItems }));
+
     const updatedDropdown = [...dropdownState];
     updatedDropdown[index].searchTerm = value;
     updatedDropdown[index].open = true;
     setDropdownState(updatedDropdown);
-
-    const updatedItems = [...formData.items];
-    updatedItems[index].productName = value;
-    updatedItems[index].productId = null;
-    updatedItems[index].size = "";
-    setFormData((prev) => ({ ...prev, items: updatedItems }));
   };
-
   const getEffectiveUnitPrice = (item) => {
     const basePrice = n(item.unitPrice);
     const discountAmount = (basePrice * n(item.discount)) / 100;
@@ -151,18 +158,34 @@ export default function AddSalesInvoice() {
       const lineTotal = n(item.quantity) * getEffectiveUnitPrice(item);
       return sum + (lineTotal * n(item.tax)) / 100;
     }, 0);
-    const calculateDiscountTotal = () =>
-  formData.items.reduce((sum, item) => {
-    return sum + (n(item.unitPrice) * n(item.quantity) * n(item.discount)) / 100;
-  }, 0);
+  const calculateDiscountTotal = () =>
+    formData.items.reduce((sum, item) => {
+      return sum + (n(item.unitPrice) * n(item.quantity) * n(item.discount)) / 100;
+    }, 0);
 
   const calculateTotal = () => calculateSubtotal() + calculateTaxTotal();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const validItems = formData.items.filter((item) => item.productId && n(item.quantity) > 0);
+
+    formData.items.forEach((item, i) => {
+      const product = productOptions.find(p => p.id === item.productId);
+      console.log(i, item.productName, item.size, product?.sizes);
+    });
+
+    const validItems = formData.items.filter((item) => {
+      const product = productOptions.find(p => p.id === item.productId);
+      // If product has sizes, require size. Otherwise, ignore.
+      if (!item.productId || n(item.quantity) <= 0) return false;
+      if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
+      return true;
+    });
     if (validItems.length === 0) {
-      alert("Please add at least one product with quantity > 0");
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Please add at least one product with quantity greater than 0",
+      });
       return;
     }
 
@@ -183,7 +206,7 @@ export default function AddSalesInvoice() {
         return {
           productId: item.productId,
           name: item.productName,
-          size: item.size,
+          size: item.size || "",
           quantity: n(item.quantity),
           unitPrice: basePrice,
           discount: n(item.discount),
@@ -199,7 +222,16 @@ export default function AddSalesInvoice() {
 
     try {
       await axios.post("http://localhost:4000/api/sales", salesRecord);
-      alert("Sales invoice saved successfully!");
+      Swal.fire({
+        icon: "success",
+        title: "Invoice Saved!",
+        html: `
+        Invoice <strong>${formData.invoiceNumber}</strong> saved successfully.<br/>
+        Total: ₹${calculateTotal().toFixed(2)}
+      `,
+        timer: 2500,
+        showConfirmButton: false,
+      });
       setFormData({
         invoiceNumber: generateInvoiceNumber(),
         customerName: "",
@@ -210,7 +242,11 @@ export default function AddSalesInvoice() {
       setDropdownState([{ open: false, searchTerm: "" }]);
     } catch (err) {
       console.error(err);
-      alert("Error saving invoice. Check server connection.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to save invoice. Please check server connection.",
+      });
     }
   };
 
@@ -251,7 +287,7 @@ export default function AddSalesInvoice() {
       doc.text("Product", 40, y);
       doc.text("Qty", 200, y);
       doc.text("Unit (Rs.)", 260, y);
-      doc.text("Disc %", 340, y); 
+      doc.text("Disc %", 340, y);
       doc.text("GST %", 400, y);
       doc.text("Line Total (Rs.)", 470, y);
       doc.setFont(undefined, "normal");
@@ -317,13 +353,13 @@ export default function AddSalesInvoice() {
           </thead>
           <tbody>
             ${invoice.products
-              .map((item) => {
-                const basePrice = n(item.unitPrice);
-                const discountAmount = (basePrice * n(item.discount)) / 100;
-                const effectivePrice = basePrice - discountAmount;
-                const lineTotal = n(item.quantity) * effectivePrice;
-                const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
-                return `<tr>
+          .map((item) => {
+            const basePrice = n(item.unitPrice);
+            const discountAmount = (basePrice * n(item.discount)) / 100;
+            const effectivePrice = basePrice - discountAmount;
+            const lineTotal = n(item.quantity) * effectivePrice;
+            const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
+            return `<tr>
                   <td>${item.name || "N/A"}</td>
                   <td style="text-align:center;">${item.quantity}</td>
                   <td style="text-align:right;">${basePrice.toFixed(2)}</td>
@@ -331,8 +367,8 @@ export default function AddSalesInvoice() {
                   <td style="text-align:center;">${item.tax || 0}</td>
                   <td style="text-align:right;">${lineWithTax.toFixed(2)}</td>
                 </tr>`;
-              })
-              .join("")}
+          })
+          .join("")}
           </tbody>
         </table>
         <p style="text-align:right; margin-top:10px;">Subtotal: ₹${invoice.subtotal.toFixed(2)}</p>
@@ -391,33 +427,33 @@ export default function AddSalesInvoice() {
           <input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
         </div>
         <div className="flex space-x-4">
-  <div className="flex-1">
-    <label>Payment Mode</label>
-    <select
-      name="paymentMode"
-      value={formData.paymentMode}
-      onChange={handleChange}
-      className="w-full border px-3 py-2 rounded"
-    >
-      <option value="cash">Cash</option>
-      <option value="upi">UPI</option>
-      <option value="card">Card</option>
-      <option value="wallet">Wallet</option>
-      <option value="credit">Credit</option>
-    </select>
-  </div>
+          <div className="flex-1">
+            <label>Payment Mode</label>
+            <select
+              name="paymentMode"
+              value={formData.paymentMode}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded"
+            >
+              <option value="cash">Cash</option>
+              <option value="upi">UPI</option>
+              <option value="card">Card</option>
+              <option value="wallet">Wallet</option>
+              <option value="credit">Credit</option>
+            </select>
+          </div>
 
-  <div className="flex-1 flex items-center space-x-2 mt-6">
-    <input
-      type="checkbox"
-      name="paymentStatus"
-      checked={formData.paymentStatus}
-      onChange={handleCheckboxChange}
-      className="w-5 h-5"
-    />
-    <label>Paid</label>
-  </div>
-</div>
+          <div className="flex-1 flex items-center space-x-2 mt-6">
+            <input
+              type="checkbox"
+              name="paymentStatus"
+              checked={formData.paymentStatus}
+              onChange={handleCheckboxChange}
+              className="w-5 h-5"
+            />
+            <label>Paid</label>
+          </div>
+        </div>
 
 
         <div>
@@ -425,8 +461,8 @@ export default function AddSalesInvoice() {
           {formData.items.map((item, index) => {
             const filteredOptions = dropdownState[index]?.searchTerm
               ? productOptions.filter((p) =>
-                  p.name.toLowerCase().includes(dropdownState[index].searchTerm.toLowerCase())
-                )
+                p.name.toLowerCase().includes(dropdownState[index].searchTerm.toLowerCase())
+              )
               : productOptions;
 
             return (
@@ -464,26 +500,33 @@ export default function AddSalesInvoice() {
                   </div>
                 )}
 
-                {item.productId && productOptions.find(p => p.id === item.productId)?.sizes && (
+                {item.productId && productOptions.find(p => p.id === item.productId)?.sizes?.some(s => s.trim() !== "") ? (
                   <select
-                    value={item.size}
+                     value={item.size || ""}
                     onChange={(e) => handleItemChange(index, "size", e.target.value)}
                     className="w-24 border px-2 py-1 rounded"
+                    required={true}
                   >
                     <option value="">Select Size</option>
-                    {productOptions.find(p => p.id === item.productId).sizes.map((s, i) => (
-                      <option key={i} value={s}>{s}</option>
-                    ))}
+                    {productOptions
+                      .find(p => p.id === item.productId)
+                      .sizes.filter(s => s.trim() !== "")
+                      .map((s, i) => (
+                        <option key={i} value={s}>{s}</option>
+                      ))}
                   </select>
-                )}
+                ) :null}
+                  <input type="hidden" value="" />
+                
+
                 <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-20 border px-2 py-1 rounded" />
                 <input type="number" placeholder="Unit ₹" value={item.unitPrice} onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)} className="w-24 border px-2 py-1 rounded" />
                 <input type="number" placeholder="Disc %" value={item.discount} onChange={(e) => handleItemChange(index, "discount", e.target.value)} className="w-20 border px-2 py-1 rounded" />
                 <input type="number" placeholder="GST %" value={item.tax} onChange={(e) => handleItemChange(index, "tax", e.target.value)} className="w-20 border px-2 py-1 rounded" />
                 {/* <span className="w-24">{calculateLineTotal(item).toFixed(2)}</span> */}
-                 <span className="w-24 font-medium text-right">
-          ₹{getEffectiveUnitPrice(item).toFixed(2)}
-        </span>
+                <span className="w-24 font-medium text-right">
+                  ₹{getEffectiveUnitPrice(item).toFixed(2)}
+                </span>
                 <button type="button" onClick={() => removeItem(index)} className="text-red-500 px-2">X</button>
               </div>
             );
@@ -492,12 +535,12 @@ export default function AddSalesInvoice() {
         </div>
 
         <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 mt-4">Save Invoice</button>
-       <div className="flex flex-col items-end space-y-1 mt-6">
-  <div>Subtotal: ₹{calculateSubtotal().toFixed(2)}</div>
-  <div>Discount: ₹{calculateDiscountTotal().toFixed(2)}</div>
-  <div>GST: ₹{calculateTaxTotal().toFixed(2)}</div>
-  <div className="font-bold">Total: ₹{calculateTotal().toFixed(2)}</div>
-</div>
+        <div className="flex flex-col items-end space-y-1 mt-6">
+          <div>Subtotal: ₹{calculateSubtotal().toFixed(2)}</div>
+          <div>Discount: ₹{calculateDiscountTotal().toFixed(2)}</div>
+          <div>GST: ₹{calculateTaxTotal().toFixed(2)}</div>
+          <div className="font-bold">Total: ₹{calculateTotal().toFixed(2)}</div>
+        </div>
 
       </form>
     </div>
