@@ -22,6 +22,9 @@ import StockReport from './pages/reports/StockReport';
 import PurchaseReport from './pages/reports/PurchaseReport';
 import './css/style.css';
 import './charts/ChartjsConfig';
+import AddEmployees from './pages/Employees/AddEmployees';
+import EditEmployees from './pages/Employees/EditEmployees';
+import ListEmployees from './pages/Employees/ListEmployees';
 
 function App() {
 
@@ -56,6 +59,10 @@ function App() {
           <Route path='expense/report' element={<ExpenseReport />} />
           <Route path='stock/report' element={<StockReport/>} />
           <Route path='purchase/report' element={<PurchaseReport />} />
+          <Route path='/addEmployees' element={<AddEmployees />} />
+          <Route path='/editEmployees/:id' element={<EditEmployees />} />
+          <Route path='/listEmployees' element={<ListEmployees />} />
+
         </Route>
       </Routes>
     </>
