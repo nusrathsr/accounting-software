@@ -803,7 +803,7 @@ export default function AddSalesInvoice() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Customer Information */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
                 <User className="w-5 h-5 text-blue-600" />
@@ -874,56 +874,8 @@ export default function AddSalesInvoice() {
               </div>
             </div>
           </div>
-
-          {/* Payment Information */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-blue-600" />
-                Payment Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Payment Mode
-                  </label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <select
-                      name="paymentMode"
-                      value={formData.paymentMode}
-                      onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none"
-                    >
-                      <option value="cash">Cash</option>
-                      <option value="upi">UPI</option>
-                      <option value="card">Card</option>
-                      <option value="wallet">Wallet</option>
-                      <option value="credit">Credit</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 pt-8">
-                  <div className="relative flex items-center">
-                    <input
-                      type="checkbox"
-                      name="paymentStatus"
-                      checked={formData.paymentStatus}
-                      onChange={handleCheckboxChange}
-                      className="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                    />
-                    <Check className={`absolute left-0.5 top-0.5 w-3 h-3 text-white pointer-events-none ${formData.paymentStatus ? 'opacity-100' : 'opacity-0'} transition-opacity`} />
-                  </div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Payment Received
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Items Section */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
@@ -959,7 +911,7 @@ export default function AddSalesInvoice() {
                             Product
                           </label>
                           <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
                             <input
                               type="text"
                               placeholder="Search product..."
@@ -970,11 +922,19 @@ export default function AddSalesInvoice() {
                                 updatedDropdown[index].open = true;
                                 setDropdownState(updatedDropdown);
                               }}
-                              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                              onBlur={() => {
+                                // Add a small delay to allow for option selection
+                                setTimeout(() => {
+                                  const updatedDropdown = [...dropdownState];
+                                  updatedDropdown[index].open = false;
+                                  setDropdownState(updatedDropdown);
+                                }, 200);
+                              }}
+                              className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 relative z-10"
                             />
                             {dropdownState[index]?.open && (
-                              <div className="absolute z-20 bg-white border border-gray-200 w-full 
-                                max-h-[60vh] overflow-auto mt-1 rounded-xl shadow-lg">
+                              <div className="absolute z-50 bg-white border border-gray-200 w-full 
+                                max-h-[60vh] overflow-auto mt-1 rounded-xl shadow-xl">
                                 {filteredOptions.length > 0 ? (
                                   filteredOptions.map((product) => (
                                     <div
@@ -1125,8 +1085,55 @@ export default function AddSalesInvoice() {
             </div>
           </div>
 
+           {/* Payment Information */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-blue-600" />
+                Payment Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Payment Mode
+                  </label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <select
+                      name="paymentMode"
+                      value={formData.paymentMode}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white appearance-none"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="upi">UPI</option>
+                      <option value="card">Card</option>
+                      <option value="wallet">Wallet</option>
+                      <option value="credit">Credit</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 pt-8">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      name="paymentStatus"
+                      checked={formData.paymentStatus}
+                      onChange={handleCheckboxChange}
+                      className="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    />
+                    <Check className={`absolute left-0.5 top-0.5 w-3 h-3 text-white pointer-events-none ${formData.paymentStatus ? 'opacity-100' : 'opacity-0'} transition-opacity`} />
+                  </div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Payment Received
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Summary Section */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
                 <IndianRupee className="w-5 h-5 text-blue-600" />
