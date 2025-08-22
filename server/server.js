@@ -31,7 +31,7 @@ mongoose.connect(process.env.MONGO_URL,{
 
 //Routes
 app.use('/api/products', productRoutes)
-app.use('/api/customers', customerRoutes)
+app.use('/api/customer', customerRoutes)
 app.use('/api/expense', expenseRoutes)
 app.use("/api/sales", salesRoutes);
 app.use("/api/purchases", purchaseRoutes);

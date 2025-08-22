@@ -4,7 +4,6 @@ import AddSales from './pages/sales/AddSales';
 import ViewSales from './pages/sales/ViewSales';
 import AddPurchase from './pages/purchase/AddPurchase';
 import ViewPurchase from './pages/purchase/ViewPurchase';
-import ListCustomer from './pages/customer/listCustomer/ListCustomer';
 import AddTransaction from './pages/payments/AddTransaction';
 import TransactionList from './pages/payments/TransactionList';
 import PurchaseDue from "./pages/purchase/PurchaseDue";
@@ -13,6 +12,7 @@ import EditProduct from './pages/product/EditProduct'
 import ListProduct from './pages/product/ListProduct'
 import AddCustomer from './pages/customer/AddCustomer'
 import EditCustomer from './pages/customer/EditCustomer'
+import ListCustomer from './pages/customer/ListCustomer';
 import Dashboard from './pages/Dashboard';
 import AddExpense from './pages/expense/AddExpense';
 import ListExpenses from './pages/expense/ListExpense';
