@@ -40,7 +40,7 @@ export default function AddTransaction() {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await fetch(`${baseURL}/customers`);
+        const response = await fetch(`${baseURL}/customer`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setCustomers(data);
