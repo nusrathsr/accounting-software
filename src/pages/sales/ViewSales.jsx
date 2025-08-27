@@ -79,7 +79,7 @@ export default function ViewSalesInvoices() {
         method: "DELETE",
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
+
       showNotification("success", "Deleted!", "Invoice deleted successfully.");
       fetchSales(); // Refresh list
     } catch (err) {
@@ -119,11 +119,10 @@ export default function ViewSalesInvoices() {
       <div className="max-w-7xl mx-auto">
         {/* Notification */}
         {notification && (
-          <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border max-w-md ${
-            notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-            notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-            'bg-yellow-50 border-yellow-200 text-yellow-800'
-          }`}>
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border max-w-md ${notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+              notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+                'bg-yellow-50 border-yellow-200 text-yellow-800'
+            }`}>
             <div className="flex items-start gap-3">
               {notification.type === 'success' && <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />}
               {notification.type === 'error' && <AlertCircle className="w-5 h-5 mt-0.5 text-red-600" />}
@@ -132,7 +131,7 @@ export default function ViewSalesInvoices() {
                 <h4 className="font-semibold text-sm">{notification.title}</h4>
                 <p className="text-sm mt-1">{notification.message}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setNotification(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -268,53 +267,28 @@ export default function ViewSalesInvoices() {
                           </td>
 
                           {/* Items */}
-                          {/* <td className="px-6 py-4">
-                            <div className="max-w-xs">
-                              <div className="flex items-center gap-1 mb-1">
-                                <Package className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm font-medium text-gray-700">
-                                  {(sale.products || []).length} item(s)
-                                </span>
-                              </div>
-                              <div className="space-y-1 max-h-20 overflow-y-auto">
-                                {(sale.products || []).slice(0, 2).map((item, j) => (
-                                  <div key={j} className="text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">
-                                    <div className="font-medium">{item.name || "Unnamed Product"}</div>
-                                    <div>Qty: {item.quantity || 0} × ₹{parseFloat(item.unitPrice || 0).toFixed(2)}</div>
+                          <td className="px-6 py-4">
+                            <div className="max-w-xs space-y-2">
+                              {(sale.products || []).map((item, j) => (
+                                <div key={j} className="text-xs text-gray-600 bg-gray-50 rounded px-2 py-2">
+                                  <div className="font-medium">{item.name || "Unnamed Product"}</div>
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    {/* Main product */}
+                                    <span className="bg-blue-50 text-blue-700 rounded px-2 py-1">
+                                      Qty: {item.quantity || 0} × ₹{parseFloat(item.unitPrice || 0).toFixed(2)}
+                                    </span>
+
+                                    {/* Variants in same row */}
+                                    {(item.variants || []).map((variant, k) => (
+                                      <span key={k} className="bg-gray-100 text-gray-700 rounded px-2 py-1">
+                                        {variant.name} — Qty: {variant.quantity || 0} × ₹{parseFloat(variant.unitPrice || 0).toFixed(2)}
+                                      </span>
+                                    ))}
                                   </div>
-                                ))}
-                                {(sale.products || []).length > 2 && (
-                                  <div className="text-xs text-blue-600 font-medium">
-                                    +{(sale.products || []).length - 2} more items
-                                  </div>
-                                )}
-                              </div>
+                                </div>
+                              ))}
                             </div>
-                          </td> */}
-                          {/* Items */}
-<td className="px-6 py-4">
-  <div className="max-w-xs space-y-1">
-    {(sale.products || []).map((item, j) => (
-      <div key={j}>
-        {/* Main product */}
-        <div className="text-xs text-gray-600 bg-gray-50 rounded px-2 py-1 mb-1">
-          <div className="font-medium">{item.name || "Unnamed Product"}</div>
-          <div>Qty: {item.quantity || 0} × ₹{parseFloat(item.unitPrice || 0).toFixed(2)}</div>
-        </div>
-
-        {/* Variants */}
-        {(item.variants || []).map((variant, k) => (
-          <div key={k} className="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 ml-4 mb-1">
-            <div className="font-medium">{variant.name}</div>
-            <div>Qty: {variant.quantity || 0} × ₹{parseFloat(variant.unitPrice || 0).toFixed(2)}</div>
-          </div>
-        ))}
-      </div>
-    ))}
-  </div>
-</td>
-
-
+                          </td>
                           {/* Amounts */}
                           <td className="px-6 py-4 whitespace-nowrap text-right">
                             <div className="space-y-1">
@@ -339,11 +313,10 @@ export default function ViewSalesInvoices() {
                                   {sale.paymentMode || "—"}
                                 </span>
                               </div>
-                              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                sale.paymentStatus 
-                                  ? 'bg-green-100 text-green-800' 
+                              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${sale.paymentStatus
+                                  ? 'bg-green-100 text-green-800'
                                   : 'bg-red-100 text-red-800'
-                              }`}>
+                                }`}>
                                 {sale.paymentStatus ? (
                                   <>
                                     <CheckCircle className="w-3 h-3" />
@@ -395,17 +368,16 @@ export default function ViewSalesInvoices() {
                         <ChevronLeft className="w-4 h-4" />
                         Previous
                       </button>
-                      
+
                       <div className="flex space-x-1">
                         {[...Array(totalPages)].map((_, i) => (
                           <button
                             key={i}
                             onClick={() => setPage(i + 1)}
-                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                              page === i + 1
+                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${page === i + 1
                                 ? "bg-blue-600 text-white shadow-md"
                                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200"
-                            }`}
+                              }`}
                           >
                             {i + 1}
                           </button>
