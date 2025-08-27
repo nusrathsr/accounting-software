@@ -320,8 +320,26 @@ const AddAttendance = () => {
     }
   }, [formData.checkIn, formData.checkOut, formData.shift]);
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "shift") {
+   
+    const selectedShift = shift.find((sh) => sh.shift === value);
+    if (selectedShift) {
+      setFormData((prev) => ({
+        ...prev,
+        shift: value,
+        checkIn: selectedShift.startTime,  // auto fill
+        checkOut: selectedShift.endTime,   // auto fill
+      }));
+      return;
+    }
+  }
+
+  setFormData({ ...formData, [name]: value });
+};
+
 
   // ✅ Submit to backend
   const handleSubmit = async (e) => {
