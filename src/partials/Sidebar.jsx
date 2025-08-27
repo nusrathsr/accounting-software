@@ -792,7 +792,6 @@ function Sidebar({
 
 
               {/* Employees */}
-<<<<<<< HEAD
 
               <SidebarLinkGroup activecondition={pathname.includes(" Employees")}>
                 {(handleClick, open) => (
@@ -876,7 +875,9 @@ function Sidebar({
                       </ul>
                     </div>
                   </>
-=======
+                )}
+                  </SidebarLinkGroup>
+
 <SidebarLinkGroup activecondition={pathname.includes("Employees")}>
   {(handleClickFirst, openFirst) => (
     <>
@@ -973,7 +974,6 @@ function Sidebar({
                       </NavLink>
                     </li>
                   </ul>
->>>>>>> e12b1e187f9801b112eacb5158bdad7b4c922e83
                 )}
               </li>
             )}
