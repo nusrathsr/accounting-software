@@ -8,7 +8,7 @@ router.post('/', upload.single('photo'), employeesController.addEmployee);
 router.get('/', employeesController.getAllEmployees);
 router.delete('/:id',employeesController.deleteEmployee)
 router.get('/:id',employeesController.getEmployee)
-router.put('/:id',upload.single('attachment'),employeesController.editEmployee)
+router.put('/:id',upload.single('photo'),employeesController.editEmployee)
 
 
 module.exports = router;

@@ -26,6 +26,12 @@ import './charts/ChartjsConfig';
 import AddEmployees from './pages/Employees/AddEmployees';
 import EditEmployees from './pages/Employees/EditEmployees';
 import ListEmployees from './pages/Employees/ListEmployees';
+import AddAttendance from './pages/markingAttendance/AddAttendance';
+import AttendanceReport from './pages/markingAttendance/AttendaceReport';
+import EditAttendance from './pages/markingAttendance/EditAttendance';
+import AddShift from './pages/sgiftManagement/AddShift';
+import EditShift from './pages/sgiftManagement/EditShift';
+import ShiftList from './pages/sgiftManagement/ShiftList';
 
 function App() {
 
@@ -64,7 +70,15 @@ function App() {
           <Route path='/addEmployees' element={<AddEmployees />} />
           <Route path='/editEmployees/:id' element={<EditEmployees />} />
           <Route path='/listEmployees' element={<ListEmployees />} />
+          <Route path='/dailyAttendance' element={<AddAttendance />} />
+          <Route path='/attendanceReport' element={<AttendanceReport />} />
+          <Route path='/editAttendance/:id' element={<EditAttendance />} />
+           <Route path='/addShift' element={<AddShift />} />
+          <Route path='/editShift/:id' element={<EditShift/>} />
+          <Route path='/shift' element={<ShiftList />} />
 
+
+          
         </Route>
       </Routes>
     </>

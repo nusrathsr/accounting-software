@@ -10,6 +10,22 @@ export const GlobalProvider = ({ children }) => {
   const [customers, setCustomers] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [employees,setEmployees]=useState([])
+   const [shift,setShift]=useState([])
+
+
+const fetchEmployees =async()=>{
+  try {
+    const response =await axios.get(`${baseURL}/employees`)
+    setEmployees(response.data)
+  } catch (error) {
+    console.log('error fetching employees ',error);
+  }
+}
+
+console.log(employees);
+
+
 
 
 const fetchCustomer =async()=>{
@@ -23,9 +39,22 @@ const fetchCustomer =async()=>{
    
   }
 }
+
+
+  // fetch shift
+const fetchShift =async()=>{
+  try {
+    const res =await axios.get(`${baseURL}/shift`)
+    setShift(res.data)
+  } catch (error) {
+    console.log(`error fetching shift`,error);
+    
+  }
+}
 useEffect(()=>{
   fetchCustomer()
-  
+  fetchEmployees()
+  fetchShift()
 },[])
 
 
@@ -33,7 +62,9 @@ const value ={
   baseURL,
   customers,
   suppliers,
-  loading
+  loading,
+  employees,
+  shift
 }
 return(
  <GlobalContext.Provider value={value}>

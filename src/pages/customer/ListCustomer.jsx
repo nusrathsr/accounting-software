@@ -32,7 +32,7 @@ const ListCustomer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null);
-  const [itemsPerPage, setItemsPerPage] = useState(10); // Added items per page state
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Added items per page state
 
   const customerTypes = ['Retail Customer', 'Wholesale Customer',  'supplier', 'seller'];
 

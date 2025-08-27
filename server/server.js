@@ -14,6 +14,8 @@ const purchaseRoutes = require("./routes/purchaseRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const reportRouters =require("./routes/reportRoutes")
 const employeesRoutes =require('./routes/employeesRoutes')
+const attendanceRoutes =require('./routes/attendanceRoutes')
+const shiftRoutes=require('./routes/shiftRoutes')
 // Load env variables
 dotenv.config();
 
@@ -43,6 +45,8 @@ app.use("/api/purchases", purchaseRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reports",reportRouters)
 app.use('/api/employees',employeesRoutes)
+app.use('/api/attendance',attendanceRoutes)
+app.use('/api/shift',shiftRoutes)
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')

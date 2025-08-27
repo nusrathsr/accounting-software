@@ -1,4 +1,6 @@
 const Employee = require("../models/Employees");
+const cloudinary = require("../utils/cloudinary");
+
 
 // Utility: Generate next employeeId (EMP001, EMP002, ...)
 const generateEmployeeId = async () => {
@@ -20,7 +22,7 @@ exports.addEmployee = async (req, res) => {
       gender,
       phone,
       email,
-      address,
+      street,
       city,
       state,
       pincode,
@@ -36,6 +38,14 @@ exports.addEmployee = async (req, res) => {
       status,
     } = req.body;
 
+
+    let photoUrl = null;
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "employees",
+      });
+      photoUrl = result.secure_url;
+    }
     const newEmployee = new Employee({
       employeeId,
       fullName,
@@ -48,9 +58,9 @@ exports.addEmployee = async (req, res) => {
       employmentType,
       salaryType,
       status,
-      photo: req.file ? req.file.path : null,
+      photo: photoUrl,
       address: {
-        street: address,
+        street,
         city,
         state,
         pincode,
@@ -100,19 +110,74 @@ exports.getEmployee = async (req, res) => {
 // ✏️ Edit Employee
 exports.editEmployee = async (req, res) => {
   try {
-    const updateData = { ...req.body };
+    const {
+      employeeId,
+      fullName,
+      dob,
+      gender,
+      phone,
+      email,
+      street,
+      city,
+      state,
+      pincode,
+      joiningDate,
+      designation,
+      employmentType,
+      salaryType,
+      accountNo,
+      ifsc,
+      bankName,
+      emergencyName,
+      emergencyPhone,
+      status,
+    } = req.body;
 
+    // Build updateData with nested objects
+    const updateData = {
+      employeeId,
+      fullName,
+      dateOfBirth: dob,
+      gender,
+      phone,
+      email,
+      address: {
+        street,
+        city,
+        state,
+        pincode,
+      },
+      joiningDate,
+      designation,
+      employmentType,
+      salaryType,
+      bankDetails: {
+        accountNumber: accountNo,
+        ifsc,
+        bankName,
+      },
+      emergencyContact: {
+        name: emergencyName,
+        phone: emergencyPhone,
+      },
+      status,
+    };
+
+    // If new photo uploaded → replace
     if (req.file) {
-      updateData.photo = req.file.path; // update photo if new one uploaded
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "employees",
+      });
+      updateData.photo = result.secure_url;
     }
 
-    const employee = await Employee.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    );
+    const employee = await Employee.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+    });
 
-    if (!employee) return res.status(404).json({ message: "Employee not found" });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
 
     res.json(employee);
   } catch (error) {
@@ -120,6 +185,7 @@ exports.editEmployee = async (req, res) => {
     res.status(500).json({ message: "Failed to update employee" });
   }
 };
+
 
 // ❌ Delete Employee
 exports.deleteEmployee = async (req, res) => {

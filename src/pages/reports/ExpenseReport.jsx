@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
 import {
   ResponsiveContainer,
   BarChart,
@@ -7,6 +10,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  LineChart,
+  Line,
 } from "recharts";
 import {
   FaChartBar,
@@ -20,116 +25,35 @@ import {
   FaSearch,
   FaRupeeSign,
   FaListUl,
-  FaTags
+  FaTags,
+  FaReceipt
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+import { GlobalContext } from "../../context/GlobalContext";
 
 const ExpenseReport = () => {
-  const [expenses, setExpenses] = useState([
-    {
-      _id: "1",
-      expenseId: "EXP-001",
-      date: "2024-01-15",
-      category: "Office Supplies",
-      paidTo: "Staples Inc",
-      paymentMethod: "Credit Card",
-      amount: 2500,
-      description: "Office stationery and supplies"
-    },
-    {
-      _id: "2", 
-      expenseId: "EXP-002",
-      date: "2024-01-16",
-      category: "Travel",
-      paidTo: "Uber",
-      paymentMethod: "Cash",
-      amount: 850,
-      description: "Business travel"
-    },
-    {
-      _id: "3",
-      expenseId: "EXP-003", 
-      date: "2024-01-17",
-      category: "Meals",
-      paidTo: "Restaurant ABC",
-      paymentMethod: "Credit Card",
-      amount: 1200,
-      description: "Client meeting lunch"
-    },
-    {
-      _id: "4",
-      expenseId: "EXP-004",
-      date: "2024-01-18", 
-      category: "Office Supplies",
-      paidTo: "Amazon",
-      paymentMethod: "Debit Card",
-      amount: 3200,
-      description: "Computer accessories"
-    },
-    {
-      _id: "5",
-      expenseId: "EXP-005",
-      date: "2024-01-19",
-      category: "Marketing",
-      paidTo: "Google Ads",
-      paymentMethod: "Online Transfer", 
-      amount: 5000,
-      description: "Digital advertising campaign"
-    },
-    {
-      _id: "6",
-      expenseId: "EXP-006", 
-      date: "2024-01-20",
-      category: "Travel",
-      paidTo: "Air India",
-      paymentMethod: "Credit Card",
-      amount: 8500,
-      description: "Business flight tickets"
-    }
-  ]);
-  
-  const [loading, setLoading] = useState(false);
+  const {baseURL}=useContext(GlobalContext)
+  const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [totalAmount, setTotalAmount] = useState(21250);
-  const [categoryTotals, setCategoryTotals] = useState({
-    "Office Supplies": 5700,
-    "Travel": 9350, 
-    "Meals": 1200,
-    "Marketing": 5000
-  });
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [categoryTotals, setCategoryTotals] = useState({});
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 5; // 👈 change how many rows per page
 
   const fetchReport = async () => {
     try {
       setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Filter expenses by date if dates are provided
-      let filteredExpenses = expenses;
-      if (startDate && endDate) {
-        filteredExpenses = expenses.filter(expense => {
-          const expenseDate = new Date(expense.date);
-          return expenseDate >= new Date(startDate) && expenseDate <= new Date(endDate);
-        });
-      }
-      
-      // Recalculate totals
-      const total = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-      setTotalAmount(total);
-      
-      // Recalculate category totals
-      const catTotals = {};
-      filteredExpenses.forEach(exp => {
-        catTotals[exp.category] = (catTotals[exp.category] || 0) + exp.amount;
+      const { data } = await axios.get(`${baseURL}/reports/expense`, {
+        params: { startDate, endDate },
       });
-      setCategoryTotals(catTotals);
-      
-      setCurrentPage(1);
+      setExpenses(data.expenses);
+      setTotalAmount(data.totalAmount);
+      setCategoryTotals(data.categoryTotals);
+      setCurrentPage(1); // reset page when new data comes
     } catch (error) {
       console.error("Failed to fetch expense report:", error);
     } finally {
@@ -139,11 +63,27 @@ const ExpenseReport = () => {
 
   useEffect(() => {
     fetchReport();
+  }, []);
+
+  useEffect(() => {
+    fetchReport();
   }, [startDate, endDate]);
 
   const categoryChartData = Object.entries(categoryTotals).map(([key, value]) => ({
     name: key,
     total: value,
+  }));
+
+  // Prepare daily data for line chart
+  const dailyData = expenses.reduce((acc, exp) => {
+    const date = new Date(exp.date).toLocaleDateString();
+    acc[date] = (acc[date] || 0) + exp.amount;
+    return acc;
+  }, {});
+
+  const dailyChartData = Object.entries(dailyData).map(([date, total]) => ({
+    date,
+    total,
   }));
 
   // Pagination logic
@@ -169,6 +109,85 @@ const ExpenseReport = () => {
     );
   }
 
+
+    // ✅ Generate PDF for Expenses
+const generatePDF = (expenses, filter, totalAmount) => {
+  const doc = new jsPDF();
+
+  // Title
+  doc.setFontSize(20);
+  doc.setTextColor(44, 82, 130);
+  doc.text("Expense Report", 14, 25);
+
+  // Date range
+  doc.setFontSize(12);
+  doc.setTextColor(100, 100, 100);
+  if (filter.startDate || filter.endDate) {
+    const dateRange = `Period: ${filter.startDate || "Beginning"} to ${
+      filter.endDate || "Present"
+    }`;
+    doc.text(dateRange, 14, 35);
+  }
+
+  // Total Expenses
+  doc.setFontSize(14);
+  doc.setTextColor(220, 38, 127);
+  doc.text(
+    `Total Expenses: INR${totalAmount.toFixed(2)}`,
+    14,
+    filter.startDate || filter.endDate ? 45 : 35
+  );
+
+  // Table columns
+  const tableColumn = [
+    "Expense ID",
+    "Date",
+    "Category",
+    "Paid To",
+    "Payment Mode",
+    "Amount",
+    "Description",
+  ];
+
+  // Table rows
+  const tableRows = expenses.map((exp) => [
+    exp.expenseId,
+    new Date(exp.date).toLocaleDateString(),
+    exp.category,
+    exp.paidTo || "--",
+    exp.paymentMethod,
+    `INR${exp.amount}`,
+    exp.description || "--",
+  ]);
+
+  // AutoTable
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: filter.startDate || filter.endDate ? 55 : 45,
+    headStyles: {
+      fillColor: [59, 130, 246],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+    bodyStyles: { textColor: 50 },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+  });
+
+  // ✅ Auto open in print mode
+  doc.autoPrint();
+  doc.output("dataurlnewwindow");
+};
+
+// ✅ Handle Export PDF button
+const handleExportPDF = () => {
+  try {
+    generatePDF(expenses, { startDate, endDate }, totalAmount);
+  } catch (error) {
+    console.error("Error exporting PDF:", error);
+  }
+};
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -180,7 +199,7 @@ const ExpenseReport = () => {
                 <FaArrowLeft className="w-5 h-5" />
               </button>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                <FaChartBar className="w-6 h-6 text-white" />
+                <FaReceipt className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-white">Expense Report</h1>
@@ -228,7 +247,7 @@ const ExpenseReport = () => {
               </div>
               <div className="flex items-end">
                 <button
-                  onClick={fetchReport}
+                  onClick={() => fetchReport()}
                   className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 justify-center"
                 >
                   <FaSearch className="w-4 h-4" />
@@ -240,7 +259,7 @@ const ExpenseReport = () => {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             <div className="flex items-center gap-4">
               <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-3">
@@ -276,56 +295,114 @@ const ExpenseReport = () => {
               </div>
             </div>
           </div>
+          
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="flex items-center gap-4">
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3">
+                <FaRupeeSign className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-gray-600 font-medium text-sm">Average Expense</h3>
+                <p className="text-2xl font-bold text-purple-600">₹{expenses.length ? (totalAmount / expenses.length).toFixed(0) : 0}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Category-wise Chart */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                <MdDashboard className="w-5 h-5 text-blue-600" />
-                Expenses by Category
-              </h2>
-              <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
-                <FaFileExport className="w-4 h-4" />
-                Export Chart
-              </button>
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Daily Expense Trend */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <FaChartBar className="w-5 h-5 text-blue-600" />
+                  Daily Expense Trend
+                </h2>
+              
+              </div>
+              <div className="bg-gray-50 rounded-xl p-6">
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={dailyChartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                    <Line 
+                      type="monotone" 
+                      dataKey="total" 
+                      stroke="#dc2626" 
+                      strokeWidth={3}
+                      dot={{ fill: '#dc2626', strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, fill: '#b91c1c' }}
+                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#d1d5db' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#d1d5db' }}
+                    />
+                    <Tooltip 
+                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <div className="bg-gray-50 rounded-xl p-6">
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={categoryChartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    dataKey="name" 
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                    axisLine={{ stroke: '#d1d5db' }}
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12, fill: '#6b7280' }}
-                    axisLine={{ stroke: '#d1d5db' }}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']}
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '12px',
-                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="total" 
-                    fill="url(#colorGradient)"
-                    radius={[8, 8, 0, 0]}
-                  />
-                  <defs>
-                    <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" />
-                      <stop offset="100%" stopColor="#1d4ed8" />
-                    </linearGradient>
-                  </defs>
-                </BarChart>
-              </ResponsiveContainer>
+          </div>
+
+          {/* Expenses by Category */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <MdDashboard className="w-5 h-5 text-blue-600" />
+                  Expenses by Category
+                </h2>
+                
+              </div>
+              <div className="bg-gray-50 rounded-xl p-6">
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={categoryChartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                    <Bar 
+                      dataKey="total" 
+                      fill="url(#colorGradient)"
+                      radius={[8, 8, 0, 0]}
+                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="name" 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#d1d5db' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#d1d5db' }}
+                    />
+                    <Tooltip 
+                      formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']}
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <defs>
+                      <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#16a34a" />
+                        <stop offset="100%" stopColor="#15803d" />
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>
@@ -339,7 +416,9 @@ const ExpenseReport = () => {
                 Expense Details
               </h2>
               <div className="flex gap-2">
-                <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
+                <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium"
+                 onClick={handleExportPDF}
+                >
                   <FaFileExport className="w-4 h-4" />
                   Export
                 </button>
@@ -358,24 +437,32 @@ const ExpenseReport = () => {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Category</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Paid To</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Payment Method</th>
-                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Amount</th>
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Description</th>
+                        <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Amount</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {currentExpenses.map((exp, index) => (
+                      {currentExpenses.map((exp) => (
                         <tr key={exp._id} className="hover:bg-blue-50 transition-all duration-200">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">{exp.expenseId}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{new Date(exp.date).toLocaleDateString()}</td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {new Date(exp.date).toLocaleDateString()}
+                          </td>
                           <td className="px-6 py-4">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               {exp.category}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600">{exp.paidTo}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{exp.paymentMethod}</td>
-                          <td className="px-6 py-4 text-sm font-semibold text-right text-red-600">₹{exp.amount.toLocaleString()}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{exp.description}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              {exp.paymentMethod}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">{exp.description}</td>
+                          <td className="px-6 py-4 text-sm font-semibold text-right text-red-600">
+                            ₹{exp.amount.toLocaleString()}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -439,6 +526,7 @@ const ExpenseReport = () => {
               <ul className="list-disc list-inside space-y-1 text-blue-700">
                 <li>Filter expenses by date range for specific periods</li>
                 <li>View category-wise breakdown with interactive charts</li>
+                <li>Track daily expense trends and patterns</li>
                 <li>Export data for external analysis and reporting</li>
                 <li>Paginated table view for easy navigation through records</li>
               </ul>
