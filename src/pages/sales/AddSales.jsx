@@ -1719,57 +1719,734 @@
 
 
 
+// import React, { useState, useEffect, useRef } from "react";
+// import axios from "axios";
+// import Swal from "sweetalert2";
+// import jsPDF from "jspdf";
+
+// export default function AddSalesInvoice() {
+//   const invoiceRef = useRef();
+//   const n = (v) => parseFloat(v) || 0;
+
+//   const [productOptions, setProductOptions] = useState([]);
+//   useEffect(() => {
+//   const fetchProducts = async () => {
+//     try {
+//       const res = await axios.get("http://localhost:4000/api/products");
+//       const products = res.data.flatMap((p) =>
+//         p.variants && p.variants.length > 0
+//           ? p.variants.map((v) => ({
+//               id: v._id,
+//               parentId: p._id,
+//               name: `${p.name} - ${v.variantName}`, // ✅ correct field
+//               price: Number(v.sellingPrice) || 0,  // ✅ correct field
+//               taxRate: Number(v.taxPercentage || 0), // ✅ correct field
+//               isTaxInclusive: v.taxInclusive === true, // ✅ direct boolean
+//               sizes: (v.sizeOrWeight ? [v.sizeOrWeight] : []), // ✅ for dropdown if needed
+//             }))
+//           : [
+//               {
+//                 id: p._id,
+//                 parentId: null,
+//                 name: p.name || "Unnamed Product",
+//                 price: Number(p.sellingPrice) || 0,
+//                 taxRate: Number(p.taxPercentage) || 0,
+//                 isTaxInclusive: p.taxType === "GST IN",
+//                 sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
+//               },
+//             ]
+//       );
+//       setProductOptions(products);
+//     } catch (err) {
+//       console.error("Error fetching products:", err);
+//     }
+//   };
+//   fetchProducts();
+// }, []);
+
+
+//   const [formData, setFormData] = useState({
+//     invoiceNumber: "",
+//     customerName: "",
+//     number: "",
+//     saleDate: new Date().toISOString().slice(0, 10),
+//     items: [
+//       {
+//         productId: null,
+//         productName: "",
+//         size: "",
+//         quantity: "",
+//         unitPrice: "",
+//         discount: "",
+//         tax: "",
+//       },
+//     ],
+//     paymentMode: "cash",
+//     paymentStatus: "",
+//   });
+
+//   const [dropdownState, setDropdownState] = useState([{ open: false, searchTerm: "" }]);
+
+//   const generateInvoiceNumber = () =>
+//     `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+//   useEffect(() => {
+//     setFormData((prev) => ({ ...prev, invoiceNumber: generateInvoiceNumber() }));
+//   }, []);
+
+//   useEffect(() => {
+//     if (dropdownState.length !== formData.items.length) {
+//       setDropdownState(formData.items.map(() => ({ open: false, searchTerm: "" })));
+//     }
+//   }, [formData.items.length]);
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//   };
+
+// const handleProductSelect = (index, product) => {
+//   const updatedItems = [...formData.items];
+//   updatedItems[index] = {
+//     productId: product.id,
+//     variantId: product.parentId ? product.id : null,
+//     productName: product.name,
+//     sizeOrWeight: product.sizes?.[0] || "",
+//     quantity: "",
+//     unitPrice: Number(product.price),   
+//     discount: "",
+//     tax: product.taxRate.toFixed(2),
+//   };
+//   setFormData((prev) => ({ ...prev, items: updatedItems }));
+
+//   const updatedDropdown = [...dropdownState];
+//   updatedDropdown[index] = { open: false, searchTerm: "" };
+//   setDropdownState(updatedDropdown);
+// };
+
+//   const handleItemChange = (index, field, value) => {
+//     const updatedItems = [...formData.items];
+//     updatedItems[index][field] = value;
+//     setFormData((prev) => ({ ...prev, items: updatedItems }));
+//   };
+
+//   const handleCheckboxChange = (e) => {
+//     const { name, checked } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: checked }));
+//   };
+
+//   const addItem = () => {
+//     setFormData((prev) => ({
+//       ...prev,
+//       items: [
+//         ...prev.items,
+//         { productId: null, productName: "", size: "", quantity: "", unitPrice: "", discount: "0", tax: "" },
+//       ],
+//     }));
+//     setDropdownState((prev) => [...prev, { open: false, searchTerm: "" }]);
+//   };
+
+//   const removeItem = (index) => {
+//     setFormData((prev) => ({ ...prev, items: prev.items.filter((_, i) => i !== index) }));
+//     setDropdownState((prev) => prev.filter((_, i) => i !== index));
+//   };
+
+//   const toggleDropdown = (index) => {
+//     setDropdownState((prev) =>
+//       prev.map((d, i) => (i === index ? { ...d, open: !d.open, searchTerm: "" } : { ...d, open: false, searchTerm: "" }))
+//     );
+//   };
+
+//   const onSearchChange = (index, value) => {
+//     const product = productOptions.find(p => p.name.toLowerCase() === value.toLowerCase());
+
+//     const updatedItems = [...formData.items];
+//     updatedItems[index].productName = value;
+//     if (product) {
+//       updatedItems[index].productId = product.id;
+//       updatedItems[index].size = ""; // reset size if needed
+//     } else {
+//       updatedItems[index].productId = null;
+//       updatedItems[index].size = "";
+//     }
+//     setFormData((prev) => ({ ...prev, items: updatedItems }));
+
+//     const updatedDropdown = [...dropdownState];
+//     updatedDropdown[index].searchTerm = value;
+//     updatedDropdown[index].open = true;
+//     setDropdownState(updatedDropdown);
+//   };
+//   const getEffectiveUnitPrice = (item) => {
+//     const basePrice = n(item.unitPrice);
+//     const discountAmount = (basePrice * n(item.discount)) / 100;
+//     return basePrice - discountAmount;
+//   };
+
+//   const calculateLineTotal = (item) => {
+//     const effectivePrice = getEffectiveUnitPrice(item);
+//     const lineTotal = n(item.quantity) * effectivePrice;
+//     const taxAmount = (lineTotal * n(item.tax)) / 100;
+//     return lineTotal + taxAmount;
+//   };
+
+//   const calculateSubtotal = () =>
+//     formData.items.reduce((sum, item) => sum + n(item.quantity) * getEffectiveUnitPrice(item), 0);
+
+//   const calculateTaxTotal = () =>
+//     formData.items.reduce((sum, item) => {
+//       const lineTotal = n(item.quantity) * getEffectiveUnitPrice(item);
+//       return sum + (lineTotal * n(item.tax)) / 100;
+//     }, 0);
+//   const calculateDiscountTotal = () =>
+//     formData.items.reduce((sum, item) => {
+//       return sum + (n(item.unitPrice) * n(item.quantity) * n(item.discount)) / 100;
+//     }, 0);
+
+//   const calculateTotal = () => calculateSubtotal() + calculateTaxTotal();
+
+//   // const handleSubmit = async (e) => {
+//   //   e.preventDefault();
+
+//   //   formData.items.forEach((item, i) => {
+//   //     const product = productOptions.find(p => p.id === item.productId);
+//   //     console.log(i, item.productName, item.size, product?.sizes);
+//   //   });
+
+//   //   const validItems = formData.items.filter((item) => {
+//   //     const product = productOptions.find(p => p.id === item.productId);
+//   //     // If product has sizes, require size. Otherwise, ignore.
+//   //     if (!item.productId || n(item.quantity) <= 0) return false;
+//   //     if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
+//   //     return true;
+//   //   });
+//   //   if (validItems.length === 0) {
+//   //     Swal.fire({
+//   //       icon: "warning",
+//   //       title: "Oops...",
+//   //       text: "Please add at least one product with quantity greater than 0",
+//   //     });
+//   //     return;
+//   //   }
+
+//   //   const salesRecord = {
+//   //     invoiceNumber: formData.invoiceNumber,
+//   //     customerName: formData.customerName,
+//   //     number: formData.number,
+//   //     saleDate: formData.saleDate,
+//   //     paymentMode: formData.paymentMode,
+//   //     paymentStatus: formData.paymentStatus,
+//   //     products: formData.items.map((item) => {
+//   //       const basePrice = n(item.unitPrice);
+//   //       const discountAmount = (basePrice * n(item.discount)) / 100;
+//   //       const effectivePrice = basePrice - discountAmount;
+//   //       const lineTotal = n(item.quantity) * effectivePrice;
+//   //       const taxAmount = (lineTotal * n(item.tax)) / 100;
+
+//   //       return {
+//   //         productId: item.productId,
+//   //         variantId: item.variantId,
+//   //         name: item.productName,
+//   //         // size: item.size || "",
+//   //          sizeOrWeight: item.sizeOrWeight || item.size || "",
+//   //         quantity: n(item.quantity),
+//   //         unitPrice: basePrice,
+//   //         discount: n(item.discount),
+//   //         tax: n(item.tax),
+//   //         lineTotal: lineTotal + taxAmount,
+//   //       };
+//   //     }),
+//   //     subtotal: calculateSubtotal(),
+//   //     discountTotal: calculateDiscountTotal(),
+//   //     tax: calculateTaxTotal(),
+//   //     totalAmount: calculateTotal(),
+//   //   };
+
+//   //   try {
+//   //     await axios.post("http://localhost:4000/api/sales", salesRecord);
+//   //     Swal.fire({
+//   //       icon: "success",
+//   //       title: "Invoice Saved!",
+//   //       html: `
+//   //       Invoice <strong>${formData.invoiceNumber}</strong> saved successfully.<br/>
+//   //       Total: ₹${calculateTotal().toFixed(2)}
+//   //     `,
+//   //       timer: 2500,
+//   //       showConfirmButton: false,
+//   //     });
+//   //     setFormData({
+//   //       invoiceNumber: generateInvoiceNumber(),
+//   //       customerName: "",
+//   //       number: "",
+//   //       saleDate: new Date().toISOString().slice(0, 10),
+//   //       items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
+//   //     });
+//   //     setDropdownState([{ open: false, searchTerm: "" }]);
+//   //   } catch (err) {
+//   //     console.error(err);
+//   //     Swal.fire({
+//   //       icon: "error",
+//   //       title: "Error",
+//   //       text: "Failed to save invoice. Please check server connection.",
+//   //     });
+//   //   }
+//   // };
+
+
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+
+//   // ✅ Validate products
+//   const validItems = formData.items.filter((item) => {
+//     const product = productOptions.find(p => p.id === item.productId);
+//     if (!item.productId || n(item.quantity) <= 0) return false;
+//     if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
+//     return true;
+//   });
+
+//   if (validItems.length === 0) {
+//     Swal.fire({
+//       icon: "warning",
+//       title: "Oops...",
+//       text: "Please add at least one product with quantity greater than 0",
+//     });
+//     return;
+//   }
+
+//   // ✅ Format products for backend schema
+//   const formattedProducts = formData.items.map((item) => {
+//     const basePrice = n(item.unitPrice);
+//     const discountAmount = (basePrice * n(item.discount)) / 100; // ₹ discount
+//     const effectivePrice = basePrice - discountAmount;
+//     const lineTotal = n(item.quantity) * effectivePrice;
+//     const taxAmount = (lineTotal * n(item.tax)) / 100; // ₹ tax
+//     const total = lineTotal + taxAmount;
+
+//     return {
+//       productId: item.productId,
+//       variantId: item.variantId,
+//       name: item.productName,
+//       sizeOrWeight: item.sizeOrWeight || item.size || "",
+//       quantity: n(item.quantity),
+//       unitPrice: basePrice,
+//       discount: discountAmount,  // ✅ store as ₹ amount
+//       tax: taxAmount,            // ✅ store as ₹ amount
+//       total                      // ✅ correct field
+//     };
+//   });
+
+//   // ✅ Calculate totals
+//   const subtotal = formattedProducts.reduce((sum, p) => sum + (p.unitPrice * p.quantity) - p.discount, 0);
+//   const totalTax = formattedProducts.reduce((sum, p) => sum + p.tax, 0);
+//   const totalAmount = subtotal + totalTax;
+
+//   const salesRecord = {
+//     invoiceNumber: formData.invoiceNumber,
+//     customerName: formData.customerName,
+//     number: formData.number,
+//     date: formData.saleDate,  // ✅ schema expects "date"
+//     products: formattedProducts,
+//     subtotal,
+//     tax: totalTax,
+//     totalAmount,
+//     paymentMode: formData.paymentMode,
+//     paymentStatus: !!formData.paymentStatus // ✅ boolean
+//   };
+
+//   try {
+//     await axios.post("http://localhost:4000/api/sales", salesRecord);
+//     Swal.fire({
+//       icon: "success",
+//       title: "Invoice Saved!",
+//       html: `
+//         Invoice <strong>${formData.invoiceNumber}</strong> saved successfully.<br/>
+//         Total: ₹${totalAmount.toFixed(2)}
+//       `,
+//       timer: 2500,
+//       showConfirmButton: false,
+//     });
+
+//     // ✅ reset form
+//     setFormData({
+//       invoiceNumber: generateInvoiceNumber(),
+//       customerName: "",
+//       number: "",
+//       saleDate: new Date().toISOString().slice(0, 10),
+//       items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
+//     });
+//     setDropdownState([{ open: false, searchTerm: "" }]);
+//   } catch (err) {
+//     console.error(err);
+//     Swal.fire({
+//       icon: "error",
+//       title: "Error",
+//       text: "Failed to save invoice. Please check server connection.",
+//     });
+//   }
+// };
+
+//   const handleDownload = async () => {
+//     try {
+//       const res = await axios.get("http://localhost:4000/api/sales/latest");
+//       const invoice = res.data;
+//       if (!invoice) return alert("No invoice found!");
+//       const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
+//       const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
+
+//       const doc = new jsPDF({ unit: "pt", format: "a4" });
+//       let y = 40;
+
+//       doc.setFontSize(18);
+//       doc.text("Shop Name", 40, y);
+//       doc.setFontSize(11);
+//       doc.text("Phone: +1234567890", 40, y + 25);
+//       doc.text("Email: shop@example.com", 40, y + 40);
+
+//       y += 70;
+//       doc.setFontSize(16);
+//       doc.text("Sales Invoice", 40, y);
+//       y += 20;
+//       doc.setFontSize(11);
+//       doc.text(`Invoice No: ${invoice.invoiceNumber}`, 40, y);
+//       doc.text(`Date: ${formattedDate}`, 300, y);
+//       y += 20;
+//       doc.text(`Bill To: ${invoice.customerName}`, 40, y);
+//       doc.text(`Mobile: ${invoice.number || "—"}`, 40, y + 15);
+//       y += 20;
+//       doc.text(`Payment Mode: ${invoice.paymentMode || "—"}`, 40, y);
+//       doc.text(`Payment Status: ${invoice.paymentStatus ? "Paid" : "Unpaid"}`, 300, y);
+
+//       y += 20;
+//       doc.setFontSize(12);
+//       doc.setFont(undefined, "bold");
+//       doc.text("Product", 40, y);
+//       doc.text("Qty", 200, y);
+//       doc.text("Unit (Rs.)", 260, y);
+//       doc.text("Disc %", 340, y);
+//       doc.text("GST %", 400, y);
+//       doc.text("Line Total (Rs.)", 470, y);
+//       doc.setFont(undefined, "normal");
+//       y += 10;
+//       doc.line(40, y, 550, y);
+//       y += 15;
+
+//       invoice.products.forEach((item) => {
+//         const basePrice = n(item.unitPrice);
+//         const discountAmount = (basePrice * n(item.discount)) / 100;
+//         const effectivePrice = basePrice - discountAmount;
+//         const lineTotal = n(item.quantity) * effectivePrice;
+//         const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
+
+//         doc.text(item.name || "N/A", 40, y);
+//         doc.text(String(item.quantity), 200, y);
+//         doc.text(basePrice.toFixed(2), 260, y);
+//         doc.text(String(item.discount || 0), 340, y);
+//         doc.text(String(item.tax || 0), 400, y);
+//         doc.text(lineWithTax.toFixed(2), 470, y);
+//         y += 20;
+//       });
+
+//       y += 10;
+//       doc.line(40, y, 550, y);
+//       y += 20;
+//       doc.text(`Subtotal: Rs.${invoice.subtotal.toFixed(2)}`, 300, y);
+//       y += 15;
+//       doc.text(`Tax Total: Rs.${invoice.tax.toFixed(2)}`, 300, y);
+//       y += 15;
+//       doc.setFont(undefined, "bold");
+//       doc.text(`Total Amount: Rs.${invoice.totalAmount.toFixed(2)}`, 300, y);
+
+//       doc.save(`invoice-${invoice.invoiceNumber}.pdf`);
+//     } catch (err) {
+//       console.error(err);
+//       alert("Error fetching the latest invoice.");
+//     }
+//   };
+
+//   const handlePrint = async () => {
+//     try {
+//       const res = await axios.get("http://localhost:4000/api/sales/latest");
+//       const invoice = res.data;
+//       if (!invoice) return alert("No invoice found!");
+//       const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
+//       const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
+
+//       const printableContent = `
+//       <div>
+//         <h2 style="text-align:center;">Sales Invoice</h2>
+//         <p><strong>Invoice No:</strong> ${invoice.invoiceNumber}</p>
+//         <p><strong>Date:</strong> ${formattedDate}</p>
+//         <p><strong>Customer:</strong> ${invoice.customerName || "—"}</p>
+//         <p><strong>Mobile:</strong> ${invoice.number || "—"}</p>
+//         <p><strong>Payment Mode:</strong> ${invoice.paymentMode || "—"}</p>
+//         <p><strong>Payment Status:</strong> ${invoice.paymentStatus ? "Paid" : "Unpaid"}</p>
+//         <table border="1" cellspacing="0" cellpadding="5" width="100%" style="border-collapse:collapse; margin-top:10px;">
+//           <thead>
+//             <tr>
+//               <th>Product</th><th>Qty</th><th>Unit ₹</th><th>Disc %</th><th>GST %</th><th>Total ₹</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             ${invoice.products
+//           .map((item) => {
+//             const basePrice = n(item.unitPrice);
+//             const discountAmount = (basePrice * n(item.discount)) / 100;
+//             const effectivePrice = basePrice - discountAmount;
+//             const lineTotal = n(item.quantity) * effectivePrice;
+//             const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
+//             return `<tr>
+//                   <td>${item.name || "N/A"}</td>
+//                   <td style="text-align:center;">${item.quantity}</td>
+//                   <td style="text-align:right;">${basePrice.toFixed(2)}</td>
+//                   <td style="text-align:center;">${item.discount || 0}</td>
+//                   <td style="text-align:center;">${item.tax || 0}</td>
+//                   <td style="text-align:right;">${lineWithTax.toFixed(2)}</td>
+//                 </tr>`;
+//           })
+//           .join("")}
+//           </tbody>
+//         </table>
+//         <p style="text-align:right; margin-top:10px;">Subtotal: ₹${invoice.subtotal.toFixed(2)}</p>
+//         <p style="text-align:right;">Tax Total: ₹${invoice.tax.toFixed(2)}</p>
+//         <p style="text-align:right; font-weight:bold;">Total: ₹${invoice.totalAmount.toFixed(2)}</p>
+//       </div>
+//     `;
+
+//       const printWindow = window.open("", "_blank");
+//       printWindow.document.write(`<html><head><title>Invoice</title></head><body>${printableContent}</body></html>`);
+//       printWindow.document.close();
+//       printWindow.print();
+//     } catch (err) {
+//       console.error(err);
+//       alert("Error fetching the latest invoice for printing.");
+//     }
+//   };
+
+//   return (
+//     <div className="p-6 w-full bg-white rounded shadow">
+//       <div className="flex justify-end space-x-3 mb-6">
+//         <button onClick={handleDownload} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+//           Download Invoice
+//         </button>
+//         <button onClick={handlePrint} className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
+//           Export
+//         </button>
+//       </div>
+
+//       <h1 className="text-3xl font-bold mb-6">Add Sales Invoice</h1>
+
+//       <form onSubmit={handleSubmit} className="space-y-6">
+//         <div className="flex space-x-4">
+//           <div className="flex-1">
+//             <label>Invoice Number</label>
+//             <input type="text" value={formData.invoiceNumber} readOnly className="w-full border px-3 py-2 rounded bg-gray-100" />
+//           </div>
+//           <div className="flex-1">
+//             <label>Customer Name(optional)</label>
+//             <input type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
+//           </div>
+//           <div className="flex-1">
+//             <label>Mobile Number(optional)</label>
+//             <input
+//               type="tel"
+//               name="number"
+//               value={formData.number}
+//               onChange={handleChange}
+//               className="w-full border px-3 py-2 rounded"
+//               placeholder="Enter mobile number"
+//             />
+//           </div>
+//         </div>
+//         <div>
+//           <label>Sale Date</label>
+//           <input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
+//         </div>
+//         <div className="flex space-x-4">
+//           <div className="flex-1">
+//             <label>Payment Mode</label>
+//             <select
+//               name="paymentMode"
+//               value={formData.paymentMode}
+//               onChange={handleChange}
+//               className="w-full border px-3 py-2 rounded"
+//             >
+//               <option value="cash">Cash</option>
+//               <option value="upi">UPI</option>
+//               <option value="card">Card</option>
+//               <option value="wallet">Wallet</option>
+//               <option value="credit">Credit</option>
+//             </select>
+//           </div>
+
+//           <div className="flex-1 flex items-center space-x-2 mt-6">
+//             <input
+//               type="checkbox"
+//               name="paymentStatus"
+//               checked={formData.paymentStatus}
+//               onChange={handleCheckboxChange}
+//               className="w-5 h-5"
+//             />
+//             <label>Paid</label>
+//           </div>
+//         </div>
+
+
+//         <div>
+//           <label>Items</label>
+//           {formData.items.map((item, index) => {
+//             const filteredOptions = dropdownState[index]?.searchTerm
+//               ? productOptions.filter((p) =>
+//                 p.name.toLowerCase().includes(dropdownState[index].searchTerm.toLowerCase())
+//               )
+//               : productOptions;
+
+//             return (
+//               <div key={index} className="flex space-x-2 mb-3 items-center relative">
+//                 <input
+//                   type="text"
+//                   placeholder="Enter or search product..."
+//                   value={item.productName}
+//                   onChange={(e) => onSearchChange(index, e.target.value)}
+//                   onFocus={() => {
+//                     const updatedDropdown = [...dropdownState];
+//                     updatedDropdown[index].open = true;
+//                     setDropdownState(updatedDropdown);
+//                   }}
+//                   className="w-full border px-3 py-2 rounded"
+//                 />
+//                 {dropdownState[index]?.open && (
+//                   <div className="absolute z-20 bg-white border w-full max-h-48 overflow-auto mt-1 rounded shadow-lg">
+//                     {filteredOptions.length > 0 ? (
+//                       filteredOptions.map((product) => (
+//                         <div
+//                           key={product.id}
+//                           onMouseDown={(e) => {
+//                             e.preventDefault();
+//                             handleProductSelect(index, product);
+//                           }}
+//                           className="cursor-pointer px-3 py-2 hover:bg-gray-200"
+//                         >
+//                           {product.name} - ₹{Number(product.price).toFixed(2)} {product.isTaxInclusive ? "(Tax Incl.)" : ""}
+//                         </div>
+//                       ))
+//                     ) : (
+//                       <div className="px-3 py-2 text-gray-500">No products found</div>
+//                     )}
+//                   </div>
+//                 )}
+
+//                 {item.productId && productOptions.find(p => p.id === item.productId)?.sizes?.some(s => s.trim() !== "") ? (
+//                   <select
+//                      value={item.size || ""}
+//                     onChange={(e) => handleItemChange(index, "size", e.target.value)}
+//                     className="w-24 border px-2 py-1 rounded"
+//                     required={true}
+//                   >
+//                     <option value="">Select Size</option>
+//                     {productOptions
+//                       .find(p => p.id === item.productId)
+//                       .sizes.filter(s => s.trim() !== "")
+//                       .map((s, i) => (
+//                         <option key={i} value={s}>{s}</option>
+//                       ))}
+//                   </select>
+//                 ) :null}
+//                   <input type="hidden" value="" />
+                
+
+//                 <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-20 border px-2 py-1 rounded" />
+//                 <input type="number" placeholder="Unit ₹" value={item.unitPrice} onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)} className="w-24 border px-2 py-1 rounded" />
+//                 <input type="number" placeholder="Disc %" value={item.discount} onChange={(e) => handleItemChange(index, "discount", e.target.value)} className="w-20 border px-2 py-1 rounded" />
+//                 <input type="number" placeholder="GST %" value={item.tax} onChange={(e) => handleItemChange(index, "tax", e.target.value)} className="w-20 border px-2 py-1 rounded" />
+//                 {/* <span className="w-24">{calculateLineTotal(item).toFixed(2)}</span> */}
+//                 <span className="w-24 font-medium text-right">
+//                   ₹{getEffectiveUnitPrice(item).toFixed(2)}
+//                 </span>
+//                 <button type="button" onClick={() => removeItem(index)} className="text-red-500 px-2">X</button>
+//               </div>
+//             );
+//           })}
+//           <button type="button" onClick={addItem} className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Item</button>
+//         </div>
+
+//         <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 mt-4">Save Invoice</button>
+//         <div className="flex flex-col items-end space-y-1 mt-6">
+//           <div>Subtotal: ₹{calculateSubtotal().toFixed(2)}</div>
+//           <div>Discount: ₹{calculateDiscountTotal().toFixed(2)}</div>
+//           <div>GST: ₹{calculateTaxTotal().toFixed(2)}</div>
+//           <div className="font-bold">Total: ₹{calculateTotal().toFixed(2)}</div>
+//         </div>
+
+//       </form>
+//     </div>
+//   );
+// }
+
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import Swal from "sweetalert2";
-import jsPDF from "jspdf";
+import {
+  Receipt,
+  User,
+  Calendar,
+  ShoppingCart,
+  CreditCard,
+  Download,
+  Printer,
+  ArrowLeft,
+  Save,
+  Plus,
+  X,
+  FileText,
+  CheckCircle
+} from "lucide-react";
 
 export default function AddSalesInvoice() {
   const invoiceRef = useRef();
   const n = (v) => parseFloat(v) || 0;
 
   const [productOptions, setProductOptions] = useState([]);
+  
   useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      const res = await axios.get("http://localhost:4000/api/products");
-      const products = res.data.flatMap((p) =>
-        p.variants && p.variants.length > 0
-          ? p.variants.map((v) => ({
-              id: v._id,
-              parentId: p._id,
-              name: `${p.name} - ${v.variantName}`, // ✅ correct field
-              price: Number(v.sellingPrice) || 0,  // ✅ correct field
-              taxRate: Number(v.taxPercentage || 0), // ✅ correct field
-              isTaxInclusive: v.taxInclusive === true, // ✅ direct boolean
-              sizes: (v.sizeOrWeight ? [v.sizeOrWeight] : []), // ✅ for dropdown if needed
-            }))
-          : [
-              {
-                id: p._id,
-                parentId: null,
-                name: p.name || "Unnamed Product",
-                price: Number(p.sellingPrice) || 0,
-                taxRate: Number(p.taxPercentage) || 0,
-                isTaxInclusive: p.taxType === "GST IN",
-                sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
-              },
-            ]
-      );
-      setProductOptions(products);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-    }
-  };
-  fetchProducts();
-}, []);
-
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/api/products");
+        const data = await res.json();
+        const products = data.flatMap((p) =>
+          p.variants && p.variants.length > 0
+            ? p.variants.map((v) => ({
+                id: v._id,
+                parentId: p._id,
+                name: `${p.name} - ${v.variantName}`,
+                price: Number(v.sellingPrice) || 0,
+                taxRate: Number(v.taxPercentage || 0),
+                isTaxInclusive: v.taxInclusive === true,
+                sizes: (v.sizeOrWeight ? [v.sizeOrWeight] : []),
+              }))
+            : [
+                {
+                  id: p._id,
+                  parentId: null,
+                  name: p.name || "Unnamed Product",
+                  price: Number(p.sellingPrice) || 0,
+                  taxRate: Number(p.taxPercentage) || 0,
+                  isTaxInclusive: p.taxType === "GST IN",
+                  sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
+                },
+              ]
+        );
+        setProductOptions(products);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const [formData, setFormData] = useState({
     invoiceNumber: "",
     customerName: "",
     number: "",
     saleDate: new Date().toISOString().slice(0, 10),
+    paymentMode: "cash",
+    paymentStatus: false,
     items: [
       {
         productId: null,
@@ -1781,8 +2458,6 @@ export default function AddSalesInvoice() {
         tax: "",
       },
     ],
-    paymentMode: "cash",
-    paymentStatus: "",
   });
 
   const [dropdownState, setDropdownState] = useState([{ open: false, searchTerm: "" }]);
@@ -1805,24 +2480,24 @@ export default function AddSalesInvoice() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleProductSelect = (index, product) => {
-  const updatedItems = [...formData.items];
-  updatedItems[index] = {
-    productId: product.id,
-    variantId: product.parentId ? product.id : null,
-    productName: product.name,
-    sizeOrWeight: product.sizes?.[0] || "",
-    quantity: "",
-    unitPrice: Number(product.price),   
-    discount: "",
-    tax: product.taxRate.toFixed(2),
-  };
-  setFormData((prev) => ({ ...prev, items: updatedItems }));
+  const handleProductSelect = (index, product) => {
+    const updatedItems = [...formData.items];
+    updatedItems[index] = {
+      productId: product.id,
+      variantId: product.parentId ? product.id : null,
+      productName: product.name,
+      sizeOrWeight: product.sizes?.[0] || "",
+      quantity: "",
+      unitPrice: Number(product.price),   
+      discount: "",
+      tax: product.taxRate.toFixed(2),
+    };
+    setFormData((prev) => ({ ...prev, items: updatedItems }));
 
-  const updatedDropdown = [...dropdownState];
-  updatedDropdown[index] = { open: false, searchTerm: "" };
-  setDropdownState(updatedDropdown);
-};
+    const updatedDropdown = [...dropdownState];
+    updatedDropdown[index] = { open: false, searchTerm: "" };
+    setDropdownState(updatedDropdown);
+  };
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...formData.items];
@@ -1851,12 +2526,6 @@ const handleProductSelect = (index, product) => {
     setDropdownState((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const toggleDropdown = (index) => {
-    setDropdownState((prev) =>
-      prev.map((d, i) => (i === index ? { ...d, open: !d.open, searchTerm: "" } : { ...d, open: false, searchTerm: "" }))
-    );
-  };
-
   const onSearchChange = (index, value) => {
     const product = productOptions.find(p => p.name.toLowerCase() === value.toLowerCase());
 
@@ -1864,7 +2533,7 @@ const handleProductSelect = (index, product) => {
     updatedItems[index].productName = value;
     if (product) {
       updatedItems[index].productId = product.id;
-      updatedItems[index].size = ""; // reset size if needed
+      updatedItems[index].size = "";
     } else {
       updatedItems[index].productId = null;
       updatedItems[index].size = "";
@@ -1876,17 +2545,11 @@ const handleProductSelect = (index, product) => {
     updatedDropdown[index].open = true;
     setDropdownState(updatedDropdown);
   };
+
   const getEffectiveUnitPrice = (item) => {
     const basePrice = n(item.unitPrice);
     const discountAmount = (basePrice * n(item.discount)) / 100;
     return basePrice - discountAmount;
-  };
-
-  const calculateLineTotal = (item) => {
-    const effectivePrice = getEffectiveUnitPrice(item);
-    const lineTotal = n(item.quantity) * effectivePrice;
-    const taxAmount = (lineTotal * n(item.tax)) / 100;
-    return lineTotal + taxAmount;
   };
 
   const calculateSubtotal = () =>
@@ -1897,6 +2560,7 @@ const handleProductSelect = (index, product) => {
       const lineTotal = n(item.quantity) * getEffectiveUnitPrice(item);
       return sum + (lineTotal * n(item.tax)) / 100;
     }, 0);
+
   const calculateDiscountTotal = () =>
     formData.items.reduce((sum, item) => {
       return sum + (n(item.unitPrice) * n(item.quantity) * n(item.discount)) / 100;
@@ -1904,230 +2568,205 @@ const handleProductSelect = (index, product) => {
 
   const calculateTotal = () => calculateSubtotal() + calculateTaxTotal();
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   formData.items.forEach((item, i) => {
-  //     const product = productOptions.find(p => p.id === item.productId);
-  //     console.log(i, item.productName, item.size, product?.sizes);
-  //   });
-
-  //   const validItems = formData.items.filter((item) => {
-  //     const product = productOptions.find(p => p.id === item.productId);
-  //     // If product has sizes, require size. Otherwise, ignore.
-  //     if (!item.productId || n(item.quantity) <= 0) return false;
-  //     if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
-  //     return true;
-  //   });
-  //   if (validItems.length === 0) {
-  //     Swal.fire({
-  //       icon: "warning",
-  //       title: "Oops...",
-  //       text: "Please add at least one product with quantity greater than 0",
-  //     });
-  //     return;
-  //   }
-
-  //   const salesRecord = {
-  //     invoiceNumber: formData.invoiceNumber,
-  //     customerName: formData.customerName,
-  //     number: formData.number,
-  //     saleDate: formData.saleDate,
-  //     paymentMode: formData.paymentMode,
-  //     paymentStatus: formData.paymentStatus,
-  //     products: formData.items.map((item) => {
-  //       const basePrice = n(item.unitPrice);
-  //       const discountAmount = (basePrice * n(item.discount)) / 100;
-  //       const effectivePrice = basePrice - discountAmount;
-  //       const lineTotal = n(item.quantity) * effectivePrice;
-  //       const taxAmount = (lineTotal * n(item.tax)) / 100;
-
-  //       return {
-  //         productId: item.productId,
-  //         variantId: item.variantId,
-  //         name: item.productName,
-  //         // size: item.size || "",
-  //          sizeOrWeight: item.sizeOrWeight || item.size || "",
-  //         quantity: n(item.quantity),
-  //         unitPrice: basePrice,
-  //         discount: n(item.discount),
-  //         tax: n(item.tax),
-  //         lineTotal: lineTotal + taxAmount,
-  //       };
-  //     }),
-  //     subtotal: calculateSubtotal(),
-  //     discountTotal: calculateDiscountTotal(),
-  //     tax: calculateTaxTotal(),
-  //     totalAmount: calculateTotal(),
-  //   };
-
-  //   try {
-  //     await axios.post("http://localhost:4000/api/sales", salesRecord);
-  //     Swal.fire({
-  //       icon: "success",
-  //       title: "Invoice Saved!",
-  //       html: `
-  //       Invoice <strong>${formData.invoiceNumber}</strong> saved successfully.<br/>
-  //       Total: ₹${calculateTotal().toFixed(2)}
-  //     `,
-  //       timer: 2500,
-  //       showConfirmButton: false,
-  //     });
-  //     setFormData({
-  //       invoiceNumber: generateInvoiceNumber(),
-  //       customerName: "",
-  //       number: "",
-  //       saleDate: new Date().toISOString().slice(0, 10),
-  //       items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
-  //     });
-  //     setDropdownState([{ open: false, searchTerm: "" }]);
-  //   } catch (err) {
-  //     console.error(err);
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Error",
-  //       text: "Failed to save invoice. Please check server connection.",
-  //     });
-  //   }
-  // };
-
-
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  // ✅ Validate products
-  const validItems = formData.items.filter((item) => {
-    const product = productOptions.find(p => p.id === item.productId);
-    if (!item.productId || n(item.quantity) <= 0) return false;
-    if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
-    return true;
+  const [alertState, setAlertState] = useState({
+    show: false,
+    title: '',
+    text: '',
+    type: 'info'
   });
 
-  if (validItems.length === 0) {
-    Swal.fire({
-      icon: "warning",
-      title: "Oops...",
-      text: "Please add at least one product with quantity greater than 0",
+  const showAlert = (title, text, type = 'info') => {
+    setAlertState({
+      show: true,
+      title,
+      text,
+      type
     });
-    return;
-  }
-
-  // ✅ Format products for backend schema
-  const formattedProducts = formData.items.map((item) => {
-    const basePrice = n(item.unitPrice);
-    const discountAmount = (basePrice * n(item.discount)) / 100; // ₹ discount
-    const effectivePrice = basePrice - discountAmount;
-    const lineTotal = n(item.quantity) * effectivePrice;
-    const taxAmount = (lineTotal * n(item.tax)) / 100; // ₹ tax
-    const total = lineTotal + taxAmount;
-
-    return {
-      productId: item.productId,
-      variantId: item.variantId,
-      name: item.productName,
-      sizeOrWeight: item.sizeOrWeight || item.size || "",
-      quantity: n(item.quantity),
-      unitPrice: basePrice,
-      discount: discountAmount,  // ✅ store as ₹ amount
-      tax: taxAmount,            // ✅ store as ₹ amount
-      total                      // ✅ correct field
-    };
-  });
-
-  // ✅ Calculate totals
-  const subtotal = formattedProducts.reduce((sum, p) => sum + (p.unitPrice * p.quantity) - p.discount, 0);
-  const totalTax = formattedProducts.reduce((sum, p) => sum + p.tax, 0);
-  const totalAmount = subtotal + totalTax;
-
-  const salesRecord = {
-    invoiceNumber: formData.invoiceNumber,
-    customerName: formData.customerName,
-    number: formData.number,
-    date: formData.saleDate,  // ✅ schema expects "date"
-    products: formattedProducts,
-    subtotal,
-    tax: totalTax,
-    totalAmount,
-    paymentMode: formData.paymentMode,
-    paymentStatus: !!formData.paymentStatus // ✅ boolean
   };
 
-  try {
-    await axios.post("http://localhost:4000/api/sales", salesRecord);
-    Swal.fire({
-      icon: "success",
-      title: "Invoice Saved!",
-      html: `
-        Invoice <strong>${formData.invoiceNumber}</strong> saved successfully.<br/>
-        Total: ₹${totalAmount.toFixed(2)}
-      `,
-      timer: 2500,
-      showConfirmButton: false,
+  const closeAlert = () => {
+    setAlertState(prev => ({ ...prev, show: false }));
+  };
+
+  // Custom Sweet Alert Component
+  const CustomAlert = () => {
+    if (!alertState.show) return null;
+
+    const getIcon = () => {
+      switch (alertState.type) {
+        case 'success':
+          return (
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            </div>
+          );
+        case 'error':
+          return (
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+              <X className="h-6 w-6 text-red-600" />
+            </div>
+          );
+        case 'warning':
+          return (
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+              <span className="text-2xl">⚠️</span>
+            </div>
+          );
+        default:
+          return (
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+              <span className="text-2xl">ℹ️</span>
+            </div>
+          );
+      }
+    };
+
+    const getButtonColor = () => {
+      switch (alertState.type) {
+        case 'success':
+          return 'bg-green-600 hover:bg-green-700';
+        case 'error':
+          return 'bg-red-600 hover:bg-red-700';
+        case 'warning':
+          return 'bg-yellow-600 hover:bg-yellow-700';
+        default:
+          return 'bg-blue-600 hover:bg-blue-700';
+      }
+    };
+
+    return (
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-auto animate-in fade-in zoom-in duration-200">
+          <div className="p-6 text-center">
+            {getIcon()}
+            <h3 className="text-lg font-semibold text-gray-900 mt-4 mb-2">
+              {alertState.title}
+            </h3>
+            <p className="text-sm text-gray-600 mb-6">
+              {alertState.text}
+            </p>
+            <button
+              onClick={closeAlert}
+              className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-colors duration-200 ${getButtonColor()}`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const validItems = formData.items.filter((item) => {
+      const product = productOptions.find(p => p.id === item.productId);
+      if (!item.productId || n(item.quantity) <= 0) return false;
+      if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
+      return true;
     });
 
-    // ✅ reset form
-    setFormData({
-      invoiceNumber: generateInvoiceNumber(),
-      customerName: "",
-      number: "",
-      saleDate: new Date().toISOString().slice(0, 10),
-      items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
+    if (validItems.length === 0) {
+      showAlert("Warning", "Please add at least one product with quantity greater than 0", "warning");
+      return;
+    }
+
+    const formattedProducts = formData.items.map((item) => {
+      const basePrice = n(item.unitPrice);
+      const discountAmount = (basePrice * n(item.discount)) / 100;
+      const effectivePrice = basePrice - discountAmount;
+      const lineTotal = n(item.quantity) * effectivePrice;
+      const taxAmount = (lineTotal * n(item.tax)) / 100;
+      const total = lineTotal + taxAmount;
+
+      return {
+        productId: item.productId,
+        variantId: item.variantId,
+        name: item.productName,
+        sizeOrWeight: item.sizeOrWeight || item.size || "",
+        quantity: n(item.quantity),
+        unitPrice: basePrice,
+        discount: discountAmount,
+        tax: taxAmount,
+        total
+      };
     });
-    setDropdownState([{ open: false, searchTerm: "" }]);
-  } catch (err) {
-    console.error(err);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Failed to save invoice. Please check server connection.",
-    });
-  }
-};
+
+    const subtotal = formattedProducts.reduce((sum, p) => sum + (p.unitPrice * p.quantity) - p.discount, 0);
+    const totalTax = formattedProducts.reduce((sum, p) => sum + p.tax, 0);
+    const totalAmount = subtotal + totalTax;
+
+    const salesRecord = {
+      invoiceNumber: formData.invoiceNumber,
+      customerName: formData.customerName,
+      number: formData.number,
+      date: formData.saleDate,
+      products: formattedProducts,
+      subtotal,
+      tax: totalTax,
+      totalAmount,
+      paymentMode: formData.paymentMode,
+      paymentStatus: formData.paymentStatus
+    };
+
+    try {
+      const response = await fetch("http://localhost:4000/api/sales", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(salesRecord),
+      });
+
+      if (response.ok) {
+        showAlert("Success!", `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${totalAmount.toFixed(2)}`, "success");
+
+        setFormData({
+          invoiceNumber: generateInvoiceNumber(),
+          customerName: "",
+          number: "",
+          saleDate: new Date().toISOString().slice(0, 10),
+          paymentMode: "cash",
+          paymentStatus: false,
+          items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
+        });
+        setDropdownState([{ open: false, searchTerm: "" }]);
+      } else {
+        throw new Error("Failed to save invoice");
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert("Error!", "Failed to save invoice. Please check server connection.", "error");
+    }
+  };
 
   const handleDownload = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/sales/latest");
-      const invoice = res.data;
-      if (!invoice) return alert("No invoice found!");
+      const res = await fetch("http://localhost:4000/api/sales/latest");
+      const invoice = await res.json();
+      if (!invoice) {
+        alert("No invoice found!");
+        return;
+      }
+
       const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
       const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
 
-      const doc = new jsPDF({ unit: "pt", format: "a4" });
-      let y = 40;
-
-      doc.setFontSize(18);
-      doc.text("Shop Name", 40, y);
-      doc.setFontSize(11);
-      doc.text("Phone: +1234567890", 40, y + 25);
-      doc.text("Email: shop@example.com", 40, y + 40);
-
-      y += 70;
-      doc.setFontSize(16);
-      doc.text("Sales Invoice", 40, y);
-      y += 20;
-      doc.setFontSize(11);
-      doc.text(`Invoice No: ${invoice.invoiceNumber}`, 40, y);
-      doc.text(`Date: ${formattedDate}`, 300, y);
-      y += 20;
-      doc.text(`Bill To: ${invoice.customerName}`, 40, y);
-      doc.text(`Mobile: ${invoice.number || "—"}`, 40, y + 15);
-      y += 20;
-      doc.text(`Payment Mode: ${invoice.paymentMode || "—"}`, 40, y);
-      doc.text(`Payment Status: ${invoice.paymentStatus ? "Paid" : "Unpaid"}`, 300, y);
-
-      y += 20;
-      doc.setFontSize(12);
-      doc.setFont(undefined, "bold");
-      doc.text("Product", 40, y);
-      doc.text("Qty", 200, y);
-      doc.text("Unit (Rs.)", 260, y);
-      doc.text("Disc %", 340, y);
-      doc.text("GST %", 400, y);
-      doc.text("Line Total (Rs.)", 470, y);
-      doc.setFont(undefined, "normal");
-      y += 10;
-      doc.line(40, y, 550, y);
-      y += 15;
+      // Create a simple text-based invoice for download
+      let content = `SALES INVOICE\n\n`;
+      content += `Shop Name\n`;
+      content += `Phone: +1234567890\n`;
+      content += `Email: shop@example.com\n\n`;
+      content += `Invoice No: ${invoice.invoiceNumber}\n`;
+      content += `Date: ${formattedDate}\n`;
+      content += `Bill To: ${invoice.customerName || "—"}\n`;
+      content += `Mobile: ${invoice.number || "—"}\n`;
+      content += `Payment Mode: ${invoice.paymentMode || "—"}\n`;
+      content += `Payment Status: ${invoice.paymentStatus ? "Paid" : "Unpaid"}\n\n`;
+      content += `ITEMS:\n`;
+      content += `Product\t\tQty\tUnit ₹\tDisc %\tGST %\tTotal ₹\n`;
+      content += `${"=".repeat(70)}\n`;
 
       invoice.products.forEach((item) => {
         const basePrice = n(item.unitPrice);
@@ -2136,26 +2775,23 @@ const handleProductSelect = (index, product) => {
         const lineTotal = n(item.quantity) * effectivePrice;
         const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
 
-        doc.text(item.name || "N/A", 40, y);
-        doc.text(String(item.quantity), 200, y);
-        doc.text(basePrice.toFixed(2), 260, y);
-        doc.text(String(item.discount || 0), 340, y);
-        doc.text(String(item.tax || 0), 400, y);
-        doc.text(lineWithTax.toFixed(2), 470, y);
-        y += 20;
+        content += `${item.name}\t${item.quantity}\t${basePrice.toFixed(2)}\t${item.discount || 0}\t${item.tax || 0}\t${lineWithTax.toFixed(2)}\n`;
       });
 
-      y += 10;
-      doc.line(40, y, 550, y);
-      y += 20;
-      doc.text(`Subtotal: Rs.${invoice.subtotal.toFixed(2)}`, 300, y);
-      y += 15;
-      doc.text(`Tax Total: Rs.${invoice.tax.toFixed(2)}`, 300, y);
-      y += 15;
-      doc.setFont(undefined, "bold");
-      doc.text(`Total Amount: Rs.${invoice.totalAmount.toFixed(2)}`, 300, y);
+      content += `\n${"=".repeat(70)}\n`;
+      content += `Subtotal: ₹${invoice.subtotal.toFixed(2)}\n`;
+      content += `Tax Total: ₹${invoice.tax.toFixed(2)}\n`;
+      content += `Total Amount: ₹${invoice.totalAmount.toFixed(2)}\n`;
 
-      doc.save(`invoice-${invoice.invoiceNumber}.pdf`);
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${invoice.invoiceNumber}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
       alert("Error fetching the latest invoice.");
@@ -2164,55 +2800,81 @@ const handleProductSelect = (index, product) => {
 
   const handlePrint = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/sales/latest");
-      const invoice = res.data;
-      if (!invoice) return alert("No invoice found!");
+      const res = await fetch("http://localhost:4000/api/sales/latest");
+      const invoice = await res.json();
+      if (!invoice) {
+        alert("No invoice found!");
+        return;
+      }
+
       const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
       const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
 
       const printableContent = `
-      <div>
-        <h2 style="text-align:center;">Sales Invoice</h2>
-        <p><strong>Invoice No:</strong> ${invoice.invoiceNumber}</p>
-        <p><strong>Date:</strong> ${formattedDate}</p>
-        <p><strong>Customer:</strong> ${invoice.customerName || "—"}</p>
-        <p><strong>Mobile:</strong> ${invoice.number || "—"}</p>
-        <p><strong>Payment Mode:</strong> ${invoice.paymentMode || "—"}</p>
-        <p><strong>Payment Status:</strong> ${invoice.paymentStatus ? "Paid" : "Unpaid"}</p>
-        <table border="1" cellspacing="0" cellpadding="5" width="100%" style="border-collapse:collapse; margin-top:10px;">
-          <thead>
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h2 style="text-align:center; color: #333; margin-bottom: 30px;">Sales Invoice</h2>
+        <div style="margin-bottom: 20px;">
+          <p><strong>Invoice No:</strong> ${invoice.invoiceNumber}</p>
+          <p><strong>Date:</strong> ${formattedDate}</p>
+          <p><strong>Customer:</strong> ${invoice.customerName || "—"}</p>
+          <p><strong>Mobile:</strong> ${invoice.number || "—"}</p>
+          <p><strong>Payment Mode:</strong> ${invoice.paymentMode || "—"}</p>
+          <p><strong>Payment Status:</strong> ${invoice.paymentStatus ? "Paid" : "Unpaid"}</p>
+        </div>
+        <table border="1" cellspacing="0" cellpadding="8" width="100%" style="border-collapse:collapse; margin-top:20px;">
+          <thead style="background-color: #f5f5f5;">
             <tr>
-              <th>Product</th><th>Qty</th><th>Unit ₹</th><th>Disc %</th><th>GST %</th><th>Total ₹</th>
+              <th style="text-align: left;">Product</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Unit ₹</th>
+              <th style="text-align: center;">Disc %</th>
+              <th style="text-align: center;">GST %</th>
+              <th style="text-align: right;">Total ₹</th>
             </tr>
           </thead>
           <tbody>
             ${invoice.products
-          .map((item) => {
-            const basePrice = n(item.unitPrice);
-            const discountAmount = (basePrice * n(item.discount)) / 100;
-            const effectivePrice = basePrice - discountAmount;
-            const lineTotal = n(item.quantity) * effectivePrice;
-            const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
-            return `<tr>
-                  <td>${item.name || "N/A"}</td>
-                  <td style="text-align:center;">${item.quantity}</td>
-                  <td style="text-align:right;">${basePrice.toFixed(2)}</td>
-                  <td style="text-align:center;">${item.discount || 0}</td>
-                  <td style="text-align:center;">${item.tax || 0}</td>
-                  <td style="text-align:right;">${lineWithTax.toFixed(2)}</td>
-                </tr>`;
-          })
-          .join("")}
+              .map((item) => {
+                const basePrice = n(item.unitPrice);
+                const discountAmount = (basePrice * n(item.discount)) / 100;
+                const effectivePrice = basePrice - discountAmount;
+                const lineTotal = n(item.quantity) * effectivePrice;
+                const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
+                return `<tr>
+                      <td>${item.name || "N/A"}</td>
+                      <td style="text-align:center;">${item.quantity}</td>
+                      <td style="text-align:right;">₹${basePrice.toFixed(2)}</td>
+                      <td style="text-align:center;">${item.discount || 0}%</td>
+                      <td style="text-align:center;">${item.tax || 0}%</td>
+                      <td style="text-align:right;">₹${lineWithTax.toFixed(2)}</td>
+                    </tr>`;
+              })
+              .join("")}
           </tbody>
         </table>
-        <p style="text-align:right; margin-top:10px;">Subtotal: ₹${invoice.subtotal.toFixed(2)}</p>
-        <p style="text-align:right;">Tax Total: ₹${invoice.tax.toFixed(2)}</p>
-        <p style="text-align:right; font-weight:bold;">Total: ₹${invoice.totalAmount.toFixed(2)}</p>
+        <div style="margin-top: 20px; text-align: right;">
+          <p style="font-size: 16px;"><strong>Subtotal:</strong> ₹${invoice.subtotal.toFixed(2)}</p>
+          <p style="font-size: 16px;"><strong>Tax Total:</strong> ₹${invoice.tax.toFixed(2)}</p>
+          <p style="font-size: 18px; font-weight: bold; color: #2563eb;"><strong>Total Amount:</strong> ₹${invoice.totalAmount.toFixed(2)}</p>
+        </div>
       </div>
     `;
 
       const printWindow = window.open("", "_blank");
-      printWindow.document.write(`<html><head><title>Invoice</title></head><body>${printableContent}</body></html>`);
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Invoice - ${invoice.invoiceNumber}</title>
+            <style>
+              @media print {
+                body { margin: 0; }
+                @page { margin: 1cm; }
+              }
+            </style>
+          </head>
+          <body>${printableContent}</body>
+        </html>
+      `);
       printWindow.document.close();
       printWindow.print();
     } catch (err) {
@@ -2222,161 +2884,378 @@ const handleProductSelect = (index, product) => {
   };
 
   return (
-    <div className="p-6 w-full bg-white rounded shadow">
-      <div className="flex justify-end space-x-3 mb-6">
-        <button onClick={handleDownload} className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-          Download Invoice
-        </button>
-        <button onClick={handlePrint} className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
-          Export
-        </button>
-      </div>
-
-      <h1 className="text-3xl font-bold mb-6">Add Sales Invoice</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <label>Invoice Number</label>
-            <input type="text" value={formData.invoiceNumber} readOnly className="w-full border px-3 py-2 rounded bg-gray-100" />
-          </div>
-          <div className="flex-1">
-            <label>Customer Name(optional)</label>
-            <input type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
-          </div>
-          <div className="flex-1">
-            <label>Mobile Number(optional)</label>
-            <input
-              type="tel"
-              name="number"
-              value={formData.number}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Enter mobile number"
-            />
-          </div>
-        </div>
-        <div>
-          <label>Sale Date</label>
-          <input type="date" name="saleDate" value={formData.saleDate} onChange={handleChange} className="w-full border px-3 py-2 rounded" />
-        </div>
-        <div className="flex space-x-4">
-          <div className="flex-1">
-            <label>Payment Mode</label>
-            <select
-              name="paymentMode"
-              value={formData.paymentMode}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-            >
-              <option value="cash">Cash</option>
-              <option value="upi">UPI</option>
-              <option value="card">Card</option>
-              <option value="wallet">Wallet</option>
-              <option value="credit">Credit</option>
-            </select>
-          </div>
-
-          <div className="flex-1 flex items-center space-x-2 mt-6">
-            <input
-              type="checkbox"
-              name="paymentStatus"
-              checked={formData.paymentStatus}
-              onChange={handleCheckboxChange}
-              className="w-5 h-5"
-            />
-            <label>Paid</label>
-          </div>
-        </div>
-
-
-        <div>
-          <label>Items</label>
-          {formData.items.map((item, index) => {
-            const filteredOptions = dropdownState[index]?.searchTerm
-              ? productOptions.filter((p) =>
-                p.name.toLowerCase().includes(dropdownState[index].searchTerm.toLowerCase())
-              )
-              : productOptions;
-
-            return (
-              <div key={index} className="flex space-x-2 mb-3 items-center relative">
-                <input
-                  type="text"
-                  placeholder="Enter or search product..."
-                  value={item.productName}
-                  onChange={(e) => onSearchChange(index, e.target.value)}
-                  onFocus={() => {
-                    const updatedDropdown = [...dropdownState];
-                    updatedDropdown[index].open = true;
-                    setDropdownState(updatedDropdown);
-                  }}
-                  className="w-full border px-3 py-2 rounded"
-                />
-                {dropdownState[index]?.open && (
-                  <div className="absolute z-20 bg-white border w-full max-h-48 overflow-auto mt-1 rounded shadow-lg">
-                    {filteredOptions.length > 0 ? (
-                      filteredOptions.map((product) => (
-                        <div
-                          key={product.id}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            handleProductSelect(index, product);
-                          }}
-                          className="cursor-pointer px-3 py-2 hover:bg-gray-200"
-                        >
-                          {product.name} - ₹{Number(product.price).toFixed(2)} {product.isTaxInclusive ? "(Tax Incl.)" : ""}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-3 py-2 text-gray-500">No products found</div>
-                    )}
-                  </div>
-                )}
-
-                {item.productId && productOptions.find(p => p.id === item.productId)?.sizes?.some(s => s.trim() !== "") ? (
-                  <select
-                     value={item.size || ""}
-                    onChange={(e) => handleItemChange(index, "size", e.target.value)}
-                    className="w-24 border px-2 py-1 rounded"
-                    required={true}
-                  >
-                    <option value="">Select Size</option>
-                    {productOptions
-                      .find(p => p.id === item.productId)
-                      .sizes.filter(s => s.trim() !== "")
-                      .map((s, i) => (
-                        <option key={i} value={s}>{s}</option>
-                      ))}
-                  </select>
-                ) :null}
-                  <input type="hidden" value="" />
-                
-
-                <input type="number" placeholder="Qty" value={item.quantity} onChange={(e) => handleItemChange(index, "quantity", e.target.value)} className="w-20 border px-2 py-1 rounded" />
-                <input type="number" placeholder="Unit ₹" value={item.unitPrice} onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)} className="w-24 border px-2 py-1 rounded" />
-                <input type="number" placeholder="Disc %" value={item.discount} onChange={(e) => handleItemChange(index, "discount", e.target.value)} className="w-20 border px-2 py-1 rounded" />
-                <input type="number" placeholder="GST %" value={item.tax} onChange={(e) => handleItemChange(index, "tax", e.target.value)} className="w-20 border px-2 py-1 rounded" />
-                {/* <span className="w-24">{calculateLineTotal(item).toFixed(2)}</span> */}
-                <span className="w-24 font-medium text-right">
-                  ₹{getEffectiveUnitPrice(item).toFixed(2)}
-                </span>
-                <button type="button" onClick={() => removeItem(index)} className="text-red-500 px-2">X</button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
+      {/* Custom Alert Modal */}
+      <CustomAlert />
+      
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button className="p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-white">Add Sales Invoice</h1>
+                  <p className="text-blue-100 text-sm">Create and manage sales invoices</p>
+                </div>
               </div>
-            );
-          })}
-          <button type="button" onClick={addItem} className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Item</button>
+              <div className="flex space-x-3">
+                <button 
+                  onClick={handleDownload} 
+                  className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </button>
+                <button 
+                  onClick={handlePrint} 
+                  className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 mt-4">Save Invoice</button>
-        <div className="flex flex-col items-end space-y-1 mt-6">
-          <div>Subtotal: ₹{calculateSubtotal().toFixed(2)}</div>
-          <div>Discount: ₹{calculateDiscountTotal().toFixed(2)}</div>
-          <div>GST: ₹{calculateTaxTotal().toFixed(2)}</div>
-          <div className="font-bold">Total: ₹{calculateTotal().toFixed(2)}</div>
-        </div>
+        {/* Form Container */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <form onSubmit={handleSubmit} className="p-8">
 
-      </form>
+            {/* Invoice Information Section */}
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-2">
+                  <Receipt className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Invoice Information</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {/* Invoice Number */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-blue-600" />
+                    Invoice Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.invoiceNumber}
+                    readOnly
+                    className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-100 font-medium text-gray-700 text-base"
+                  />
+                </div>
+
+                {/* Sale Date */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-blue-600" />
+                    Sale Date
+                  </label>
+                  <input
+                    type="date"
+                    name="saleDate"
+                    value={formData.saleDate}
+                    onChange={handleChange}
+                    className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white text-base"
+                  />
+                </div>
+
+                {/* Customer Name */}
+                <div className="space-y-2 md:col-span-2 xl:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <User className="w-4 h-4 text-blue-600" />
+                    Customer Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="customerName"
+                    value={formData.customerName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white text-base"
+                    placeholder="Enter customer name"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-6">
+                {/* Mobile Number */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <User className="w-4 h-4 text-blue-600" />
+                    Mobile Number (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    name="number"
+                    value={formData.number}
+                    onChange={handleChange}
+                    className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white text-base"
+                    placeholder="Enter mobile number"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Items Section */}
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-2">
+                  <ShoppingCart className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Items</h2>
+              </div>
+
+              <div className="space-y-4">
+                {formData.items.map((item, index) => {
+                  const filteredOptions = dropdownState[index]?.searchTerm
+                    ? productOptions.filter((p) =>
+                      p.name.toLowerCase().includes(dropdownState[index].searchTerm.toLowerCase())
+                    )
+                    : productOptions;
+
+                  return (
+                    <div key={index} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
+                        {/* Product Search */}
+                        <div className="lg:col-span-4 relative">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Product</label>
+                          <input
+                            type="text"
+                            placeholder="Enter or search product..."
+                            value={item.productName}
+                            onChange={(e) => onSearchChange(index, e.target.value)}
+                            onFocus={() => {
+                              const updatedDropdown = [...dropdownState];
+                              updatedDropdown[index].open = true;
+                              setDropdownState(updatedDropdown);
+                            }}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                          />
+                          {dropdownState[index]?.open && (
+                            <div className="absolute z-20 bg-white border border-gray-200 w-full max-h-48 overflow-auto mt-1 rounded-xl shadow-lg">
+                              {filteredOptions.length > 0 ? (
+                                filteredOptions.map((product) => (
+                                  <div
+                                    key={product.id}
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      handleProductSelect(index, product);
+                                    }}
+                                    className="cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 text-sm"
+                                  >
+                                    {product.name} - ₹{Number(product.price).toFixed(2)} {product.isTaxInclusive ? "(Tax Incl.)" : ""}
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="px-4 py-3 text-gray-500 text-sm">No products found</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Size (if applicable) */}
+                        {item.productId && productOptions.find(p => p.id === item.productId)?.sizes?.some(s => s.trim() !== "") && (
+                          <div className="lg:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                            <select
+                              value={item.size || ""}
+                              onChange={(e) => handleItemChange(index, "size", e.target.value)}
+                              className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                              required={true}
+                            >
+                              <option value="">Select Size</option>
+                              {productOptions
+                                .find(p => p.id === item.productId)
+                                .sizes.filter(s => s.trim() !== "")
+                                .map((s, i) => (
+                                  <option key={i} value={s}>{s}</option>
+                                ))}
+                            </select>
+                          </div>
+                        )}
+
+                        {/* Quantity */}
+                        <div className="lg:col-span-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Qty</label>
+                          <input
+                            type="number"
+                            placeholder="Qty"
+                            value={item.quantity}
+                            onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+                            className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                          />
+                        </div>
+
+                        {/* Unit Price */}
+                        <div className="lg:col-span-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Unit ₹</label>
+                          <input
+                            type="number"
+                            placeholder="Unit ₹"
+                            value={item.unitPrice}
+                            onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)}
+                            className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                          />
+                        </div>
+
+                        {/* Discount */}
+                        <div className="lg:col-span-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Disc %</label>
+                          <input
+                            type="number"
+                            placeholder="Disc %"
+                            value={item.discount}
+                            onChange={(e) => handleItemChange(index, "discount", e.target.value)}
+                            className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                          />
+                        </div>
+
+                        {/* GST */}
+                        <div className="lg:col-span-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">GST %</label>
+                          <input
+                            type="number"
+                            placeholder="GST %"
+                            value={item.tax}
+                            onChange={(e) => handleItemChange(index, "tax", e.target.value)}
+                            className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                          />
+                        </div>
+
+                        {/* Effective Price */}
+                        <div className="lg:col-span-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Price ₹</label>
+                          <div className="w-full px-3 py-3 border border-gray-200 rounded-xl bg-gray-100 font-medium text-gray-700 text-right text-base">
+                            ₹{getEffectiveUnitPrice(item).toFixed(2)}
+                          </div>
+                        </div>
+
+                        {/* Remove Button */}
+                        <div className="lg:col-span-1">
+                          <button
+                            type="button"
+                            onClick={() => removeItem(index)}
+                            className="w-full px-3 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-200 flex items-center justify-center"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+ {/* Payment Information Section - Added after Items */}
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-2">
+                  <CreditCard className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Payment Information</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Payment Mode */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-purple-600" />
+                    Payment Mode
+                  </label>
+                  <select
+                    name="paymentMode"
+                    value={formData.paymentMode}
+                    onChange={handleChange}
+                    className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white text-base"
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="card">Card</option>
+                    <option value="wallet">Wallet</option>
+                    <option value="credit">Credit</option>
+                  </select>
+                </div>
+
+                {/* Payment Status */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-purple-600" />
+                    Payment Status
+                  </label>
+                  <div className="flex items-center space-x-3 mt-4">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        name="paymentStatus"
+                        checked={formData.paymentStatus}
+                        onChange={handleCheckboxChange}
+                        className="w-6 h-6 text-purple-600 border-2 border-gray-300 rounded-lg focus:ring-purple-500 focus:ring-2 transition-all duration-200"
+                        id="paymentStatus"
+                      />
+                    </div>
+                    <label htmlFor="paymentStatus" className="text-base font-medium text-gray-700 cursor-pointer select-none">
+                      Mark as Paid
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+                {/* Add Item Button */}
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={addItem}
+                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Item
+                  </button>
+                </div>
+              </div>
+            </div>
+
+           
+            {/* Totals Section */}
+            <div className="mb-10">
+              <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-100">
+                <div className="flex flex-col items-end space-y-2">
+                  <div className="text-lg font-medium text-gray-700">
+                    Subtotal: <span className="text-blue-600 font-semibold">₹{calculateSubtotal().toFixed(2)}</span>
+                  </div>
+                  <div className="text-lg font-medium text-gray-700">
+                    Discount: <span className="text-red-600 font-semibold">₹{calculateDiscountTotal().toFixed(2)}</span>
+                  </div>
+                  <div className="text-lg font-medium text-gray-700">
+                    GST: <span className="text-green-600 font-semibold">₹{calculateTaxTotal().toFixed(2)}</span>
+                  </div>
+                  <div className="text-xl font-bold text-gray-900 border-t pt-2">
+                    Total: <span className="text-blue-700">₹{calculateTotal().toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-center pt-6 border-t border-gray-100">
+              <button
+                type="submit"
+                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                Save Invoice
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
