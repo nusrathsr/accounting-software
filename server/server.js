@@ -4,7 +4,9 @@ const dotenv =require('dotenv')
 const cors =require('cors')
 // const fileUpload =require('express-fileupload')
 const productRoutes = require('./routes/productRoutes');
+const variantRoutes = require('./routes/variantRoutes');
 const path =require('path');
+const categoryRoutes = require('./routes/categoryRoutes');
 const customerRoutes =require('./routes/customerRoutes');
 const expenseRoutes =require('./routes/expenseRoutes');
 const salesRoutes = require("./routes/salesRoutes");
@@ -31,13 +33,14 @@ mongoose.connect(process.env.MONGO_URL,{
 .catch((error)=>console.error('❌ MongoDB connection failed:', error));
 
 //Routes
-app.use('/api/products', productRoutes)
+app.use('/api/products', productRoutes);
+app.use('/api/variants', variantRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/customer', customerRoutes)
 app.use('/api/expense', expenseRoutes)
 app.use("/api/sales", salesRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/purchase", purchaseRoutes);
 app.use("/api/reports",reportRouters)
 app.use('/api/employees',employeesRoutes)
 //Root route

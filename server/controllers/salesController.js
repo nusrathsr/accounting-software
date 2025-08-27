@@ -1,12 +1,85 @@
 const SalesInvoice = require("../models/SalesInvoice");
 const Product = require("../models/Product");
+const ProductVariant = require("../models/ProductVariant");
 
 // Add a sale
+// exports.addSale = async (req, res) => {
+//   const session = await Product.startSession();
+//   session.startTransaction();
+
+//   try {
+//     const { products } = req.body;
+
+//     if (!products || products.length === 0) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({ message: "At least one product is required" });
+//     }
+
+//     // Reduce stock for each product
+//     for (const item of products) {
+//       const product = await Product.findById(item.productId).session(session);
+//       if (!product) {
+//         await session.abortTransaction();
+//         session.endSession();
+//         return res.status(400).json({ message: `Product not found: ${item.productId}` });
+//       }
+
+//       // Find matching size
+//       const sizeIndex = product.sizes.findIndex(s => s.size.trim() === item.size.trim());
+//       if (sizeIndex === -1) {
+//         await session.abortTransaction();
+//         session.endSession();
+//         return res.status(400).json({ message: `Size ${item.size} not found for ${product.name}` });
+//       }
+
+//       // Check stock availability
+//       if (product.sizes[sizeIndex].quantity < item.quantity) {
+//         await session.abortTransaction();
+//         session.endSession();
+//         return res.status(400).json({ message: `Insufficient stock for ${product.name} (${item.size})` });
+//       }
+
+//       // Deduct stock
+//       product.sizes[sizeIndex].quantity -= item.quantity;
+
+//       await product.save({ session });
+//     }
+
+//     // Save the sale
+//     const { invoiceNumber, customerName, number, saleDate, subtotal, tax, totalAmount, paymentMode, paymentStatus } = req.body;
+//     const sale = new SalesInvoice({
+//   invoiceNumber,
+//   customerName,
+//   number,
+//   saleDate,
+//   products,
+//   subtotal,
+//   tax,
+//   totalAmount,
+//   paymentMode: paymentMode || "cash",       // default to cash
+//   paymentStatus: !!paymentStatus,           // convert to Boolean
+// });
+   
+//     await sale.save({ session });
+
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     res.status(201).json(sale);
+//   } catch (err) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 exports.addSale = async (req, res) => {
   const session = await Product.startSession();
   session.startTransaction();
 
   try {
+    console.log("➡️ Incoming request body:", req.body);
     const { products } = req.body;
 
     if (!products || products.length === 0) {
@@ -15,58 +88,67 @@ exports.addSale = async (req, res) => {
       return res.status(400).json({ message: "At least one product is required" });
     }
 
-    // Reduce stock for each product
+    // Reduce stock for each product variant
     for (const item of products) {
-      const product = await Product.findById(item.productId).session(session);
-      if (!product) {
+       console.log("🔍 Checking product variant:", item);
+      const variant = await ProductVariant.findById(item.variantId).session(session);
+      if (!variant) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(400).json({ message: `Product not found: ${item.productId}` });
+        return res.status(400).json({ message: `Variant not found: ${item.variantId}` });
       }
+       console.log("✅ Found variant:", variant.variantName, "Current Qty:", variant.quantity);
 
-      // Find matching size
-      const sizeIndex = product.sizes.findIndex(s => s.size.trim() === item.size.trim());
-      if (sizeIndex === -1) {
+
+      if (variant.quantity < item.quantity) {
         await session.abortTransaction();
         session.endSession();
-        return res.status(400).json({ message: `Size ${item.size} not found for ${product.name}` });
-      }
-
-      // Check stock availability
-      if (product.sizes[sizeIndex].quantity < item.quantity) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).json({ message: `Insufficient stock for ${product.name} (${item.size})` });
+        return res.status(400).json({ message: `Insufficient stock for ${variant.variantName}` });
       }
 
       // Deduct stock
-      product.sizes[sizeIndex].quantity -= item.quantity;
-
-      await product.save({ session });
+      variant.quantity -= item.quantity;
+      await variant.save({ session });
     }
 
     // Save the sale
-    const { invoiceNumber, customerName, number, saleDate, subtotal, tax, totalAmount, paymentMode, paymentStatus } = req.body;
+    const {
+      invoiceNumber,
+      customerName,
+      number,
+      saleDate,
+      subtotal,
+      tax,
+      totalAmount,
+      paymentMode,
+      paymentStatus,
+    } = req.body;
+
     const sale = new SalesInvoice({
-  invoiceNumber,
-  customerName,
-  number,
-  saleDate,
-  products,
-  subtotal,
-  tax,
-  totalAmount,
-  paymentMode: paymentMode || "cash",       // default to cash
-  paymentStatus: !!paymentStatus,           // convert to Boolean
-});
-   
+      invoiceNumber,
+      customerName,
+      number,
+      saleDate,
+      products,
+      subtotal,
+      tax,
+      totalAmount,
+      paymentMode: paymentMode || "cash",
+      paymentStatus: !!paymentStatus,
+    });
+
+    console.log("💾 Saving sale:", sale);
+
+
     await sale.save({ session });
 
     await session.commitTransaction();
     session.endSession();
+    console.log("✅ Sale saved successfully!");
 
     res.status(201).json(sale);
   } catch (err) {
+    console.error("❌ Error in addSale:", err.message);
     await session.abortTransaction();
     session.endSession();
     res.status(500).json({ error: err.message });
@@ -76,9 +158,12 @@ exports.addSale = async (req, res) => {
 // Get all sales
 exports.getAllSales = async (req, res) => {
   try {
+    console.log("➡️ Fetching all sales...");
     const sales = await SalesInvoice.find();
+    console.log("✅ Sales fetched:", sales.length);
     res.json(sales);
   } catch (err) {
+        console.error("❌ Error in getAllSales:", err.message);
     res.status(500).json({ error: err.message });
   }
 };

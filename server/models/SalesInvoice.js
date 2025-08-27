@@ -8,8 +8,9 @@ const salesInvoiceSchema = new mongoose.Schema({
   products: [
     {
       productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      variantId: { type: mongoose.Schema.Types.ObjectId, ref: 'ProductVariant' },
       name: String,
-      size: String,
+      sizeOrWeight: String,
       quantity: Number,
       unitPrice: Number,
       discount: Number,

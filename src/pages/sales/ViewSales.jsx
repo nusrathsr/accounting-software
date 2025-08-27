@@ -268,7 +268,7 @@ export default function ViewSalesInvoices() {
                           </td>
 
                           {/* Items */}
-                          <td className="px-6 py-4">
+                          {/* <td className="px-6 py-4">
                             <div className="max-w-xs">
                               <div className="flex items-center gap-1 mb-1">
                                 <Package className="w-4 h-4 text-gray-400" />
@@ -290,7 +290,30 @@ export default function ViewSalesInvoices() {
                                 )}
                               </div>
                             </div>
-                          </td>
+                          </td> */}
+                          {/* Items */}
+<td className="px-6 py-4">
+  <div className="max-w-xs space-y-1">
+    {(sale.products || []).map((item, j) => (
+      <div key={j}>
+        {/* Main product */}
+        <div className="text-xs text-gray-600 bg-gray-50 rounded px-2 py-1 mb-1">
+          <div className="font-medium">{item.name || "Unnamed Product"}</div>
+          <div>Qty: {item.quantity || 0} × ₹{parseFloat(item.unitPrice || 0).toFixed(2)}</div>
+        </div>
+
+        {/* Variants */}
+        {(item.variants || []).map((variant, k) => (
+          <div key={k} className="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 ml-4 mb-1">
+            <div className="font-medium">{variant.name}</div>
+            <div>Qty: {variant.quantity || 0} × ₹{parseFloat(variant.unitPrice || 0).toFixed(2)}</div>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+</td>
+
 
                           {/* Amounts */}
                           <td className="px-6 py-4 whitespace-nowrap text-right">

@@ -62,7 +62,7 @@ export default function AddPurchase() {
     
     getSellers: async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/customers/sellers");
+        const response = await fetch("http://localhost:4000/api/customer/sellers");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return response.json();
       } catch (error) {

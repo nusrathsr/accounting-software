@@ -9,6 +9,7 @@ import TransactionList from './pages/payments/TransactionList';
 import PurchaseDue from "./pages/purchase/PurchaseDue";
 import AddProduct from './pages/product/AddProduct'
 import EditProduct from './pages/product/EditProduct'
+import AddProductVariant from './pages/product/AddProductVariant';
 import ListProduct from './pages/product/ListProduct'
 import AddCustomer from './pages/customer/AddCustomer'
 import EditCustomer from './pages/customer/EditCustomer'
@@ -46,6 +47,7 @@ function App() {
           <Route path="purchase/view" element={<ViewPurchase />} />
           <Route path='/addProduct' element={<AddProduct />} />
           <Route path='/editProduct/:id' element={<EditProduct />} />
+          <Route path="addProductVariant" element={<AddProductVariant />} />
           <Route path='/listProduct' element={<ListProduct />} />
           <Route path='/addCustomer' element={<AddCustomer />} />
           <Route path='/editCustomer/:id' element={<EditCustomer />} />

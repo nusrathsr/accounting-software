@@ -1,32 +1,19 @@
-const mongoose = require('mongoose')
-const { type } = require('os')
-
-//size sub-schema
-const sizeSchema = new mongoose.Schema({
-  size: { type: String },
-  quantity: { type: Number, required: true, default: 0 }
-});
+const mongoose = require('mongoose');
 
 // product schema
-
 const productSchema = new mongoose.Schema({
-  productId:{ type: String,unique:true,required:true},
-  sku: { type: String, unique: true }, // Auto-generated in backend
-  name: { type: String, required: true },
-  category: { type: String, required: true },
-  subcategory: { type: String, required: true },
-  brand: { type: String, required: true },
-  sizes:[sizeSchema],
-  color: { type: String },
-  sellingPrice: { type: Number, required: true },
- purchasePrice: { type: Number, required: true },
-  expiryDate: { type: Date },
-  supplier: { type: String },
-  stockStatus :{type:String},
-  taxType:{type:String},
-  taxPercentage:{type:Number},
-  image: { type: String },
-},{timestamps:true});
+  productId: { type: String, unique: true, required: true }, // Product ID
+  name: { type: String, required: true },                     // Product Name
+  brand: { type: String },                                     // Brand
+  category: { type: String, required: true },                  // Category
+  stockStatus: { type: String, default: 'Active' },           // Status (Active / Cancel)
 
+  sellingPrice: { type: Number, default: 0 },
+  purchasePrice: { type: Number, default: 0 },
+  quantity: { type: Number, default: 0 },
 
-module.exports = mongoose.model('Product', productSchema)
+  // Add this field to link variants
+  variants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProductVariant' }],
+}, { timestamps: true });
+
+module.exports = mongoose.model('Product', productSchema);
