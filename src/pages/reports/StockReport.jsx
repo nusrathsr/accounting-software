@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import {
   FaBoxOpen,
@@ -16,8 +16,10 @@ import {
   FaWarehouse
 } from "react-icons/fa";
 import { MdInventory } from "react-icons/md";
+import { GlobalContext } from "../../context/GlobalContext";
 
 const StockReport = () => {
+  const {baseURL}=useContext(GlobalContext)
   const [report, setReport] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -27,7 +29,7 @@ const StockReport = () => {
   const fetchReport = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:4000/api/reports/stock");
+      const res = await axios.get(`${baseURL}/reports/stock`);
       setReport(res.data.report);
     } catch (error) {
       console.error("Failed to fetch stock report:", error);
@@ -341,3 +343,6 @@ const StockReport = () => {
 };
 
 export default StockReport;
+
+
+

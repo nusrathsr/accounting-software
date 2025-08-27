@@ -42,7 +42,7 @@ const employeeSchema = new mongoose.Schema(
     },
     designation: {
       type: String,
-      enum: ["Cashier", "Manager", "Accountant", "Helper", "Other"],
+      enum: ["Cashier", "Manager", "Accountant", "Helper","Supervisor","Cleaner", "Other"],
     },
     employmentType: {
       type: String,

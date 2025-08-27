@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
+import { GlobalContext } from "../../context/GlobalContext";
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
+  BarChart,
+  Bar,
+  ResponsiveContainer,
 } from "recharts";
 import {
   FaChartBar,
@@ -20,74 +26,30 @@ import {
   FaSearch,
   FaRupeeSign,
   FaListUl,
-  FaReceipt
+  FaTags,
+  FaChartLine
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
 const SalesReport = () => {
-  const [report, setReport] = useState({
-    totalRevenue: 125000,
-    totalTax: 22500,
-    sales: [
-      {
-        _id: "1",
-        invoiceNumber: "INV-001",
-        customerName: "John Doe",
-        date: "2024-01-15",
-        totalAmount: 15000
-      },
-      {
-        _id: "2", 
-        invoiceNumber: "INV-002",
-        customerName: "Jane Smith",
-        date: "2024-01-16",
-        totalAmount: 22500
-      },
-      {
-        _id: "3",
-        invoiceNumber: "INV-003",
-        customerName: "Bob Johnson",
-        date: "2024-01-17", 
-        totalAmount: 18000
-      },
-      {
-        _id: "4",
-        invoiceNumber: "INV-004",
-        customerName: "Alice Brown",
-        date: "2024-01-18",
-        totalAmount: 31000
-      },
-      {
-        _id: "5",
-        invoiceNumber: "INV-005", 
-        customerName: "Charlie Wilson",
-        date: "2024-01-19",
-        totalAmount: 12500
-      },
-      {
-        _id: "6",
-        invoiceNumber: "INV-006",
-        customerName: "Diana Davis",
-        date: "2024-01-20",
-        totalAmount: 26000
-      }
-    ]
-  });
+  const [report, setReport] = useState(null);
   const [dates, setDates] = useState({ startDate: "", endDate: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const rowsPerPage = 5;
+  const rowsPerPage = 10; // 👈 adjust as needed
+  const { baseURL } = useContext(GlobalContext);
 
-  // Fetch report function (simulated)
+  // Fetch report function
   const fetchReport = async (startDate = "", endDate = "") => {
     try {
       setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In real implementation, you would filter the data based on dates
-      // For demo, we'll just reset pagination
-      setCurrentPage(1);
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
+      const { data } = await axios.get(`${baseURL}/reports/sales`, { params });
+      setReport(data);
+      setCurrentPage(1); // reset to first page whenever new data comes
     } catch (error) {
       console.error("Failed to fetch sales report:", error);
     } finally {
@@ -106,6 +68,29 @@ const SalesReport = () => {
     fetchReport(dates.startDate, dates.endDate);
   }, [dates]);
 
+  // Prepare chart data
+  const dailyData = report?.sales.reduce((acc, sale) => {
+    const date = new Date(sale.date).toLocaleDateString();
+    acc[date] = (acc[date] || 0) + sale.totalAmount;
+    return acc;
+  }, {}) || {};
+
+  const dailyChartData = Object.entries(dailyData).map(([date, total]) => ({
+    date,
+    total,
+  }));
+
+  const monthlyData = report?.sales.reduce((acc, sale) => {
+    const month = new Date(sale.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    acc[month] = (acc[month] || 0) + sale.totalAmount;
+    return acc;
+  }, {}) || {};
+
+  const monthlyChartData = Object.entries(monthlyData).map(([month, total]) => ({
+    month,
+    total,
+  }));
+
   // Pagination logic
   const indexOfLastRow = currentPage * rowsPerPage;
   const indexOfFirstRow = indexOfLastRow - rowsPerPage;
@@ -116,25 +101,6 @@ const SalesReport = () => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
-  };
-
-  // Create chart data for monthly sales
-  const createChartData = () => {
-    if (!report?.sales) return [];
-    
-    const monthlyData = {};
-    report.sales.forEach(sale => {
-      const month = new Date(sale.date).toLocaleDateString('en-US', { 
-        month: 'short', 
-        year: 'numeric' 
-      });
-      monthlyData[month] = (monthlyData[month] || 0) + sale.totalAmount;
-    });
-    
-    return Object.entries(monthlyData).map(([month, total]) => ({
-      name: month,
-      total: total
-    }));
   };
 
   if (loading) {
@@ -148,6 +114,81 @@ const SalesReport = () => {
     );
   }
 
+
+  const generatePDF = (salesData, filter) => {
+  const doc = new jsPDF();
+
+  // Title
+  doc.setFontSize(20);
+  doc.setTextColor(44, 82, 130);
+  doc.text("Sales Report", 14, 25);
+
+  // Date range (if filter applied)
+  doc.setFontSize(12);
+  doc.setTextColor(100, 100, 100);
+  if (filter.startDate || filter.endDate) {
+    const dateRange = `Period: ${filter.startDate || "Beginning"} to ${
+      filter.endDate || "Present"
+    }`;
+    doc.text(dateRange, 14, 35);
+  }
+
+  // Total Sales
+  const totalSales = salesData.reduce((acc, s) => acc + s.totalAmount, 0);
+  doc.setFontSize(14);
+  doc.setTextColor(220, 38, 127);
+  doc.text(
+    `Total Sales: INR${totalSales.toFixed(2)}`,
+    14,
+    filter.startDate || filter.endDate ? 45 : 35
+  );
+
+  // Table columns
+  const tableColumn = [
+    "Invoice No",
+    "Customer",
+    "Date",
+    "Payment Mode",
+    "Status",
+    "Subtotal",
+    "Tax",
+    "Total",
+  ];
+
+  // Table rows
+  const tableRows = salesData.map((sale) => [
+    sale.invoiceNumber,
+    sale.customerName || "--",
+    new Date(sale.date).toLocaleDateString(),
+    sale.paymentMode,
+    sale.paymentStatus ? "Paid" : "Unpaid",
+    `INR${sale.subtotal}`,
+    `INR${sale.tax}`,
+    `INR${sale.totalAmount}`,
+  ]);
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: filter.startDate || filter.endDate ? 55 : 45,
+    headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
+    bodyStyles: { textColor: 50 },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+  });
+
+  // ✅ Download PDF directly
+  doc.save("SalesReport.pdf");
+};
+
+const handleExportPDF = () => {
+  if (!report || !report.sales || report.sales.length === 0) {
+    alert("No sales data to export.");
+    return;
+  }
+  generatePDF(report.sales, dates);
+};
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -159,11 +200,11 @@ const SalesReport = () => {
                 <FaArrowLeft className="w-5 h-5" />
               </button>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
-                <FaChartBar className="w-6 h-6 text-white" />
+                <FaChartLine className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-white">Sales Report</h1>
-                <p className="text-blue-100 text-sm">Track and analyze your business sales performance</p>
+                <p className="text-blue-100 text-sm">Track and analyze your sales performance</p>
               </div>
             </div>
           </div>
@@ -219,9 +260,9 @@ const SalesReport = () => {
         </div>
 
         {report && (
-          <>
+          <div className="space-y-8">
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center gap-4">
                   <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-3">
@@ -229,7 +270,7 @@ const SalesReport = () => {
                   </div>
                   <div>
                     <h3 className="text-gray-600 font-medium text-sm">Total Revenue</h3>
-                    <p className="text-2xl font-bold text-green-600">₹{report.totalRevenue?.toLocaleString() || 0}</p>
+                    <p className="text-2xl font-bold text-green-600">INR{report.totalRevenue.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -237,11 +278,11 @@ const SalesReport = () => {
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center gap-4">
                   <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-3">
-                    <FaReceipt className="w-6 h-6 text-white" />
+                    <FaTags className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="text-gray-600 font-medium text-sm">Total Tax</h3>
-                    <p className="text-2xl font-bold text-yellow-600">₹{report.totalTax?.toLocaleString() || 0}</p>
+                    <p className="text-2xl font-bold text-yellow-600">INR{report.totalTax.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -253,60 +294,120 @@ const SalesReport = () => {
                   </div>
                   <div>
                     <h3 className="text-gray-600 font-medium text-sm">Total Sales</h3>
-                    <p className="text-2xl font-bold text-blue-600">{report.sales?.length || 0}</p>
+                    <p className="text-2xl font-bold text-blue-600">{report.sales.length}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="flex items-center gap-4">
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3">
+                    <FaRupeeSign className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-gray-600 font-medium text-sm">Average Sale</h3>
+                    <p className="text-2xl font-bold text-purple-600">
+                      INR{report.sales.length ? (report.totalRevenue / report.sales.length).toFixed(0) : 0}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Sales Chart */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                    <MdDashboard className="w-5 h-5 text-blue-600" />
-                    Monthly Sales Overview
-                  </h2>
-                  <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
-                    <FaFileExport className="w-4 h-4" />
-                    Export Chart
-                  </button>
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Daily Sales Trend */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                      <FaChartBar className="w-5 h-5 text-blue-600" />
+                      Daily Sales Trend
+                    </h2>
+                  
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <LineChart data={dailyChartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                        <Line 
+                          type="monotone" 
+                          dataKey="total" 
+                          stroke="#16a34a" 
+                          strokeWidth={3}
+                          dot={{ fill: '#16a34a', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6, fill: '#15803d' }}
+                        />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis 
+                          dataKey="date" 
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                          axisLine={{ stroke: '#d1d5db' }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                          axisLine={{ stroke: '#d1d5db' }}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`INR${value.toLocaleString()}`, 'Revenue']}
+                          contentStyle={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={createChartData()} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis 
-                        dataKey="name" 
-                        tick={{ fontSize: 12, fill: '#6b7280' }}
-                        axisLine={{ stroke: '#d1d5db' }}
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 12, fill: '#6b7280' }}
-                        axisLine={{ stroke: '#d1d5db' }}
-                      />
-                      <Tooltip 
-                        formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                        contentStyle={{
-                          backgroundColor: '#fff',
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '12px',
-                          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
-                        }}
-                      />
-                      <Bar 
-                        dataKey="total" 
-                        fill="url(#colorGradient)"
-                        radius={[8, 8, 0, 0]}
-                      />
-                      <defs>
-                        <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#10b981" />
-                          <stop offset="100%" stopColor="#059669" />
-                        </linearGradient>
-                      </defs>
-                    </BarChart>
-                  </ResponsiveContainer>
+              </div>
+
+              {/* Monthly Sales */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                      <MdDashboard className="w-5 h-5 text-blue-600" />
+                      Monthly Sales
+                    </h2>
+                   
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={monthlyChartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                        <Bar 
+                          dataKey="total" 
+                          fill="url(#colorGradient)"
+                          radius={[8, 8, 0, 0]}
+                        />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis 
+                          dataKey="month" 
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                          axisLine={{ stroke: '#d1d5db' }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                          axisLine={{ stroke: '#d1d5db' }}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`INR${value.toLocaleString()}`, 'Revenue']}
+                          contentStyle={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '12px',
+                            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <defs>
+                          <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#3b82f6" />
+                            <stop offset="100%" stopColor="#1d4ed8" />
+                          </linearGradient>
+                        </defs>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               </div>
             </div>
@@ -320,7 +421,7 @@ const SalesReport = () => {
                     Sales Details
                   </h2>
                   <div className="flex gap-2">
-                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
+                    <button  onClick={handleExportPDF} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
                       <FaFileExport className="w-4 h-4" />
                       Export
                     </button>
@@ -334,22 +435,26 @@ const SalesReport = () => {
                       <table className="min-w-full">
                         <thead>
                           <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Invoice</th>
+                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Invoice #</th>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Customer</th>
                             <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
                             <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Total Amount</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                          {currentRows.map((sale) => (
-                            <tr key={sale._id} className="hover:bg-blue-50 transition-all duration-200">
-                              <td className="px-6 py-4 text-sm font-medium text-gray-900">{sale.invoiceNumber}</td>
-                              <td className="px-6 py-4 text-sm text-gray-600">{sale.customerName}</td>
+                          {currentRows.map((s) => (
+                            <tr key={s._id} className="hover:bg-blue-50 transition-all duration-200">
+                              <td className="px-6 py-4 text-sm font-medium text-gray-900">{s.invoiceNumber}</td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  {s.customerName}
+                                </span>
+                              </td>
                               <td className="px-6 py-4 text-sm text-gray-600">
-                                {new Date(sale.date).toLocaleDateString()}
+                                {new Date(s.date).toLocaleDateString()}
                               </td>
                               <td className="px-6 py-4 text-sm font-semibold text-right text-green-600">
-                                ₹{sale.totalAmount?.toLocaleString()}
+                                INR{s.totalAmount.toLocaleString()}
                               </td>
                             </tr>
                           ))}
@@ -412,15 +517,16 @@ const SalesReport = () => {
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">Sales Report Features:</p>
                   <ul className="list-disc list-inside space-y-1 text-blue-700">
-                    <li>Filter sales data by specific date ranges</li>
-                    <li>View monthly sales trends with interactive charts</li>
-                    <li>Export sales data for external analysis and reporting</li>
+                    <li>Filter sales by date range for specific periods</li>
+                    <li>View daily and monthly sales trends with interactive charts</li>
+                    <li>Track total revenue, tax, and average sale amounts</li>
+                    <li>Export data for external analysis and reporting</li>
                     <li>Paginated table view for easy navigation through records</li>
                   </ul>
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
