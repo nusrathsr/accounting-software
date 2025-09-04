@@ -13,16 +13,16 @@ const attendanceSchema = new mongoose.Schema(
     },
     checkIn: {
       type: String, // storing as "HH:mm"
-      required: false,
+      
     },
     checkOut: {
       type: String, // storing as "HH:mm"
-      required: false,
+      
     },
     shift: {
       type: String,
       enum: ["Morning", "Evening", "Night"],
-      required: true,
+      
     },
     workHours: {
       type: Number,

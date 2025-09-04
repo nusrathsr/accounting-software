@@ -1,7 +1,8 @@
-const Purchase =require("../models/PurchaseInvoice")
+const PurchaseInvoice =require('../models/PurchaseInvoice')
 const SalesInvoice =require('../models/SalesInvoice')
 const Expense =require('../models/Expense')
 const Product =require("../models/Product")
+const ProductVariant =require("../models/ProductVariant")
 
 
 //sales report
@@ -36,7 +37,7 @@ exports.getPurchaseReport = async (req, res) => {
       };
     }
 
-    const purchases = await Purchase.find(filter);
+    const purchases = await PurchaseInvoice.find(filter);
 
     let totalPurchase = 0;
     let totalTax = 0;
@@ -79,132 +80,68 @@ exports.getPurchaseReport = async (req, res) => {
 };
 
 
-//stock report
-
-// exports.getStockReport = async (req, res) => {
-//   try {
-//     const products = await Product.find();
-
-//     let totalQuantity = 0;
-//     let totalStockValue = 0;
-
-//     const productDetails = products.map((p) => {
-//       let productQuantity = 0;
-//       let productValue = 0;
-
-//       if (p.sizes && p.sizes.length > 0) {
-//         p.sizes.forEach((s) => {
-//           const qty = s.quantity || 0;
-//           productQuantity += qty;
-//           productValue += qty * (p.purchasePrice || 0);
-//         });
-//       } else {
-//         const qty = p.quantity || 0;
-//         productQuantity += qty;
-//         productValue += qty * (p.purchasePrice || 0);
-//       }
-
-//       totalQuantity += productQuantity;
-//       totalStockValue += productValue;
-
-//       return {
-//         id: p._id,
-//         name: p.name,
-//         brand: p.brand,
-//         purchasePrice: p.purchasePrice || 0,
-//         quantity: productQuantity,
-//         stockValue: productValue,
-//       };
-//     });
-
-//     res.json({
-//       totalProducts: products.length,
-//       totalQuantity,
-//       totalStockValue,
-//       productDetails,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 
 
 
       
     
-
-
-
+//get stock report
 
 exports.getStockReport = async (req, res) => {
   try {
-    const products = await Product.find();
+    // 1️⃣ Fetch all product variants
+    const variants = await ProductVariant.find().populate("product");
 
-    // Aggregate total purchases per product name (normalized)
-    const purchaseAgg = await Purchase.aggregate([
-      {
-        $group: {
-          _id: { $toLower: { $trim: { input: "$product" } } },
-          totalQuantity: { $sum: "$quantity" }
-        }
-      }
-    ]);
+    // 2️⃣ Build report for each variant
+    const report = await Promise.all(
+      variants.map(async (v) => {
+        // ---- Purchases from PurchaseInvoice ----
+        const purchases = await PurchaseInvoice.aggregate([
+          { $match: { product: v.variantName } },  // match by product name
+          { $group: { _id: null, total: { $sum: "$quantity" } } },
+        ]);
 
-    // Aggregate total sales per product name (normalized)
-    const salesAgg = await SalesInvoice.aggregate([
-      { $unwind: "$products" },
-      {
-        $group: {
-          _id: { $toLower: { $trim: { input: "$products.name" } } },
-          totalQuantity: { $sum: "$products.quantity" }
-        }
-      }
-    ]);
+        // ---- Sales from SalesInvoice (has array of products) ----
+        const sales = await SalesInvoice.aggregate([
+          { $unwind: "$products" },
+          { $match: { "products.variantId": v._id } },
+          { $group: { _id: null, total: { $sum: "$products.quantity" } } },
+        ]);
 
-    // Convert aggregates to lookup objects
-    const purchaseMap = {};
-    purchaseAgg.forEach(p => { purchaseMap[p._id] = p.totalQuantity; });
+        // Extract totals
+        const totalPurchases = purchases[0]?.total || 0;
+        const totalSales = sales[0]?.total || 0;
+        const closingStock = totalPurchases - totalSales;
 
-    const salesMap = {};
-    salesAgg.forEach(s => { salesMap[s._id] = s.totalQuantity; });
+        // 3️⃣ Return one row for this variant
+        return {
+          variantId: v._id,
+          variantName: v.variantName,
+          sku: v.sku,
+          product: {
+            productId: v.product?._id,
+            brand: v.product?.brand || "-",
+            category: v.product?.category || "-",
+            subcategory: v.product?.subcategory || "-",
+          },
+          openingStock: 0, // extend later if you want
+          purchases: totalPurchases,
+          sales: totalSales,
+          closing: closingStock,
+          purchasePrice: v.purchasePrice,
+          sellingPrice: v.sellingPrice,
+          stockValue: closingStock * (v.purchasePrice || 0),
+        };
+      })
+    );
 
-    // Build final report
-    const report = products.map(product => {
-      const productKey = product.name.toLowerCase().trim();
-      const totalPurchases = purchaseMap[productKey] || 0;
-      const totalSales = salesMap[productKey] || 0;
-      const openingStock = product.openingStock || 0;
-
-      // Prevent negative closing stock
-      let closingStock = openingStock + totalPurchases - totalSales;
-      if (closingStock < 0) closingStock = 0;
-
-      const stockValue = closingStock * (product.purchasePrice || 0);
-
-      return {
-        productId: product.productId,
-        sku: product.sku,
-        name: product.name,
-        category: product.category,
-        subcategory: product.subcategory,
-        brand: product.brand,
-        openingStock,
-        purchases: totalPurchases,
-        sales: totalSales,
-        closingStock,
-        costPerUnit: product.purchasePrice,
-        sellingPrice: product.sellingPrice,
-        stockValue,
-      };
-    });
-
-    res.status(200).json({ report });
-  } catch (error) {
-    console.error("Stock report error:", error);
-    res.status(500).json({ message: "Failed to generate stock report", error: error.message });
+    // 4️⃣ Send response
+    res.json({ success: true, report });
+  } catch (err) {
+    console.error("Stock Report Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 
 exports.getExpenseReport = async (req, res) => {
