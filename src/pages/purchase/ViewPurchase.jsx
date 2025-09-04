@@ -27,6 +27,10 @@ export default function ViewPurchase() {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [editData, setEditData] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
   const itemsPerPage = 8;
 
   // Show notification
@@ -63,14 +67,32 @@ export default function ViewPurchase() {
   }, []);
 
   // Filter purchases based on search
+  
   const filteredPurchases = purchases.filter((purchase) => {
-    const s = search.toLowerCase();
-    return (
-      purchase.purchaseOrderNumber.toLowerCase().includes(s) ||
-      (purchase.sellerName && purchase.sellerName.toLowerCase().includes(s)) ||
-      (purchase.product && purchase.product.toLowerCase().includes(s))
-    );
-  });
+  const s = search.toLowerCase();
+
+  // Search filter
+  const matchesSearch =
+    purchase.purchaseOrderNumber.toLowerCase().includes(s) ||
+    (purchase.supplierName && purchase.supplierName.toLowerCase().includes(s)) ||
+    (purchase.product && purchase.product.toLowerCase().includes(s));
+
+  // Status filter
+  const isPaid = purchase.paidAmount >= purchase.totalAmount;
+  const matchesStatus =
+    statusFilter === "all" ||
+    (statusFilter === "paid" && isPaid) ||
+    (statusFilter === "pending" && !isPaid);
+
+  // Date filter
+  const purchaseDate = purchase.purchaseDate ? new Date(purchase.purchaseDate) : null;
+  const matchesDate =
+    (!startDate || (purchaseDate && purchaseDate >= new Date(startDate))) &&
+    (!endDate || (purchaseDate && purchaseDate <= new Date(endDate)));
+
+  return matchesSearch && matchesStatus && matchesDate;
+});
+
 
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
@@ -86,7 +108,7 @@ export default function ViewPurchase() {
         method: "DELETE",
       });
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
+
       showNotification("success", "Deleted!", "Purchase record deleted successfully.");
       fetchPurchases(); // Refresh list
     } catch (err) {
@@ -105,6 +127,9 @@ export default function ViewPurchase() {
         ? new Date(purchase.purchaseDate).toISOString().slice(0, 10)
         : '',
       quantity: purchase.quantity ?? 0,
+      expiryDate: purchase.expiryDate
+        ? new Date(purchase.expiryDate).toISOString().slice(0, 10)
+        : '',
       unitPrice: purchase.unitPrice ?? 0,
       tax: purchase.tax ?? 0,
       totalAmount: purchase.totalAmount ?? 0,
@@ -122,7 +147,7 @@ export default function ViewPurchase() {
       let tax = prev.tax ?? 0;
       let newVal = value;
 
-      if (['quantity','unitPrice','tax','paidAmount'].includes(name)) {
+      if (['quantity', 'unitPrice', 'tax', 'paidAmount'].includes(name)) {
         newVal = parseFloat(value) || 0;
         if (name === 'quantity') qty = newVal;
         if (name === 'unitPrice') price = newVal;
@@ -132,7 +157,7 @@ export default function ViewPurchase() {
       return {
         ...prev,
         [name]: newVal,
-        totalAmount: +(qty * price + (qty * price * tax)/100).toFixed(2)
+        totalAmount: +(qty * price + (qty * price * tax) / 100).toFixed(2)
       };
     });
   };
@@ -143,10 +168,11 @@ export default function ViewPurchase() {
       setLoading(true);
       const updatedPurchase = {
         purchaseOrderNumber: editData.purchaseOrderNumber,
-        sellerName: editData.sellerName,
+        supplierName: editData.supplierName,
         product: editData.product,
         size: editData.size || '',
         quantity: editData.quantity,
+        expiryDate: editData.expiryDate || null,
         unitPrice: editData.unitPrice,
         tax: editData.tax,
         totalAmount: editData.totalAmount,
@@ -164,7 +190,7 @@ export default function ViewPurchase() {
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
-      
+
       setPurchases(purchases.map(p => p._id === editData._id ? result.purchase : p));
       closeEditModal();
       showNotification("success", "Updated!", "Purchase record updated successfully.");
@@ -205,11 +231,10 @@ export default function ViewPurchase() {
       <div className="max-w-7xl mx-auto">
         {/* Notification */}
         {notification && (
-          <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border max-w-md ${
-            notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border max-w-md ${notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
             notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-            'bg-yellow-50 border-yellow-200 text-yellow-800'
-          }`}>
+              'bg-yellow-50 border-yellow-200 text-yellow-800'
+            }`}>
             <div className="flex items-start gap-3">
               {notification.type === 'success' && <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />}
               {notification.type === 'error' && <AlertCircle className="w-5 h-5 mt-0.5 text-red-600" />}
@@ -218,7 +243,7 @@ export default function ViewPurchase() {
                 <h4 className="font-semibold text-sm">{notification.title}</h4>
                 <p className="text-sm mt-1">{notification.message}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setNotification(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -256,24 +281,63 @@ export default function ViewPurchase() {
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
           <div className="p-6">
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search by PO number, seller, or product..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
-                />
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Filter className="w-4 h-4" />
-                <span>Showing {currentPurchases.length} of {filteredPurchases.length} records</span>
-              </div>
-            </div>
+        <div className="relative flex-1 max-w-md">
+    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+    <input
+      type="text"
+      placeholder="Search by PO number, supplier, or product..."
+      value={search}
+      onChange={(e) => {
+        setSearch(e.target.value);
+        setPage(1);
+      }}
+      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
+    />
+  </div>
+
+  {/* Status Filter */}
+  <select
+    value={statusFilter}
+    onChange={(e) => {
+      setStatusFilter(e.target.value);
+      setPage(1);
+    }}
+    className="px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+  >
+    <option value="all">All</option>
+    <option value="paid">Paid</option>
+    <option value="pending">Pending</option>
+  </select>
+
+  {/* Date Filters */}
+<div className="flex items-center gap-2">
+  <input
+    type="date"
+    value={startDate}
+    onChange={(e) => {
+      setStartDate(e.target.value);
+      setPage(1);
+    }}
+    className="px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+  <span className="text-gray-600">to</span>
+  <input
+    type="date"
+    value={endDate}
+    onChange={(e) => {
+      setEndDate(e.target.value);
+      setPage(1);
+    }}
+    className="px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+</div>
+
+
+  <div className="flex items-center gap-2 text-sm text-gray-600">
+    <Filter className="w-4 h-4" />
+    <span>Showing {currentPurchases.length} of {filteredPurchases.length} records</span>
+  </div>
+  </div>
           </div>
         </div>
 
@@ -299,7 +363,7 @@ export default function ViewPurchase() {
                         Purchase Details
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Seller
+                        Supplier
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Product Info
@@ -339,13 +403,13 @@ export default function ViewPurchase() {
                             </div>
                           </td>
 
-                          {/* Seller */}
+                          {/* Supplier */}
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <User className="w-4 h-4 text-gray-400 mr-2" />
                               <div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {purchase.sellerName || "Unknown Seller"}
+                                  {purchase.supplierName || "Unknown Supplier"}
                                 </div>
                               </div>
                             </div>
@@ -366,6 +430,9 @@ export default function ViewPurchase() {
                               </div>
                             </div>
                           </td>
+                          {purchase.expiryDate && (
+                            <div>Expiry: {formatDate(purchase.expiryDate)}</div>
+                          )}
 
                           {/* Amounts */}
                           <td className="px-6 py-4 whitespace-nowrap text-right">
@@ -388,11 +455,10 @@ export default function ViewPurchase() {
                               <div className="text-sm text-gray-600">
                                 Paid: ₹{parseFloat(purchase.paidAmount || 0).toFixed(2)}
                               </div>
-                              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                isPaid 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
+                              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${isPaid
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                                }`}>
                                 {isPaid ? (
                                   <>
                                     <CheckCircle className="w-3 h-3" />
@@ -452,17 +518,16 @@ export default function ViewPurchase() {
                         <ChevronLeft className="w-4 h-4" />
                         Previous
                       </button>
-                      
+
                       <div className="flex space-x-1">
                         {[...Array(totalPages)].map((_, i) => (
                           <button
                             key={i}
                             onClick={() => setPage(i + 1)}
-                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                              page === i + 1
-                                ? "bg-blue-600 text-white shadow-md"
-                                : "text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200"
-                            }`}
+                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${page === i + 1
+                              ? "bg-blue-600 text-white shadow-md"
+                              : "text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200"
+                              }`}
                           >
                             {i + 1}
                           </button>
@@ -539,21 +604,22 @@ export default function ViewPurchase() {
                 <h2 className="text-xl font-bold text-white">Edit Purchase Record</h2>
                 <p className="text-blue-100 text-sm">Update purchase information</p>
               </div>
-              
+
               <div className="p-6 max-h-[calc(90vh-200px)] overflow-y-auto">
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
-                      {label:'PO Number',name:'purchaseOrderNumber',type:'text',readOnly:true, col:'full'},
-                      {label:'Seller Name',name:'sellerName',type:'text'},
-                      {label:'Product',name:'product',type:'text'},
-                      {label:'Size',name:'size',type:'text'},
-                      {label:'Quantity',name:'quantity',type:'number'},
-                      {label:'Unit Price (₹)',name:'unitPrice',type:'number'},
-                      {label:'Tax (%)',name:'tax',type:'number'},
-                      {label:'Total Amount (₹)',name:'totalAmount',type:'number',readOnly:true},
-                      {label:'Paid Amount (₹)',name:'paidAmount',type:'number'},
-                      {label:'Purchase Date',name:'purchaseDate',type:'date'},
+                      { label: 'PO Number', name: 'purchaseOrderNumber', type: 'text', readOnly: true, col: 'full' },
+                      { label: 'Supplier Name', name: 'supplierName', type: 'text' },
+                      { label: 'Product', name: 'product', type: 'text' },
+                      { label: 'Size', name: 'size', type: 'text' },
+                      { label: 'Quantity', name: 'quantity', type: 'number' },
+                      { label: 'Unit Price (₹)', name: 'unitPrice', type: 'number' },
+                      { label: 'Tax (%)', name: 'tax', type: 'number' },
+                      { label: 'Total Amount (₹)', name: 'totalAmount', type: 'number', readOnly: true },
+                      { label: 'Paid Amount (₹)', name: 'paidAmount', type: 'number' },
+                      { label: 'Purchase Date', name: 'purchaseDate', type: 'date' },
+                      { label: 'Expiry Date', name: 'expiryDate', type: 'date' },
                     ].map(f => (
                       <div key={f.name} className={f.col === 'full' ? 'md:col-span-2' : ''}>
                         <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
@@ -563,27 +629,26 @@ export default function ViewPurchase() {
                           value={editData[f.name] ?? ''}
                           onChange={handleChange}
                           readOnly={f.readOnly}
-                          min={['quantity','unitPrice','tax','paidAmount'].includes(f.name) ? 0 : undefined}
-                          step={['unitPrice','paidAmount'].includes(f.name) ? '0.01' : undefined}
-                          className={`w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                            f.readOnly ? 'bg-gray-50 text-gray-500' : 'bg-white hover:border-blue-300'
-                          }`}
+                          min={['quantity', 'unitPrice', 'tax', 'paidAmount'].includes(f.name) ? 0 : undefined}
+                          step={['unitPrice', 'paidAmount'].includes(f.name) ? '0.01' : undefined}
+                          className={`w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${f.readOnly ? 'bg-gray-50 text-gray-500' : 'bg-white hover:border-blue-300'
+                            }`}
                         />
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-gray-50 px-6 py-4 border-t flex justify-end space-x-3">
-                <button 
-                  type="button" 
-                  onClick={closeEditModal} 
+                <button
+                  type="button"
+                  onClick={closeEditModal}
                   className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-all duration-200"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   type="button"
                   onClick={handleSave}
                   disabled={loading}

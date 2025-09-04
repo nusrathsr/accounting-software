@@ -19,25 +19,27 @@ import {
 } from "lucide-react";
 
 export default function AddPurchase() {
-  const [sellers, setSellers] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
 
   const [formData, setFormData] = useState({
     purchaseOrderNumber: "",
-    sellerName: "",
+    supplierName: "",
     product: "",
     quantity: "",
     unitPrice: "",
     tax: "",
+    taxInclusive: "no",
     totalAmount: "",
     paidAmount: "",
     purchaseDate: new Date().toISOString().slice(0, 10),
+    expiryDate: "",
   });
 
-  const [sellerSearch, setSellerSearch] = useState("");
-  const [sellerDropdownOpen, setSellerDropdownOpen] = useState(false);
+  const [supplierSearch, setSupplierSearch] = useState("");
+  const [supplierDropdownOpen, setSupplierDropdownOpen] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
 
@@ -59,14 +61,14 @@ export default function AddPurchase() {
         throw error;
       }
     },
-    
-    getSellers: async () => {
+
+    getSuppliers: async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/customer/sellers");
+        const response = await fetch("http://localhost:4000/api/customer/suppliers");
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return response.json();
       } catch (error) {
-        console.error("Failed to fetch sellers:", error);
+        console.error("Failed to fetch suppliers:", error);
         throw error;
       }
     },
@@ -89,17 +91,17 @@ export default function AddPurchase() {
     }
   };
 
-  // Fetch products and sellers
+  // Fetch products and suppliers
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [productsData, sellersData] = await Promise.all([
+        const [productsData, suppliersData] = await Promise.all([
           api.getProducts(),
-          api.getSellers()
+          api.getSuppliers()
         ]);
         setProducts(productsData);
-        setSellers(sellersData);
+        setSuppliers(suppliersData);
       } catch (err) {
         console.error("Error fetching data:", err);
         showNotification("error", "Error", "Failed to fetch data. Please check server connection.");
@@ -127,7 +129,7 @@ export default function AddPurchase() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.dropdown-container')) {
-        setSellerDropdownOpen(false);
+        setSupplierDropdownOpen(false);
         setProductDropdownOpen(false);
       }
     };
@@ -140,26 +142,32 @@ export default function AddPurchase() {
 
   // Handle input change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
+  const { name, value } = e.target;
+  setFormData((prev) => {
+    const updated = { ...prev, [name]: value };
 
-      if (["quantity", "unitPrice", "tax"].includes(name)) {
-        const qty = parseFloat(updated.quantity) || 0;
-        const price = parseFloat(updated.unitPrice) || 0;
-        const taxPct = parseFloat(updated.tax) || 0;
+    if (["quantity", "unitPrice", "tax", "taxInclusive"].includes(name)) {
+      const qty = parseFloat(updated.quantity) || 0;
+      const price = parseFloat(updated.unitPrice) || 0;
+      const taxPct = parseFloat(updated.tax) || 0;
+
+      if (updated.taxInclusive === "yes") {
         updated.totalAmount = (qty * price + (qty * price * taxPct) / 100).toFixed(2);
+      } else {
+        updated.totalAmount = (qty * price).toFixed(2);
       }
+    }
 
-      return updated;
-    });
-  };
+    return updated; // ✅ always return
+  });
+};
 
-  // Select seller
-  const handleSellerSelect = (seller) => {
-    setFormData((prev) => ({ ...prev, sellerName: seller.name }));
-    setSellerSearch(seller.name);
-    setSellerDropdownOpen(false);
+
+  // Select supplier
+  const handleSupplierSelect = (supplier) => {
+    setFormData((prev) => ({ ...prev, supplierName: supplier.name }));
+    setSupplierSearch(supplier.name);
+    setSupplierDropdownOpen(false);
   };
 
   // Select product
@@ -169,11 +177,11 @@ export default function AddPurchase() {
     setProductDropdownOpen(false);
   };
 
-  // Handle seller search
-  const handleSellerSearchChange = (value) => {
-    setSellerSearch(value);
-    setFormData((prev) => ({ ...prev, sellerName: value }));
-    setSellerDropdownOpen(true);
+  // Handle supplier search
+  const handleSupplierSearchChange = (value) => {
+    setSupplierSearch(value);
+    setFormData((prev) => ({ ...prev, supplierName: value }));
+    setSupplierDropdownOpen(true);
   };
 
   // Handle product search
@@ -185,8 +193,8 @@ export default function AddPurchase() {
 
   // Submit form
   const handleSubmit = async () => {
-    if (!formData.sellerName || !formData.product) {
-      showNotification("warning", "Validation Error", "Please select a seller and a product.");
+    if (!formData.supplierName || !formData.product) {
+      showNotification("warning", "Validation Error", "Please select a supplier and a product.");
       return;
     }
 
@@ -199,7 +207,7 @@ export default function AddPurchase() {
       setLoading(true);
       const payload = {
         purchaseOrderNumber: formData.purchaseOrderNumber,
-        sellerName: formData.sellerName,
+        supplierName: formData.supplierName,
         product: formData.product,
         quantity: Number(formData.quantity),
         unitPrice: Number(formData.unitPrice),
@@ -207,16 +215,17 @@ export default function AddPurchase() {
         totalAmount: Number(formData.totalAmount),
         paidAmount: Number(formData.paidAmount) || 0,
         purchaseDate: new Date(formData.purchaseDate),
+        expiryDate: formData.expiryDate ? new Date(formData.expiryDate) : null,
       };
-
+      console.log("➡️ Sending payload:", payload);
       await api.savePurchase(payload);
-      
+
       showNotification("success", "Purchase Saved!", `Purchase of ${formData.product} saved successfully! Total: ₹${formData.totalAmount}`, 2500);
 
       // Reset form
       setFormData({
         purchaseOrderNumber: generatePONumber(),
-        sellerName: "",
+        supplierName: "",
         product: "",
         quantity: "",
         unitPrice: "",
@@ -224,8 +233,9 @@ export default function AddPurchase() {
         totalAmount: "",
         paidAmount: "",
         purchaseDate: new Date().toISOString().slice(0, 10),
+        expiryDate: "",
       });
-      setSellerSearch("");
+      setSupplierSearch("");
       setProductSearch("");
     } catch (err) {
       console.error("Error saving purchase:", err);
@@ -236,8 +246,8 @@ export default function AddPurchase() {
   };
 
   // Filter functions
-  const filteredSellers = sellers.filter((s) =>
-    s.name.toLowerCase().includes(sellerSearch.toLowerCase())
+  const filteredSuppliers = suppliers.filter((s) =>
+    s.name.toLowerCase().includes(supplierSearch.toLowerCase())
   );
 
   const filteredProducts = products.filter((p) =>
@@ -259,11 +269,10 @@ export default function AddPurchase() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {notification && (
-          <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border max-w-md ${
-            notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border max-w-md ${notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
             notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-            'bg-yellow-50 border-yellow-200 text-yellow-800'
-          }`}>
+              'bg-yellow-50 border-yellow-200 text-yellow-800'
+            }`}>
             <div className="flex items-start gap-3">
               {notification.type === 'success' && <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />}
               {notification.type === 'error' && <AlertCircle className="w-5 h-5 mt-0.5 text-red-600" />}
@@ -272,7 +281,7 @@ export default function AddPurchase() {
                 <h4 className="font-semibold text-sm">{notification.title}</h4>
                 <p className="text-sm mt-1">{notification.message}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setNotification(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -348,39 +357,39 @@ export default function AddPurchase() {
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
                 <User className="w-5 h-5 text-blue-600" />
-                Seller Information
+                Supplier Information
               </h2>
               <div className="space-y-2 relative dropdown-container">
                 <label className="block text-sm font-medium text-gray-700">
-                  Seller Name
+                  Supplier Name
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
                   <input
                     type="text"
-                    value={sellerSearch}
-                    onChange={(e) => handleSellerSearchChange(e.target.value)}
-                    onFocus={() => setSellerDropdownOpen(true)}
-                    placeholder="Search seller..."
+                    value={supplierSearch}
+                    onChange={(e) => handleSupplierSearchChange(e.target.value)}
+                    onFocus={() => setSupplierDropdownOpen(true)}
+                    placeholder="Search supplier..."
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white relative z-10"
                   />
-                  {sellerDropdownOpen && (
+                  {supplierDropdownOpen && (
                     <div className="absolute z-50 bg-white border border-gray-200 w-full max-h-60 overflow-y-auto mt-1 rounded-xl shadow-xl ring-1 ring-black ring-opacity-5">
-                      {filteredSellers.length > 0 ? (
-                        filteredSellers.map((seller) => (
+                      {filteredSuppliers.length > 0 ? (
+                        filteredSuppliers.map((supplier) => (
                           <div
-                            key={seller._id}
+                            key={supplier._id}
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              handleSellerSelect(seller);
+                              handleSupplierSelect(supplier);
                             }}
                             className="cursor-pointer px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors duration-150"
                           >
-                            <span className="font-medium text-gray-900">{seller.name}</span>
+                            <span className="font-medium text-gray-900">{supplier.name}</span>
                           </div>
                         ))
                       ) : (
-                        <div className="px-4 py-3 text-gray-500 text-center">No sellers found</div>
+                        <div className="px-4 py-3 text-gray-500 text-center">No suppliers found</div>
                       )}
                     </div>
                   )}
@@ -451,6 +460,24 @@ export default function AddPurchase() {
                     />
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Expiry Date <span className="text-gray-400 text-xs">(optional)</span>
+                  </label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="date"
+                      name="expiryDate"
+                      value={formData.expiryDate}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none 
+                 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 
+                 bg-gray-50 hover:bg-white"
+                    />
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -464,7 +491,7 @@ export default function AddPurchase() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    Unit Price
+                    Purchased Price
                   </label>
                   <div className="relative">
                     <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -484,22 +511,39 @@ export default function AddPurchase() {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    Tax (%)
+                    Tax Inclusive
                   </label>
-                  <div className="relative">
-                    <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="number"
-                      name="tax"
-                      value={formData.tax}
-                      onChange={handleChange}
-                      placeholder="0"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
-                      min="0"
-                      max="100"
-                    />
-                  </div>
+                  <select
+                    name="taxInclusive"
+                    value={formData.taxInclusive}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none 
+               focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
+                  >
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
                 </div>
+                {formData.taxInclusive === "yes" && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Tax (%)
+                    </label>
+                    <div className="relative">
+                      <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="number"
+                        name="tax"
+                        value={formData.tax}
+                        onChange={handleChange}
+                        placeholder="0"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
+                        min="0"
+                        max="100"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
@@ -549,7 +593,9 @@ export default function AddPurchase() {
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Tax:</span>
                     <span className="font-semibold">
-                      ₹{(((parseFloat(formData.quantity) * parseFloat(formData.unitPrice)) * parseFloat(formData.tax)) / 100 || 0).toFixed(2)}
+                      {formData.taxInclusive === "yes"
+                        ? `₹${(((parseFloat(formData.quantity) * parseFloat(formData.unitPrice)) * parseFloat(formData.tax)) / 100 || 0).toFixed(2)}`
+                        : "—"}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-3 bg-blue-50 rounded-xl px-4 border-2 border-blue-200">
@@ -567,7 +613,7 @@ export default function AddPurchase() {
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col justify-end">
                   <button
                     type="button"

@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const purchaseInvoiceSchema = new mongoose.Schema(
   {
     purchaseOrderNumber: { type: String, required: true, unique: true },
-    sellerName: { type: String, required: true, trim: true },
-     vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Customer"}, // <-- Add this
+    supplierName: { type: String, required: true, trim: true },
+    vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Customer"}, // <-- Add this
     product: { type: String, required: true, trim: true },
     size: { type: String },
     quantity: { type: Number, required: true, min: 1 },
@@ -13,6 +13,7 @@ const purchaseInvoiceSchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true, min: 0 },
     purchaseDate: { type: Date, required: true },
     paidAmount: { type: Number, default: 0, min: 0 },
+    expiryDate: { type: Date },
   },
   { timestamps: true }
 );

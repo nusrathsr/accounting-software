@@ -12,6 +12,7 @@ const expenseRoutes =require('./routes/expenseRoutes');
 const salesRoutes = require("./routes/salesRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
 const reportRouters =require("./routes/reportRoutes")
 const employeesRoutes =require('./routes/employeesRoutes')
 const attendanceRoutes =require('./routes/attendanceRoutes')
@@ -43,6 +44,7 @@ app.use('/api/expense', expenseRoutes)
 app.use("/api/sales", salesRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/transactions", transactionRoutes);
 app.use("/api/reports",reportRouters)
 app.use('/api/employees',employeesRoutes)
 app.use('/api/attendance',attendanceRoutes)

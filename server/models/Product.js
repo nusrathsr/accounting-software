@@ -11,6 +11,7 @@ const productSchema = new mongoose.Schema({
   sellingPrice: { type: Number, default: 0 },
   purchasePrice: { type: Number, default: 0 },
   quantity: { type: Number, default: 0 },
+  expiryDate: { type: Date },
 
   // Add this field to link variants
   variants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProductVariant' }],

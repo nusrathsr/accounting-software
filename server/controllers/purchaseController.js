@@ -1,28 +1,66 @@
 const PurchaseInvoice = require("../models/PurchaseInvoice");
 const Product = require("../models/Product");
+const ProductVariant = require("../models/ProductVariant");
 const Payment = require("../models/Payment");
 
-// ➕ Add a purchase
+// ➕ Add Purchase
 exports.addPurchase = async (req, res) => {
   try {
-    const { purchaseOrderNumber, sellerName, product: productName, quantity, unitPrice, tax, totalAmount,  paidAmount = 0, purchaseDate } = req.body;
+    const {
+      purchaseOrderNumber,
+      supplierName,
+      product: productName,
+      variantId,
+      quantity,
+      unitPrice,
+      tax,
+      totalAmount,
+      paidAmount = 0,
+      purchaseDate,
+      expiryDate,
+    } = req.body;
 
-    const purchase = new PurchaseInvoice({ purchaseOrderNumber, sellerName, product: productName, quantity, unitPrice, tax, totalAmount, paidAmount, purchaseDate });
+    const purchase = new PurchaseInvoice({
+      purchaseOrderNumber,
+      supplierName,
+      product: productName,
+      quantity,
+      unitPrice,
+      tax,
+      totalAmount,
+      paidAmount,
+      purchaseDate,
+      expiryDate: expiryDate ? new Date(expiryDate) : null,
+    });
     await purchase.save();
 
-    const product = await Product.findOne({ name: productName.trim() });
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    // 🔹 If purchase is for a variant
+    if (variantId) {
+      const variant = await ProductVariant.findOne({ variantId });
+      if (!variant) return res.status(404).json({ error: "Variant not found" });
 
-    if (product.sizes && product.sizes.length > 0) {
-      product.sizes[0].quantity = (product.sizes[0].quantity || 0) + Number(quantity);
+      variant.quantity = (variant.quantity || 0) + Number(quantity);
+      variant.purchasePrice = Number(unitPrice);
+      variant.expiryDate = expiryDate ? new Date(expiryDate) : null;
+      await variant.save();
+
+      await Product.findByIdAndUpdate(variant.product, {
+        purchasePrice: Number(unitPrice),
+      });
     } else {
-      product.sizes = [{ size: "Default", quantity: Number(quantity) }];
+      // 🔹 Simple product
+      const product = await Product.findOne({ name: productName.trim() });
+      if (!product) return res.status(404).json({ error: "Product not found" });
+
+      product.quantity = (product.quantity || 0) + Number(quantity);
+      product.purchasePrice = Number(unitPrice);
+      product.expiryDate = expiryDate ? new Date(expiryDate) : null;
+      await product.save();
     }
 
-    product.purchasePrice = Number(unitPrice);
-    await product.save();
-
-    res.status(201).json({ message: "✅ Purchase added & product updated", purchase, product });
+    res
+      .status(201)
+      .json({ message: "✅ Purchase added & stock updated", purchase });
   } catch (err) {
     console.error("❌ Error adding purchase:", err);
     res.status(400).json({ error: err.message });
@@ -32,12 +70,10 @@ exports.addPurchase = async (req, res) => {
 // 📋 Get all purchases
 exports.getAllPurchases = async (req, res) => {
   try {
-    // If product is stored as String, keep find()
-    // If product is ObjectId ref, you can use .populate("product")
     const purchases = await PurchaseInvoice.find().sort({ createdAt: -1 });
-    const purchasesWithPaid = purchases.map(p => ({
-      ...p._doc,           // raw document fields
-      paidAmount: p.paidAmount ?? 0
+    const purchasesWithPaid = purchases.map((p) => ({
+      ...p._doc,
+      paidAmount: p.paidAmount ?? 0,
     }));
 
     res.json(purchasesWithPaid);
@@ -47,25 +83,47 @@ exports.getAllPurchases = async (req, res) => {
   }
 };
 
+// ✏️ Update Purchase
 exports.updatePurchase = async (req, res) => {
   try {
-    const { purchaseOrderNumber, sellerName, product: productName, size, quantity, unitPrice, tax, totalAmount, paidAmount = 0, purchaseDate } = req.body;
+    const {
+      purchaseOrderNumber,
+      supplierName,
+      product: productName,
+      variantId,
+      size,
+      quantity,
+      unitPrice,
+      tax,
+      totalAmount,
+      paidAmount = 0,
+      purchaseDate,
+      expiryDate, // ✅ FIXED (was missing earlier)
+    } = req.body;
 
-    // Validate required fields
-    if (!purchaseOrderNumber || !sellerName || !productName || !quantity || !unitPrice || !totalAmount || !purchaseDate) {
-      return res.status(400).json({ message: "All required fields must be filled" });
+    if (
+      !purchaseOrderNumber ||
+      !supplierName ||
+      !productName ||
+      !quantity ||
+      !unitPrice ||
+      !totalAmount ||
+      !purchaseDate
+    ) {
+      return res
+        .status(400)
+        .json({ message: "All required fields must be filled" });
     }
 
-    // Find existing purchase
     const existingPurchase = await PurchaseInvoice.findById(req.params.id);
-    if (!existingPurchase) return res.status(404).json({ message: "Purchase not found" });
+    if (!existingPurchase)
+      return res.status(404).json({ message: "Purchase not found" });
 
-    // Calculate quantity difference for stock update
     const qtyDiff = Number(quantity) - Number(existingPurchase.quantity);
 
-    // Update purchase document
+    // Update purchase doc
     existingPurchase.purchaseOrderNumber = purchaseOrderNumber;
-    existingPurchase.sellerName = sellerName;
+    existingPurchase.supplierName = supplierName;
     existingPurchase.product = productName;
     existingPurchase.size = size;
     existingPurchase.quantity = quantity;
@@ -74,29 +132,45 @@ exports.updatePurchase = async (req, res) => {
     existingPurchase.totalAmount = totalAmount;
     existingPurchase.purchaseDate = purchaseDate;
     existingPurchase.paidAmount = paidAmount;
-
+    existingPurchase.expiryDate = expiryDate ? new Date(expiryDate) : null;
     await existingPurchase.save();
 
-    // Update Product stock
-    const product = await Product.findOne({ name: productName.trim() });
-    if (product) {
-      if (product.sizes && product.sizes.length > 0) {
-        product.sizes[0].quantity = (product.sizes[0].quantity || 0) + qtyDiff;
-      } else {
-        product.sizes = [{ size: size || "Default", quantity: qtyDiff }];
+    // 🔹 Stock update
+    if (variantId) {
+      const updatedVariant = await ProductVariant.findOne({ variantId });
+      if (!updatedVariant)
+        return res.status(404).json({ message: "Variant not found" });
+
+      updatedVariant.quantity =
+        (updatedVariant.quantity || 0) + qtyDiff;
+      updatedVariant.purchasePrice = Number(unitPrice);
+      updatedVariant.expiryDate = expiryDate ? new Date(expiryDate) : null;
+      await updatedVariant.save();
+
+      await Product.findByIdAndUpdate(updatedVariant.product, {
+        purchasePrice: Number(unitPrice),
+      });
+    } else {
+      const product = await Product.findOne({ name: productName.trim() });
+      if (product) {
+        product.quantity = (product.quantity || 0) + qtyDiff;
+        product.purchasePrice = Number(unitPrice);
+        product.expiryDate = expiryDate ? new Date(expiryDate) : null;
+        await product.save();
       }
-      product.purchasePrice = Number(unitPrice);
-      await product.save();
     }
 
-    res.json({ message: "✅ Purchase updated & stock adjusted", purchase: existingPurchase, product });
+    res.json({
+      message: "✅ Purchase updated & stock adjusted",
+      purchase: existingPurchase,
+    });
   } catch (err) {
     console.error("Update error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-// 🗑️ Delete a purchase (and adjust stock)
+// 🗑️ Delete Purchase
 exports.deletePurchase = async (req, res) => {
   try {
     const purchase = await PurchaseInvoice.findByIdAndDelete(req.params.id);
@@ -104,11 +178,28 @@ exports.deletePurchase = async (req, res) => {
       return res.status(404).json({ error: "Purchase not found" });
     }
 
-    // Decrease stock by deleted purchase quantity
-    await Product.findOneAndUpdate(
-      { name: purchase.product },
-      { $inc: { quantity: -purchase.quantity } }
-    );
+    // Adjust stock
+    if (purchase.variantId) {
+      // If it was a variant
+      const variant = await ProductVariant.findOne({ variantId: purchase.variantId });
+      if (variant) {
+        variant.quantity = Math.max(
+          0,
+          (variant.quantity || 0) - Number(purchase.quantity)
+        );
+        await variant.save();
+      }
+    } else {
+      // If it was a simple product
+      const product = await Product.findOne({ name: purchase.product });
+      if (product) {
+        product.quantity = Math.max(
+          0,
+          (product.quantity || 0) - Number(purchase.quantity)
+        );
+        await product.save();
+      }
+    }
 
     res.json({ message: "✅ Purchase deleted & stock adjusted" });
   } catch (err) {
@@ -117,32 +208,24 @@ exports.deletePurchase = async (req, res) => {
   }
 };
 
-// Get all pending dues
-// Get all pending purchase dues
-// Get all pending purchase dues
+// 📌 Get Pending Purchase Dues
 exports.getPurchaseDues = async (req, res) => {
   try {
-    // Fetch all purchases
     const purchases = await PurchaseInvoice.find().lean();
 
-    // Calculate dues based on paidAmount
-    const dues = purchases.map(p => {
-      return {
-        _id: p._id,
-        date: p.purchaseDate,
-        vendor: p.sellerName,
-        invoiceNo: p.purchaseOrderNumber,
-        totalAmount: p.totalAmount,
-        paidAmount: p.paidAmount || 0,
-        balanceDue: p.totalAmount - (p.paidAmount || 0),
-      };
-    });
+    const dues = purchases.map((p) => ({
+      _id: p._id,
+      date: p.purchaseDate,
+      vendor: p.supplierName,
+      invoiceNo: p.purchaseOrderNumber,
+      totalAmount: p.totalAmount,
+      paidAmount: p.paidAmount || 0,
+      balanceDue: p.totalAmount - (p.paidAmount || 0),
+    }));
 
-    // Only return purchases with pending balance
-    res.json(dues.filter(d => d.balanceDue > 0));
+    res.json(dues.filter((d) => d.balanceDue > 0));
   } catch (err) {
     console.error("Error fetching purchase dues:", err);
     res.status(500).json({ error: "Server error" });
   }
 };
-

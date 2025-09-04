@@ -178,7 +178,7 @@ function Sidebar({
               </SidebarLinkGroup>
 
               {/* product*/}
-              <SidebarLinkGroup activecondition={pathname.includes("product")}>
+              {/* <SidebarLinkGroup activecondition={pathname.includes("product")}>
                 {(handleClick, open) => {
                   return (
                     <React.Fragment>
@@ -201,7 +201,7 @@ function Sidebar({
                               Product
                             </span>
                           </div>
-                          {/* Icon */}
+                         
                           <div className="flex shrink-0 ml-2">
                             <svg className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"}`} viewBox="0 0 12 12">
                               <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
@@ -224,7 +224,7 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                          {/* ✅ Add Product Variant (before View Products) */}
+                         
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
@@ -261,9 +261,104 @@ function Sidebar({
                     </React.Fragment>
                   );
                 }}
-              </SidebarLinkGroup>
+              </SidebarLinkGroup> */}
+              {/*categories*/}
+              {/* <SidebarLinkGroup activecondition={pathname.includes("category")}>
+  {(handleClick, open) => {
+    return (
+      <React.Fragment>
+        <a
+          href="#0"
+          className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
+            pathname.includes("category")
+              ? ""
+              : "hover:text-gray-900 dark:hover:text-white"
+          }`}
+          onClick={(e) => {
+            e.preventDefault();
+            handleClick();
+            setSidebarExpanded(true);
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center"> */}
+              {/* Category Icon */}
+              {/* <svg
+                className={`shrink-0 fill-current ${
+                  pathname.includes("category")
+                    ? "text-violet-500"
+                    : "text-gray-400 dark:text-gray-500"
+                }`}
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+              >
+                <path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z" />
+              </svg>
+              <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                Categories
+              </span>
+            </div> */}
+            {/* Arrow */}
+            {/* <div className="flex shrink-0 ml-2">
+              <svg
+                className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${
+                  open && "rotate-180"
+                }`}
+                viewBox="0 0 12 12"
+              >
+                <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+              </svg>
+            </div>
+          </div>
+        </a>
+        <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
+          <ul className={`pl-8 mt-1 ${!open && "hidden"}`}> */}
+            {/* Add Category */}
+            {/* <li className="mb-1 last:mb-0">
+              <NavLink
+                end
+                to="/addCategory"
+                className={({ isActive }) =>
+                  "block transition duration-150 truncate " +
+                  (isActive
+                    ? "text-violet-500"
+                    : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                }
+              >
+                <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                  Add Category
+                </span>
+              </NavLink>
+            </li> */}
+
+            {/* View Categories */}
+            {/* <li className="mb-1 last:mb-0">
+              <NavLink
+                end
+                to="/listCategories"
+                className={({ isActive }) =>
+                  "block transition duration-150 truncate " +
+                  (isActive
+                    ? "text-violet-500"
+                    : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                }
+              >
+                <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                  View Categories
+                </span>
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+      </React.Fragment>
+    );
+  }}
+</SidebarLinkGroup> */}
+
               {/* customer*/}
-              <SidebarLinkGroup activecondition={pathname.includes("customer")}>
+              {/* <SidebarLinkGroup activecondition={pathname.includes("customer")}>
                 {(handleClick, open) => {
                   return (
                     <React.Fragment>
@@ -285,9 +380,9 @@ function Sidebar({
                             <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
                               Customer
                             </span>
-                          </div>
+                          </div> */}
                           {/* Icon */}
-                          <div className="flex shrink-0 ml-2">
+                          {/* <div className="flex shrink-0 ml-2">
                             <svg className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"}`} viewBox="0 0 12 12">
                               <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
                             </svg>
@@ -328,7 +423,178 @@ function Sidebar({
                     </React.Fragment>
                   );
                 }}
-              </SidebarLinkGroup>
+              </SidebarLinkGroup> */}
+              {/* Master Data */}
+<SidebarLinkGroup activecondition={
+  pathname.includes("product") ||
+  pathname.includes("category") ||
+  pathname.includes("customer")
+}>
+  {(handleClick, open) => (
+    <React.Fragment>
+      <a
+        href="#0"
+        className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
+          pathname.includes("product") ||
+          pathname.includes("category") ||
+          pathname.includes("customer")
+            ? ""
+            : "hover:text-gray-900 dark:hover:text-white"
+        }`}
+        onClick={(e) => {
+          e.preventDefault();
+          handleClick();
+          setSidebarExpanded(true);
+        }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            {/* Master Data Icon */}
+            <svg
+              className={`shrink-0 fill-current ${
+                open ? "text-violet-500" : "text-gray-400 dark:text-gray-500"
+              }`}
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+            >
+              <path d="M3 3h18v2H3V3zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
+            </svg>
+            <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+              Master Data
+            </span>
+          </div>
+          {/* Arrow */}
+          <div className="flex shrink-0 ml-2">
+            <svg
+              className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${
+                open && "rotate-180"
+              }`}
+              viewBox="0 0 12 12"
+            >
+              <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+            </svg>
+          </div>
+        </div>
+      </a>
+
+      {/* Submenus: Product, Categories, Customer */}
+      <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
+        <ul className={`pl-8 mt-1 ${!open && "hidden"}`}>
+          
+          {/* Product */}
+          <SidebarLinkGroup activecondition={pathname.includes("product")}>
+            {(handleClick2, open2) => (
+              <>
+                <a
+                  href="#0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClick2();
+                  }}
+                  className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                >
+                  📦 Products
+                  <svg
+                    className={`w-3 h-3 ml-1 fill-current ${
+                      open2 && "rotate-180"
+                    }`}
+                    viewBox="0 0 12 12"
+                  >
+                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                  </svg>
+                </a>
+                <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
+                  <li>
+                    <NavLink to="/addProduct">➕ Add Product</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/addProductVariant">
+                      ➕ Add Product Variant
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/listProduct">📋 View Products</NavLink>
+                  </li>
+                </ul>
+              </>
+            )}
+          </SidebarLinkGroup>
+
+          {/* Categories */}
+          <SidebarLinkGroup activecondition={pathname.includes("category")}>
+            {(handleClick2, open2) => (
+              <>
+                <a
+                  href="#0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClick2();
+                  }}
+                  className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                >
+                  🗂️ Categories
+                  <svg
+                    className={`w-3 h-3 ml-1 fill-current ${
+                      open2 && "rotate-180"
+                    }`}
+                    viewBox="0 0 12 12"
+                  >
+                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                  </svg>
+                </a>
+                <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
+                  <li>
+                    <NavLink to="/addCategory">➕ Add Category</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/listCategories">📋 View Categories</NavLink>
+                  </li>
+                </ul>
+              </>
+            )}
+          </SidebarLinkGroup>
+
+          {/* Customers */}
+          <SidebarLinkGroup activecondition={pathname.includes("customer")}>
+            {(handleClick2, open2) => (
+              <>
+                <a
+                  href="#0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleClick2();
+                  }}
+                  className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                >
+                  👥 Customers
+                  <svg
+                    className={`w-3 h-3 ml-1 fill-current ${
+                      open2 && "rotate-180"
+                    }`}
+                    viewBox="0 0 12 12"
+                  >
+                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                  </svg>
+                </a>
+                <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
+                  <li>
+                    <NavLink to="/addCustomer">➕ Add Customer</NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/listCustomer">📋 View Customers</NavLink>
+                  </li>
+                </ul>
+              </>
+            )}
+          </SidebarLinkGroup>
+        </ul>
+      </div>
+    </React.Fragment>
+  )}
+</SidebarLinkGroup>
+
 
               {/* expense*/}
               <SidebarLinkGroup activecondition={pathname.includes("expense")}>

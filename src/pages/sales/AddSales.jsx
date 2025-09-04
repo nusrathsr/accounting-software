@@ -1,4 +1,3 @@
-
 // import React, { useState, useEffect, useRef } from "react";
 // import {
 //   Receipt,
@@ -21,7 +20,7 @@
 //   const n = (v) => parseFloat(v) || 0;
 
 //   const [productOptions, setProductOptions] = useState([]);
-  
+
 //   useEffect(() => {
 //     const fetchProducts = async () => {
 //       try {
@@ -30,25 +29,25 @@
 //         const products = data.flatMap((p) =>
 //           p.variants && p.variants.length > 0
 //             ? p.variants.map((v) => ({
-//                 id: v._id,
-//                 parentId: p._id,
-//                 name: `${p.name} - ${v.variantName}`,
-//                 price: Number(v.sellingPrice) || 0,
-//                 taxRate: Number(v.taxPercentage || 0),
-//                 isTaxInclusive: v.taxInclusive === true,
-//                 sizes: (v.sizeOrWeight ? [v.sizeOrWeight] : []),
-//               }))
+//               id: v._id,
+//               parentId: p._id,
+//               name: `${p.name} - ${v.variantName}`,
+//               price: Number(v.sellingPrice) || 0,
+//               taxRate: Number(v.taxPercentage || 0),
+//               isTaxInclusive: v.taxInclusive === true,
+//               sizes: (v.sizeOrWeight ? [v.sizeOrWeight] : []),
+//             }))
 //             : [
-//                 {
-//                   id: p._id,
-//                   parentId: null,
-//                   name: p.name || "Unnamed Product",
-//                   price: Number(p.sellingPrice) || 0,
-//                   taxRate: Number(p.taxPercentage) || 0,
-//                   isTaxInclusive: p.taxType === "GST IN",
-//                   sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
-//                 },
-//               ]
+//               {
+//                 id: p._id,
+//                 parentId: null,
+//                 name: p.name || "Unnamed Product",
+//                 price: Number(p.sellingPrice) || 0,
+//                 taxRate: Number(p.taxPercentage) || 0,
+//                 isTaxInclusive: p.taxType === "GST IN",
+//                 sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
+//               },
+//             ]
 //         );
 //         setProductOptions(products);
 //       } catch (err) {
@@ -106,7 +105,7 @@
 //       productName: product.name,
 //       sizeOrWeight: product.sizes?.[0] || "",
 //       quantity: "",
-//       unitPrice: Number(product.price),   
+//       unitPrice: Number(product.price),
 //       discount: "",
 //       tax: product.taxRate.toFixed(2),
 //     };
@@ -359,60 +358,329 @@
 //     }
 //   };
 
+//   // PDF Generation Function
+//   const generatePDF = (invoice) => {
+//     const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
+//     const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
+
+//     // Create a new window for PDF generation
+//     const printWindow = window.open('', '_blank');
+
+//     const pdfContent = `
+//     <!DOCTYPE html>
+//     <html>
+//     <head>
+//         <title>Invoice - ${invoice.invoiceNumber}</title>
+//         <style>
+//             * {
+//                 margin: 0;
+//                 padding: 0;
+//                 box-sizing: border-box;
+//             }
+//             body {
+//                 font-family: 'Arial', sans-serif;
+//                 line-height: 1.6;
+//                 color: #333;
+//                 background: white;
+//             }
+//             .invoice-container {
+//                 max-width: 800px;
+//                 margin: 20px auto;
+//                 padding: 30px;
+//                 background: white;
+//                 box-shadow: 0 0 10px rgba(0,0,0,0.1);
+//             }
+//             .header {
+//                 text-align: center;
+//                 margin-bottom: 30px;
+//                 border-bottom: 3px solid #2563eb;
+//                 padding-bottom: 20px;
+//             }
+//             .header h1 {
+//                 color: #2563eb;
+//                 font-size: 32px;
+//                 font-weight: bold;
+//                 margin-bottom: 10px;
+//             }
+//             .shop-info {
+//                 margin-bottom: 30px;
+//                 background: #f8fafc;
+//                 padding: 20px;
+//                 border-radius: 8px;
+//             }
+//             .invoice-details {
+//                 display: grid;
+//                 grid-template-columns: 1fr 1fr;
+//                 gap: 30px;
+//                 margin-bottom: 30px;
+//             }
+//             .invoice-info, .customer-info {
+//                 background: #f1f5f9;
+//                 padding: 20px;
+//                 border-radius: 8px;
+//             }
+//             .invoice-info h3, .customer-info h3 {
+//                 color: #1e40af;
+//                 margin-bottom: 15px;
+//                 font-size: 18px;
+//                 border-bottom: 2px solid #e2e8f0;
+//                 padding-bottom: 8px;
+//             }
+//             .info-item {
+//                 margin-bottom: 8px;
+//                 display: flex;
+//                 justify-content: space-between;
+//             }
+//             .info-label {
+//                 font-weight: 600;
+//                 color: #475569;
+//             }
+//             .info-value {
+//                 color: #1e293b;
+//                 font-weight: 500;
+//             }
+//             .items-table {
+//                 width: 100%;
+//                 border-collapse: collapse;
+//                 margin: 30px 0;
+//                 background: white;
+//                 box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+//                 border-radius: 8px;
+//                 overflow: hidden;
+//             }
+//             .items-table th {
+//                 background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+//                 color: white;
+//                 padding: 15px 10px;
+//                 text-align: left;
+//                 font-weight: 600;
+//                 font-size: 14px;
+//                 text-transform: uppercase;
+//                 letter-spacing: 0.5px;
+//             }
+//             .items-table td {
+//                 padding: 12px 10px;
+//                 border-bottom: 1px solid #e2e8f0;
+//                 font-size: 14px;
+//             }
+//             .items-table tbody tr:hover {
+//                 background: #f8fafc;
+//             }
+//             .items-table tbody tr:last-child td {
+//                 border-bottom: none;
+//             }
+//             .text-right {
+//                 text-align: right;
+//             }
+//             .text-center {
+//                 text-align: center;
+//             }
+//             .product-name {
+//                 font-weight: 600;
+//                 color: #1e293b;
+//             }
+//             .totals-section {
+//                 margin-top: 30px;
+//                 background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+//                 padding: 25px;
+//                 border-radius: 8px;
+//                 border-left: 4px solid #2563eb;
+//             }
+//             .totals-row {
+//                 display: flex;
+//                 justify-content: space-between;
+//                 align-items: center;
+//                 margin-bottom: 12px;
+//                 font-size: 16px;
+//             }
+//             .totals-row.final {
+//                 border-top: 2px solid #2563eb;
+//                 padding-top: 15px;
+//                 margin-top: 15px;
+//                 font-size: 20px;
+//                 font-weight: bold;
+//                 color: #1e40af;
+//             }
+//             .totals-label {
+//                 font-weight: 600;
+//                 color: #475569;
+//             }
+//             .totals-value {
+//                 font-weight: 700;
+//                 color: #1e293b;
+//             }
+//             .footer {
+//                 margin-top: 40px;
+//                 text-align: center;
+//                 color: #64748b;
+//                 font-size: 14px;
+//                 border-top: 1px solid #e2e8f0;
+//                 padding-top: 20px;
+//             }
+//             .payment-status {
+//                 display: inline-block;
+//                 padding: 6px 12px;
+//                 border-radius: 20px;
+//                 font-size: 12px;
+//                 font-weight: 600;
+//                 text-transform: uppercase;
+//             }
+//             .payment-paid {
+//                 background: #dcfce7;
+//                 color: #166534;
+//             }
+//             .payment-unpaid {
+//                 background: #fee2e2;
+//                 color: #dc2626;
+//             }
+//             @media print {
+//                 body { margin: 0; }
+//                 .invoice-container { 
+//                     max-width: none; 
+//                     margin: 0; 
+//                     box-shadow: none;
+//                     padding: 20px;
+//                 }
+//                 @page { 
+//                     margin: 1cm; 
+//                     size: A4;
+//                 }
+//             }
+//         </style>
+//     </head>
+//     <body>
+//         <div class="invoice-container">
+//             <div class="header">
+//                 <h1>SALES INVOICE</h1>
+//             </div>
+            
+//             <div class="shop-info">
+//                 <h2 style="color: #2563eb; margin-bottom: 10px;">Shop Name</h2>
+//                 <p style="margin-bottom: 5px;"><strong>Phone:</strong> +1234567890</p>
+//                 <p><strong>Email:</strong> shop@example.com</p>
+//             </div>
+            
+//             <div class="invoice-details">
+//                 <div class="invoice-info">
+//                     <h3>Invoice Information</h3>
+//                     <div class="info-item">
+//                         <span class="info-label">Invoice No:</span>
+//                         <span class="info-value">${invoice.invoiceNumber}</span>
+//                     </div>
+//                     <div class="info-item">
+//                         <span class="info-label">Date:</span>
+//                         <span class="info-value">${formattedDate}</span>
+//                     </div>
+//                     <div class="info-item">
+//                         <span class="info-label">Payment Mode:</span>
+//                         <span class="info-value" style="text-transform: capitalize;">${invoice.paymentMode || "Cash"}</span>
+//                     </div>
+//                     <div class="info-item">
+//                         <span class="info-label">Payment Status:</span>
+//                         <span class="payment-status ${invoice.paymentStatus ? 'payment-paid' : 'payment-unpaid'}">
+//                             ${invoice.paymentStatus ? 'Paid' : 'Unpaid'}
+//                         </span>
+//                     </div>
+//                 </div>
+                
+//                 <div class="customer-info">
+//                     <h3>Customer Information</h3>
+//                     <div class="info-item">
+//                         <span class="info-label">Name:</span>
+//                         <span class="info-value">${invoice.customerName || "—"}</span>
+//                     </div>
+//                     <div class="info-item">
+//                         <span class="info-label">Mobile:</span>
+//                         <span class="info-value">${invoice.number || "—"}</span>
+//                     </div>
+//                 </div>
+//             </div>
+            
+//             <table class="items-table">
+//                 <thead>
+//                     <tr>
+//                         <th style="width: 35%;">Product</th>
+//                         <th class="text-center" style="width: 10%;">Qty</th>
+//                         <th class="text-right" style="width: 12%;">Unit ₹</th>
+//                         <th class="text-center" style="width: 10%;">Disc %</th>
+//                         <th class="text-center" style="width: 10%;">GST %</th>
+//                         <th class="text-right" style="width: 13%;">Line Total ₹</th>
+//                         <th class="text-right" style="width: 10%;">Final ₹</th>
+//                     </tr>
+//                 </thead>
+//                 <tbody>
+//                     ${invoice.products.map((item) => {
+//       const basePrice = n(item.unitPrice);
+//       const discountPercent = basePrice > 0 ? ((n(item.discount) / basePrice) * 100) : 0;
+//       const effectivePrice = basePrice - n(item.discount);
+//       const lineTotal = n(item.quantity) * effectivePrice;
+//       const taxPercent = effectivePrice > 0 ? ((n(item.tax) / lineTotal) * 100) : 0;
+//       const finalAmount = lineTotal + n(item.tax);
+
+//       return `
+//                         <tr>
+//                             <td class="product-name">${item.name || "N/A"}</td>
+//                             <td class="text-center">${item.quantity}</td>
+//                             <td class="text-right">₹${basePrice.toFixed(2)}</td>
+//                             <td class="text-center">${discountPercent.toFixed(1)}%</td>
+//                             <td class="text-center">${taxPercent.toFixed(1)}%</td>
+//                             <td class="text-right">₹${lineTotal.toFixed(2)}</td>
+//                             <td class="text-right"><strong>₹${finalAmount.toFixed(2)}</strong></td>
+//                         </tr>`;
+//     }).join('')}
+//                 </tbody>
+//             </table>
+            
+//             <div class="totals-section">
+//                 <div class="totals-row">
+//                     <span class="totals-label">Subtotal:</span>
+//                     <span class="totals-value">₹${invoice.subtotal.toFixed(2)}</span>
+//                 </div>
+//                 <div class="totals-row">
+//                     <span class="totals-label">Total Tax:</span>
+//                     <span class="totals-value">₹${invoice.tax.toFixed(2)}</span>
+//                 </div>
+//                 <div class="totals-row final">
+//                     <span class="totals-label">Total Amount:</span>
+//                     <span class="totals-value">₹${invoice.totalAmount.toFixed(2)}</span>
+//                 </div>
+//             </div>
+            
+//             <div class="footer">
+//                 <p>Thank you for your business!</p>
+//                 <p style="margin-top: 10px; font-size: 12px;">
+//                     This is a computer-generated invoice. Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
+//                 </p>
+//             </div>
+//         </div>
+        
+//         <script>
+//             window.onload = function() {
+//                 window.print();
+//             }
+//         </script>
+//     </body>
+//     </html>
+//     `;
+
+//     printWindow.document.write(pdfContent);
+//     printWindow.document.close();
+//   };
+
 //   const handleDownload = async () => {
 //     try {
 //       const res = await fetch("http://localhost:4000/api/sales/latest");
 //       const invoice = await res.json();
 //       if (!invoice) {
-//         alert("No invoice found!");
+//         showAlert("Error!", "No invoice found!", "error");
 //         return;
 //       }
 
-//       const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
-//       const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
-
-//       // Create a simple text-based invoice for download
-//       let content = `SALES INVOICE\n\n`;
-//       content += `Shop Name\n`;
-//       content += `Phone: +1234567890\n`;
-//       content += `Email: shop@example.com\n\n`;
-//       content += `Invoice No: ${invoice.invoiceNumber}\n`;
-//       content += `Date: ${formattedDate}\n`;
-//       content += `Bill To: ${invoice.customerName || "—"}\n`;
-//       content += `Mobile: ${invoice.number || "—"}\n`;
-//       content += `Payment Mode: ${invoice.paymentMode || "—"}\n`;
-//       content += `Payment Status: ${invoice.paymentStatus ? "Paid" : "Unpaid"}\n\n`;
-//       content += `ITEMS:\n`;
-//       content += `Product\t\tQty\tUnit ₹\tDisc %\tGST %\tTotal ₹\n`;
-//       content += `${"=".repeat(70)}\n`;
-
-//       invoice.products.forEach((item) => {
-//         const basePrice = n(item.unitPrice);
-//         const discountAmount = (basePrice * n(item.discount)) / 100;
-//         const effectivePrice = basePrice - discountAmount;
-//         const lineTotal = n(item.quantity) * effectivePrice;
-//         const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
-
-//         content += `${item.name}\t${item.quantity}\t${basePrice.toFixed(2)}\t${item.discount || 0}\t${item.tax || 0}\t${lineWithTax.toFixed(2)}\n`;
-//       });
-
-//       content += `\n${"=".repeat(70)}\n`;
-//       content += `Subtotal: ₹${invoice.subtotal.toFixed(2)}\n`;
-//       content += `Tax Total: ₹${invoice.tax.toFixed(2)}\n`;
-//       content += `Total Amount: ₹${invoice.totalAmount.toFixed(2)}\n`;
-
-//       const blob = new Blob([content], { type: 'text/plain' });
-//       const url = URL.createObjectURL(blob);
-//       const a = document.createElement('a');
-//       a.href = url;
-//       a.download = `invoice-${invoice.invoiceNumber}.txt`;
-//       document.body.appendChild(a);
-//       a.click();
-//       document.body.removeChild(a);
-//       URL.revokeObjectURL(url);
+//       // Generate and download PDF
+//       generatePDF(invoice);
 //     } catch (err) {
 //       console.error(err);
-//       alert("Error fetching the latest invoice.");
+//       showAlert("Error!", "Error fetching the latest invoice.", "error");
 //     }
 //   };
 
@@ -421,83 +689,14 @@
 //       const res = await fetch("http://localhost:4000/api/sales/latest");
 //       const invoice = await res.json();
 //       if (!invoice) {
-//         alert("No invoice found!");
+//         showAlert("Error!", "No invoice found!", "error");
 //         return;
 //       }
 
-//       const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
-//       const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
-
-//       const printableContent = `
-//       <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-//         <h2 style="text-align:center; color: #333; margin-bottom: 30px;">Sales Invoice</h2>
-//         <div style="margin-bottom: 20px;">
-//           <p><strong>Invoice No:</strong> ${invoice.invoiceNumber}</p>
-//           <p><strong>Date:</strong> ${formattedDate}</p>
-//           <p><strong>Customer:</strong> ${invoice.customerName || "—"}</p>
-//           <p><strong>Mobile:</strong> ${invoice.number || "—"}</p>
-//           <p><strong>Payment Mode:</strong> ${invoice.paymentMode || "—"}</p>
-//           <p><strong>Payment Status:</strong> ${invoice.paymentStatus ? "Paid" : "Unpaid"}</p>
-//         </div>
-//         <table border="1" cellspacing="0" cellpadding="8" width="100%" style="border-collapse:collapse; margin-top:20px;">
-//           <thead style="background-color: #f5f5f5;">
-//             <tr>
-//               <th style="text-align: left;">Product</th>
-//               <th style="text-align: center;">Qty</th>
-//               <th style="text-align: right;">Unit ₹</th>
-//               <th style="text-align: center;">Disc %</th>
-//               <th style="text-align: center;">GST %</th>
-//               <th style="text-align: right;">Total ₹</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             ${invoice.products
-//               .map((item) => {
-//                 const basePrice = n(item.unitPrice);
-//                 const discountAmount = (basePrice * n(item.discount)) / 100;
-//                 const effectivePrice = basePrice - discountAmount;
-//                 const lineTotal = n(item.quantity) * effectivePrice;
-//                 const lineWithTax = lineTotal + (lineTotal * n(item.tax)) / 100;
-//                 return `<tr>
-//                       <td>${item.name || "N/A"}</td>
-//                       <td style="text-align:center;">${item.quantity}</td>
-//                       <td style="text-align:right;">₹${basePrice.toFixed(2)}</td>
-//                       <td style="text-align:center;">${item.discount || 0}%</td>
-//                       <td style="text-align:center;">${item.tax || 0}%</td>
-//                       <td style="text-align:right;">₹${lineWithTax.toFixed(2)}</td>
-//                     </tr>`;
-//               })
-//               .join("")}
-//           </tbody>
-//         </table>
-//         <div style="margin-top: 20px; text-align: right;">
-//           <p style="font-size: 16px;"><strong>Subtotal:</strong> ₹${invoice.subtotal.toFixed(2)}</p>
-//           <p style="font-size: 16px;"><strong>Tax Total:</strong> ₹${invoice.tax.toFixed(2)}</p>
-//           <p style="font-size: 18px; font-weight: bold; color: #2563eb;"><strong>Total Amount:</strong> ₹${invoice.totalAmount.toFixed(2)}</p>
-//         </div>
-//       </div>
-//     `;
-
-//       const printWindow = window.open("", "_blank");
-//       printWindow.document.write(`
-//         <html>
-//           <head>
-//             <title>Invoice - ${invoice.invoiceNumber}</title>
-//             <style>
-//               @media print {
-//                 body { margin: 0; }
-//                 @page { margin: 1cm; }
-//               }
-//             </style>
-//           </head>
-//           <body>${printableContent}</body>
-//         </html>
-//       `);
-//       printWindow.document.close();
-//       printWindow.print();
+//       generatePDF(invoice);
 //     } catch (err) {
 //       console.error(err);
-//       alert("Error fetching the latest invoice for printing.");
+//       showAlert("Error!", "Error fetching the latest invoice for printing.", "error");
 //     }
 //   };
 
@@ -505,7 +704,7 @@
 //     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
 //       {/* Custom Alert Modal */}
 //       <CustomAlert />
-      
+
 //       <div className="max-w-7xl mx-auto">
 //         {/* Header */}
 //         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
@@ -524,15 +723,15 @@
 //                 </div>
 //               </div>
 //               <div className="flex space-x-3">
-//                 <button 
-//                   onClick={handleDownload} 
+//                 <button
+//                   onClick={handleDownload}
 //                   className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
 //                 >
 //                   <Download className="w-4 h-4" />
-//                   Download
+//                   Download PDF
 //                 </button>
-//                 <button 
-//                   onClick={handlePrint} 
+//                 <button
+//                   onClick={handlePrint}
 //                   className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
 //                 >
 //                   <Printer className="w-4 h-4" />
@@ -623,158 +822,188 @@
 //             </div>
 
 //             {/* Items Section */}
-//             <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
-//               <div className="p-6">
-//                 <div className="flex items-center justify-between mb-6">
-//                    <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-//                   <ShoppingCart className="w-5 h-5 text-blue-600" />
-//                   Invoice Items
-//                 </h2>
+//             <div className="mb-10">
+//               <div className="flex items-center gap-3 mb-6">
+//                 <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-2">
+//                   <ShoppingCart className="w-5 h-5 text-white" />
 //                 </div>
-//                 <h2 className="text-xl font-semibold text-gray-900">Items</h2>
+//                 <h2 className="text-xl font-semibold text-gray-900">Invoice Items</h2>
 //               </div>
 
-//               <div className="space-y-4">
-//                 {formData.items.map((item, index) => {
-//                   const filteredOptions = dropdownState[index]?.searchTerm
-//                     ? productOptions.filter((p) =>
-//                       p.name.toLowerCase().includes(dropdownState[index].searchTerm.toLowerCase())
-//                     )
-//                     : productOptions;
+//               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+//                 <div className="space-y-4 p-6">
+//                   {formData.items.map((item, index) => {
+//                     const filteredOptions = dropdownState[index]?.searchTerm
+//                       ? productOptions.filter((p) =>
+//                         p.name.toLowerCase().includes(dropdownState[index].searchTerm.toLowerCase())
+//                       )
+//                       : productOptions;
 
-//                   return (
-//                     <div key={index} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-//                       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
-//                         {/* Product Search */}
-//                         <div className="lg:col-span-4 relative">
-//                           <label className="block text-sm font-medium text-gray-700 mb-2">Product</label>
-//                           <input
-//                             type="text"
-//                             placeholder="Enter or search product..."
-//                             value={item.productName}
-//                             onChange={(e) => onSearchChange(index, e.target.value)}
-//                             onFocus={() => {
-//                               const updatedDropdown = [...dropdownState];
-//                               updatedDropdown[index].open = true;
-//                               setDropdownState(updatedDropdown);
-//                             }}
-//                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
-//                           />
-//                           {dropdownState[index]?.open && (
-//                             <div className="absolute z-20 bg-white border border-gray-200 w-full max-h-48 overflow-auto mt-1 rounded-xl shadow-lg">
-//                               {filteredOptions.length > 0 ? (
-//                                 filteredOptions.map((product) => (
-//                                   <div
-//                                     key={product.id}
-//                                     onMouseDown={(e) => {
-//                                       e.preventDefault();
-//                                       handleProductSelect(index, product);
-//                                     }}
-//                                     className="cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 text-sm"
-//                                   >
-//                                     {product.name} - ₹{Number(product.price).toFixed(2)} {product.isTaxInclusive ? "(Tax Incl.)" : ""}
-//                                   </div>
-//                                 ))
-//                               ) : (
-//                                 <div className="px-4 py-3 text-gray-500 text-sm">No products found</div>
+//                     return (
+//                       <div key={index} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+//                         <div className="grid grid-cols-1 gap-4">
+//                           {/* First Row - Product and Size */}
+//                           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+//                             {/* Product Search */}
+//                             <div className="lg:col-span-3 relative">
+//                               <label className="block text-sm font-medium text-gray-700 mb-2">Product</label>
+//                               <input
+//                                 type="text"
+//                                 placeholder="Enter or search product..."
+//                                 value={item.productName}
+//                                 onChange={(e) => onSearchChange(index, e.target.value)}
+//                                 onFocus={() => {
+//                                   const updatedDropdown = [...dropdownState];
+//                                   updatedDropdown[index].open = true;
+//                                   setDropdownState(updatedDropdown);
+//                                 }}
+//                                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+//                               />
+//                               {dropdownState[index]?.open && (
+//                                 <div className="absolute z-20 bg-white border border-gray-200 w-full max-h-48 overflow-auto mt-1 rounded-xl shadow-lg">
+//                                   {filteredOptions.length > 0 ? (
+//                                     filteredOptions.map((product) => (
+//                                       <div
+//                                         key={product.id}
+//                                         onMouseDown={(e) => {
+//                                           e.preventDefault();
+//                                           handleProductSelect(index, product);
+//                                         }}
+//                                         className="cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 text-sm"
+//                                       >
+//                                         {product.name}
+//                                       </div>
+//                                     ))
+//                                   ) : (
+//                                     <div className="px-4 py-3 text-gray-500 text-sm">No products found</div>
+//                                   )}
+//                                 </div>
 //                               )}
 //                             </div>
-//                           )}
-//                         </div>
 
-//                         {/* Size (if applicable) */}
-//                         {item.productId && productOptions.find(p => p.id === item.productId)?.sizes?.some(s => s.trim() !== "") && (
-//                           <div className="lg:col-span-1">
-//                             <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
-//                             <select
-//                               value={item.size || ""}
-//                               onChange={(e) => handleItemChange(index, "size", e.target.value)}
-//                               className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
-//                               required={true}
-//                             >
-//                               <option value="">Select Size</option>
-//                               {productOptions
-//                                 .find(p => p.id === item.productId)
-//                                 .sizes.filter(s => s.trim() !== "")
-//                                 .map((s, i) => (
-//                                   <option key={i} value={s}>{s}</option>
-//                                 ))}
-//                             </select>
+//                             {/* Size (if applicable) */}
+//                             {item.productId && productOptions.find(p => p.id === item.productId)?.sizes?.some(s => s.trim() !== "") && (
+//                               <div className="lg:col-span-1">
+//                                 <label className="block text-sm font-medium text-gray-700 mb-2">Size/Weight</label>
+//                                 <select
+//                                   value={item.size || ""}
+//                                   onChange={(e) => handleItemChange(index, "size", e.target.value)}
+//                                   className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+//                                   required={true}
+//                                 >
+//                                   <option value="">Select Size</option>
+//                                   {productOptions
+//                                     .find(p => p.id === item.productId)
+//                                     .sizes.filter(s => s.trim() !== "")
+//                                     .map((s, i) => (
+//                                       <option key={i} value={s}>{s}</option>
+//                                     ))}
+//                                 </select>
+//                               </div>
+//                             )}
+
+//                             {/* Remove Button */}
+//                             <div className="lg:col-span-1 flex items-end">
+//                               <button
+//                                 type="button"
+//                                 onClick={() => removeItem(index)}
+//                                 className="w-full px-3 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-200 flex items-center justify-center"
+//                               >
+//                                 <X className="w-4 h-4" />
+//                               </button>
+//                             </div>
 //                           </div>
-//                         )}
 
-//                         {/* Quantity */}
-//                         <div className="lg:col-span-1">
-//                           <label className="block text-sm font-medium text-gray-700 mb-2">Qty</label>
-//                           <input
-//                             type="number"
-//                             placeholder="Qty"
-//                             value={item.quantity}
-//                             onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
-//                             className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
-//                           />
-//                         </div>
+//                           {/* Second Row - Quantity, Price, Discount, etc. */}
+//                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+//                             {/* Quantity */}
+//                             <div>
+//                               <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+//                               <input
+//                                 type="number"
+//                                 placeholder="Qty"
+//                                 value={item.quantity}
+//                                 onChange={(e) => handleItemChange(index, "quantity", e.target.value)}
+//                                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+//                               />
+//                             </div>
 
-//                         {/* Unit Price */}
-//                         <div className="lg:col-span-1">
-//                           <label className="block text-sm font-medium text-gray-700 mb-2">Unit ₹</label>
-//                           <input
-//                             type="number"
-//                             placeholder="Unit ₹"
-//                             value={item.unitPrice}
-//                             onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)}
-//                             className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
-//                           />
-//                         </div>
+//                             {/* Unit Price */}
+//                             <div>
+//                               <label className="block text-sm font-medium text-gray-700 mb-2">Unit Price ₹</label>
+//                               <input
+//                                 type="number"
+//                                 step="0.01"
+//                                 placeholder="Unit ₹"
+//                                 value={item.unitPrice}
+//                                 onChange={(e) => handleItemChange(index, "unitPrice", e.target.value)}
+//                                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+//                               />
+//                             </div>
 
-//                         {/* Discount */}
-//                         <div className="lg:col-span-1">
-//                           <label className="block text-sm font-medium text-gray-700 mb-2">Disc %</label>
-//                           <input
-//                             type="number"
-//                             placeholder="Disc %"
-//                             value={item.discount}
-//                             onChange={(e) => handleItemChange(index, "discount", e.target.value)}
-//                             className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
-//                           />
-//                         </div>
+//                             {/* Discount */}
+//                             <div>
+//                               <label className="block text-sm font-medium text-gray-700 mb-2">Discount %</label>
+//                               <input
+//                                 type="number"
+//                                 step="0.01"
+//                                 placeholder="Disc %"
+//                                 value={item.discount}
+//                                 onChange={(e) => handleItemChange(index, "discount", e.target.value)}
+//                                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+//                               />
+//                             </div>
 
-//                         {/* GST */}
-//                         <div className="lg:col-span-1">
-//                           <label className="block text-sm font-medium text-gray-700 mb-2">GST %</label>
-//                           <input
-//                             type="number"
-//                             placeholder="GST %"
-//                             value={item.tax}
-//                             onChange={(e) => handleItemChange(index, "tax", e.target.value)}
-//                             className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
-//                           />
-//                         </div>
+//                             {/* GST */}
+//                             <div>
+//                               <label className="block text-sm font-medium text-gray-700 mb-2">GST %</label>
+//                               <input
+//                                 type="number"
+//                                 step="0.01"
+//                                 placeholder="GST %"
+//                                 value={item.tax}
+//                                 onChange={(e) => handleItemChange(index, "tax", e.target.value)}
+//                                 className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+//                               />
+//                             </div>
 
-//                         {/* Effective Price */}
-//                         <div className="lg:col-span-1">
-//                           <label className="block text-sm font-medium text-gray-700 mb-2">Price ₹</label>
-//                           <div className="w-full px-3 py-3 border border-gray-200 rounded-xl bg-gray-100 font-medium text-gray-700 text-right text-base">
-//                             ₹{getEffectiveUnitPrice(item).toFixed(2)}
+//                             {/* Effective Price */}
+//                             <div>
+//                               <label className="block text-sm font-medium text-gray-700 mb-2">Effective Price ₹</label>
+//                               <div className="w-full px-3 py-3 border border-gray-200 rounded-xl bg-gray-100 font-medium text-gray-700 text-right text-base">
+//                                 ₹{getEffectiveUnitPrice(item).toFixed(2)}
+//                               </div>
+//                             </div>
+
+//                             {/* Line Total */}
+//                             <div>
+//                               <label className="block text-sm font-medium text-gray-700 mb-2">Line Total ₹</label>
+//                               <div className="w-full px-3 py-3 border border-gray-200 rounded-xl bg-blue-50 font-bold text-blue-700 text-right text-base">
+//                                 ₹{(n(item.quantity) * getEffectiveUnitPrice(item) + (n(item.quantity) * getEffectiveUnitPrice(item) * n(item.tax)) / 100).toFixed(2)}
+//                               </div>
+//                             </div>
 //                           </div>
-//                         </div>
-
-//                         {/* Remove Button */}
-//                         <div className="lg:col-span-1">
-//                           <button
-//                             type="button"
-//                             onClick={() => removeItem(index)}
-//                             className="w-full px-3 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-200 flex items-center justify-center"
-//                           >
-//                             <X className="w-4 h-4" />
-//                           </button>
 //                         </div>
 //                       </div>
-//                     </div>
-//                   );
-//                 })}
+//                     );
+//                   })}
 
-//  {/* Payment Information Section - Added after Items */}
+//                   {/* Add Item Button */}
+//                   <div className="flex justify-center pt-4">
+//                     <button
+//                       type="button"
+//                       onClick={addItem}
+//                       className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+//                     >
+//                       <Plus className="w-4 h-4" />
+//                       Add Item
+//                     </button>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Payment Information Section */}
 //             <div className="mb-10">
 //               <div className="flex items-center gap-3 mb-6">
 //                 <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-2">
@@ -829,36 +1058,25 @@
 //               </div>
 //             </div>
 
-//                 {/* Add Item Button */}
-//                 <div className="flex justify-center">
-//                   <button
-//                     type="button"
-//                     onClick={addItem}
-//                     className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
-//                   >
-//                     <Plus className="w-4 h-4" />
-//                     Add Item
-//                   </button>
-//                 </div>
-//               </div>
-//             </div>
-
-           
 //             {/* Totals Section */}
 //             <div className="mb-10">
 //               <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-100">
-//                 <div className="flex flex-col items-end space-y-2">
-//                   <div className="text-lg font-medium text-gray-700">
-//                     Subtotal: <span className="text-blue-600 font-semibold">₹{calculateSubtotal().toFixed(2)}</span>
+//                 <div className="flex flex-col items-end space-y-3">
+//                   <div className="text-lg font-medium text-gray-700 flex justify-between w-full max-w-md">
+//                     <span>Subtotal:</span>
+//                     <span className="text-blue-600 font-semibold">₹{calculateSubtotal().toFixed(2)}</span>
 //                   </div>
-//                   <div className="text-lg font-medium text-gray-700">
-//                     Discount: <span className="text-red-600 font-semibold">₹{calculateDiscountTotal().toFixed(2)}</span>
+//                   <div className="text-lg font-medium text-gray-700 flex justify-between w-full max-w-md">
+//                     <span>Total Discount:</span>
+//                     <span className="text-red-600 font-semibold">₹{calculateDiscountTotal().toFixed(2)}</span>
 //                   </div>
-//                   <div className="text-lg font-medium text-gray-700">
-//                     GST: <span className="text-green-600 font-semibold">₹{calculateTaxTotal().toFixed(2)}</span>
+//                   <div className="text-lg font-medium text-gray-700 flex justify-between w-full max-w-md">
+//                     <span>Total GST:</span>
+//                     <span className="text-green-600 font-semibold">₹{calculateTaxTotal().toFixed(2)}</span>
 //                   </div>
-//                   <div className="text-xl font-bold text-gray-900 border-t pt-2">
-//                     Total: <span className="text-blue-700">₹{calculateTotal().toFixed(2)}</span>
+//                   <div className="text-xl font-bold text-gray-900 border-t pt-3 flex justify-between w-full max-w-md">
+//                     <span>Grand Total:</span>
+//                     <span className="text-blue-700">₹{calculateTotal().toFixed(2)}</span>
 //                   </div>
 //                 </div>
 //               </div>
@@ -903,7 +1121,7 @@ export default function AddSalesInvoice() {
   const n = (v) => parseFloat(v) || 0;
 
   const [productOptions, setProductOptions] = useState([]);
-  
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -912,25 +1130,25 @@ export default function AddSalesInvoice() {
         const products = data.flatMap((p) =>
           p.variants && p.variants.length > 0
             ? p.variants.map((v) => ({
-                id: v._id,
-                parentId: p._id,
-                name: `${p.name} - ${v.variantName}`,
-                price: Number(v.sellingPrice) || 0,
-                taxRate: Number(v.taxPercentage || 0),
-                isTaxInclusive: v.taxInclusive === true,
-                sizes: (v.sizeOrWeight ? [v.sizeOrWeight] : []),
-              }))
+              id: v._id,
+              parentId: p._id,
+              name: `${p.name} - ${v.variantName}`,
+              price: Number(v.sellingPrice) || 0,
+              taxRate: Number(v.taxPercentage || 0),
+              isTaxInclusive: v.taxInclusive === true,
+              sizes: (v.sizeOrWeight ? [v.sizeOrWeight] : []),
+            }))
             : [
-                {
-                  id: p._id,
-                  parentId: null,
-                  name: p.name || "Unnamed Product",
-                  price: Number(p.sellingPrice) || 0,
-                  taxRate: Number(p.taxPercentage) || 0,
-                  isTaxInclusive: p.taxType === "GST IN",
-                  sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
-                },
-              ]
+              {
+                id: p._id,
+                parentId: null,
+                name: p.name || "Unnamed Product",
+                price: Number(p.sellingPrice) || 0,
+                taxRate: Number(p.taxPercentage) || 0,
+                isTaxInclusive: p.taxType === "GST IN",
+                sizes: (p.sizes || []).map((s) => s?.size?.trim() || ""),
+              },
+            ]
         );
         setProductOptions(products);
       } catch (err) {
@@ -945,8 +1163,13 @@ export default function AddSalesInvoice() {
     customerName: "",
     number: "",
     saleDate: new Date().toISOString().slice(0, 10),
-    paymentMode: "cash",
+    paymentMode: "single",
     paymentStatus: false,
+    singlePaymentMode: "cash",
+    splitPayments: [
+      { method: "cash", amount: "", paid: false },
+      { method: "upi", amount: "", paid: false }
+    ],
     items: [
       {
         productId: null,
@@ -988,7 +1211,7 @@ export default function AddSalesInvoice() {
       productName: product.name,
       sizeOrWeight: product.sizes?.[0] || "",
       quantity: "",
-      unitPrice: Number(product.price),   
+      unitPrice: Number(product.price),
       discount: "",
       tax: product.taxRate.toFixed(2),
     };
@@ -1008,6 +1231,44 @@ export default function AddSalesInvoice() {
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: checked }));
+  };
+
+  const handleSplitPaymentChange = (index, field, value) => {
+    const updatedSplitPayments = [...formData.splitPayments];
+    updatedSplitPayments[index][field] = value;
+    setFormData((prev) => ({ ...prev, splitPayments: updatedSplitPayments }));
+  };
+
+  const addSplitPayment = () => {
+    setFormData((prev) => ({
+      ...prev,
+      splitPayments: [...prev.splitPayments, { method: "cash", amount: "", paid: false }]
+    }));
+  };
+
+  const removeSplitPayment = (index) => {
+    if (formData.splitPayments.length > 1) {
+      setFormData((prev) => ({
+        ...prev,
+        splitPayments: prev.splitPayments.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  const getTotalSplitAmount = () => {
+    return formData.splitPayments.reduce((sum, payment) => sum + (parseFloat(payment.amount) || 0), 0);
+  };
+
+  const getRemainingAmount = () => {
+    const total = calculateTotal();
+    const splitTotal = getTotalSplitAmount();
+    return Math.max(0, total - splitTotal);
+  };
+
+  const isSplitPaymentComplete = () => {
+    const total = calculateTotal();
+    const splitTotal = getTotalSplitAmount();
+    return Math.abs(total - splitTotal) < 0.01;
   };
 
   const addItem = () => {
@@ -1088,7 +1349,6 @@ export default function AddSalesInvoice() {
     setAlertState(prev => ({ ...prev, show: false }));
   };
 
-  // Custom Sweet Alert Component
   const CustomAlert = () => {
     if (!alertState.show) return null;
 
@@ -1207,7 +1467,11 @@ export default function AddSalesInvoice() {
       tax: totalTax,
       totalAmount,
       paymentMode: formData.paymentMode,
-      paymentStatus: formData.paymentStatus
+      paymentStatus: formData.paymentStatus,
+      ...(formData.paymentMode === "single" 
+        ? { singlePaymentMode: formData.singlePaymentMode }
+        : { splitPayments: formData.splitPayments.filter(payment => payment.amount && parseFloat(payment.amount) > 0) }
+      )
     };
 
     try {
@@ -1227,8 +1491,13 @@ export default function AddSalesInvoice() {
           customerName: "",
           number: "",
           saleDate: new Date().toISOString().slice(0, 10),
-          paymentMode: "cash",
+          paymentMode: "single",
           paymentStatus: false,
+          singlePaymentMode: "cash",
+          splitPayments: [
+            { method: "cash", amount: "", paid: false },
+            { method: "upi", amount: "", paid: false }
+          ],
           items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
         });
         setDropdownState([{ open: false, searchTerm: "" }]);
@@ -1241,315 +1510,6 @@ export default function AddSalesInvoice() {
     }
   };
 
-  // PDF Generation Function
-  const generatePDF = (invoice) => {
-    const invoiceDate = invoice.saleDate ? new Date(invoice.saleDate) : new Date();
-    const formattedDate = isNaN(invoiceDate.getTime()) ? new Date().toLocaleDateString() : invoiceDate.toLocaleDateString();
-
-    // Create a new window for PDF generation
-    const printWindow = window.open('', '_blank');
-    
-    const pdfContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Invoice - ${invoice.invoiceNumber}</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            body {
-                font-family: 'Arial', sans-serif;
-                line-height: 1.6;
-                color: #333;
-                background: white;
-            }
-            .invoice-container {
-                max-width: 800px;
-                margin: 20px auto;
-                padding: 30px;
-                background: white;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            }
-            .header {
-                text-align: center;
-                margin-bottom: 30px;
-                border-bottom: 3px solid #2563eb;
-                padding-bottom: 20px;
-            }
-            .header h1 {
-                color: #2563eb;
-                font-size: 32px;
-                font-weight: bold;
-                margin-bottom: 10px;
-            }
-            .shop-info {
-                margin-bottom: 30px;
-                background: #f8fafc;
-                padding: 20px;
-                border-radius: 8px;
-            }
-            .invoice-details {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 30px;
-                margin-bottom: 30px;
-            }
-            .invoice-info, .customer-info {
-                background: #f1f5f9;
-                padding: 20px;
-                border-radius: 8px;
-            }
-            .invoice-info h3, .customer-info h3 {
-                color: #1e40af;
-                margin-bottom: 15px;
-                font-size: 18px;
-                border-bottom: 2px solid #e2e8f0;
-                padding-bottom: 8px;
-            }
-            .info-item {
-                margin-bottom: 8px;
-                display: flex;
-                justify-content: space-between;
-            }
-            .info-label {
-                font-weight: 600;
-                color: #475569;
-            }
-            .info-value {
-                color: #1e293b;
-                font-weight: 500;
-            }
-            .items-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin: 30px 0;
-                background: white;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                border-radius: 8px;
-                overflow: hidden;
-            }
-            .items-table th {
-                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-                color: white;
-                padding: 15px 10px;
-                text-align: left;
-                font-weight: 600;
-                font-size: 14px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-            .items-table td {
-                padding: 12px 10px;
-                border-bottom: 1px solid #e2e8f0;
-                font-size: 14px;
-            }
-            .items-table tbody tr:hover {
-                background: #f8fafc;
-            }
-            .items-table tbody tr:last-child td {
-                border-bottom: none;
-            }
-            .text-right {
-                text-align: right;
-            }
-            .text-center {
-                text-align: center;
-            }
-            .product-name {
-                font-weight: 600;
-                color: #1e293b;
-            }
-            .totals-section {
-                margin-top: 30px;
-                background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-                padding: 25px;
-                border-radius: 8px;
-                border-left: 4px solid #2563eb;
-            }
-            .totals-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 12px;
-                font-size: 16px;
-            }
-            .totals-row.final {
-                border-top: 2px solid #2563eb;
-                padding-top: 15px;
-                margin-top: 15px;
-                font-size: 20px;
-                font-weight: bold;
-                color: #1e40af;
-            }
-            .totals-label {
-                font-weight: 600;
-                color: #475569;
-            }
-            .totals-value {
-                font-weight: 700;
-                color: #1e293b;
-            }
-            .footer {
-                margin-top: 40px;
-                text-align: center;
-                color: #64748b;
-                font-size: 14px;
-                border-top: 1px solid #e2e8f0;
-                padding-top: 20px;
-            }
-            .payment-status {
-                display: inline-block;
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                text-transform: uppercase;
-            }
-            .payment-paid {
-                background: #dcfce7;
-                color: #166534;
-            }
-            .payment-unpaid {
-                background: #fee2e2;
-                color: #dc2626;
-            }
-            @media print {
-                body { margin: 0; }
-                .invoice-container { 
-                    max-width: none; 
-                    margin: 0; 
-                    box-shadow: none;
-                    padding: 20px;
-                }
-                @page { 
-                    margin: 1cm; 
-                    size: A4;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="invoice-container">
-            <div class="header">
-                <h1>SALES INVOICE</h1>
-            </div>
-            
-            <div class="shop-info">
-                <h2 style="color: #2563eb; margin-bottom: 10px;">Shop Name</h2>
-                <p style="margin-bottom: 5px;"><strong>Phone:</strong> +1234567890</p>
-                <p><strong>Email:</strong> shop@example.com</p>
-            </div>
-            
-            <div class="invoice-details">
-                <div class="invoice-info">
-                    <h3>Invoice Information</h3>
-                    <div class="info-item">
-                        <span class="info-label">Invoice No:</span>
-                        <span class="info-value">${invoice.invoiceNumber}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Date:</span>
-                        <span class="info-value">${formattedDate}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Payment Mode:</span>
-                        <span class="info-value" style="text-transform: capitalize;">${invoice.paymentMode || "Cash"}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Payment Status:</span>
-                        <span class="payment-status ${invoice.paymentStatus ? 'payment-paid' : 'payment-unpaid'}">
-                            ${invoice.paymentStatus ? 'Paid' : 'Unpaid'}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="customer-info">
-                    <h3>Customer Information</h3>
-                    <div class="info-item">
-                        <span class="info-label">Name:</span>
-                        <span class="info-value">${invoice.customerName || "—"}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Mobile:</span>
-                        <span class="info-value">${invoice.number || "—"}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th style="width: 35%;">Product</th>
-                        <th class="text-center" style="width: 10%;">Qty</th>
-                        <th class="text-right" style="width: 12%;">Unit ₹</th>
-                        <th class="text-center" style="width: 10%;">Disc %</th>
-                        <th class="text-center" style="width: 10%;">GST %</th>
-                        <th class="text-right" style="width: 13%;">Line Total ₹</th>
-                        <th class="text-right" style="width: 10%;">Final ₹</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${invoice.products.map((item) => {
-                        const basePrice = n(item.unitPrice);
-                        const discountPercent = basePrice > 0 ? ((n(item.discount) / basePrice) * 100) : 0;
-                        const effectivePrice = basePrice - n(item.discount);
-                        const lineTotal = n(item.quantity) * effectivePrice;
-                        const taxPercent = effectivePrice > 0 ? ((n(item.tax) / lineTotal) * 100) : 0;
-                        const finalAmount = lineTotal + n(item.tax);
-                        
-                        return `
-                        <tr>
-                            <td class="product-name">${item.name || "N/A"}</td>
-                            <td class="text-center">${item.quantity}</td>
-                            <td class="text-right">₹${basePrice.toFixed(2)}</td>
-                            <td class="text-center">${discountPercent.toFixed(1)}%</td>
-                            <td class="text-center">${taxPercent.toFixed(1)}%</td>
-                            <td class="text-right">₹${lineTotal.toFixed(2)}</td>
-                            <td class="text-right"><strong>₹${finalAmount.toFixed(2)}</strong></td>
-                        </tr>`;
-                    }).join('')}
-                </tbody>
-            </table>
-            
-            <div class="totals-section">
-                <div class="totals-row">
-                    <span class="totals-label">Subtotal:</span>
-                    <span class="totals-value">₹${invoice.subtotal.toFixed(2)}</span>
-                </div>
-                <div class="totals-row">
-                    <span class="totals-label">Total Tax:</span>
-                    <span class="totals-value">₹${invoice.tax.toFixed(2)}</span>
-                </div>
-                <div class="totals-row final">
-                    <span class="totals-label">Total Amount:</span>
-                    <span class="totals-value">₹${invoice.totalAmount.toFixed(2)}</span>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <p>Thank you for your business!</p>
-                <p style="margin-top: 10px; font-size: 12px;">
-                    This is a computer-generated invoice. Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
-                </p>
-            </div>
-        </div>
-        
-        <script>
-            window.onload = function() {
-                window.print();
-            }
-        </script>
-    </body>
-    </html>
-    `;
-
-    printWindow.document.write(pdfContent);
-    printWindow.document.close();
-  };
-
   const handleDownload = async () => {
     try {
       const res = await fetch("http://localhost:4000/api/sales/latest");
@@ -1558,9 +1518,7 @@ export default function AddSalesInvoice() {
         showAlert("Error!", "No invoice found!", "error");
         return;
       }
-
-      // Generate and download PDF
-      generatePDF(invoice);
+      showAlert("Info", "PDF generation feature would be implemented here", "info");
     } catch (err) {
       console.error(err);
       showAlert("Error!", "Error fetching the latest invoice.", "error");
@@ -1575,8 +1533,7 @@ export default function AddSalesInvoice() {
         showAlert("Error!", "No invoice found!", "error");
         return;
       }
-
-      generatePDF(invoice);
+      showAlert("Info", "Print functionality would be implemented here", "info");
     } catch (err) {
       console.error(err);
       showAlert("Error!", "Error fetching the latest invoice for printing.", "error");
@@ -1585,11 +1542,8 @@ export default function AddSalesInvoice() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
-      {/* Custom Alert Modal */}
       <CustomAlert />
-      
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
             <div className="flex items-center justify-between">
@@ -1606,15 +1560,15 @@ export default function AddSalesInvoice() {
                 </div>
               </div>
               <div className="flex space-x-3">
-                <button 
-                  onClick={handleDownload} 
+                <button
+                  onClick={handleDownload}
                   className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Download PDF
+                  Download
                 </button>
-                <button 
-                  onClick={handlePrint} 
+                <button
+                  onClick={handlePrint}
                   className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
                 >
                   <Printer className="w-4 h-4" />
@@ -1625,7 +1579,6 @@ export default function AddSalesInvoice() {
           </div>
         </div>
 
-        {/* Form Container */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <form onSubmit={handleSubmit} className="p-8">
 
@@ -1639,7 +1592,6 @@ export default function AddSalesInvoice() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {/* Invoice Number */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Receipt className="w-4 h-4 text-blue-600" />
@@ -1653,7 +1605,6 @@ export default function AddSalesInvoice() {
                   />
                 </div>
 
-                {/* Sale Date */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-blue-600" />
@@ -1668,7 +1619,6 @@ export default function AddSalesInvoice() {
                   />
                 </div>
 
-                {/* Customer Name */}
                 <div className="space-y-2 md:col-span-2 xl:col-span-1">
                   <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <User className="w-4 h-4 text-blue-600" />
@@ -1686,7 +1636,6 @@ export default function AddSalesInvoice() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-6">
-                {/* Mobile Number */}
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <User className="w-4 h-4 text-blue-600" />
@@ -1725,9 +1674,7 @@ export default function AddSalesInvoice() {
                     return (
                       <div key={index} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
                         <div className="grid grid-cols-1 gap-4">
-                          {/* First Row - Product and Size */}
                           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                            {/* Product Search */}
                             <div className="lg:col-span-3 relative">
                               <label className="block text-sm font-medium text-gray-700 mb-2">Product</label>
                               <input
@@ -1754,7 +1701,7 @@ export default function AddSalesInvoice() {
                                         }}
                                         className="cursor-pointer px-4 py-3 hover:bg-gray-100 transition-colors duration-150 text-sm"
                                       >
-                                        {product.name} - ₹{Number(product.price).toFixed(2)} {product.isTaxInclusive ? "(Tax Incl.)" : ""}
+                                        {product.name}
                                       </div>
                                     ))
                                   ) : (
@@ -1764,10 +1711,9 @@ export default function AddSalesInvoice() {
                               )}
                             </div>
 
-                            {/* Size (if applicable) */}
                             {item.productId && productOptions.find(p => p.id === item.productId)?.sizes?.some(s => s.trim() !== "") && (
                               <div className="lg:col-span-1">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Size/Weight</label>
                                 <select
                                   value={item.size || ""}
                                   onChange={(e) => handleItemChange(index, "size", e.target.value)}
@@ -1785,7 +1731,6 @@ export default function AddSalesInvoice() {
                               </div>
                             )}
 
-                            {/* Remove Button */}
                             <div className="lg:col-span-1 flex items-end">
                               <button
                                 type="button"
@@ -1797,9 +1742,7 @@ export default function AddSalesInvoice() {
                             </div>
                           </div>
 
-                          {/* Second Row - Quantity, Price, Discount, etc. */}
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            {/* Quantity */}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
                               <input
@@ -1811,7 +1754,6 @@ export default function AddSalesInvoice() {
                               />
                             </div>
 
-                            {/* Unit Price */}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Unit Price ₹</label>
                               <input
@@ -1824,7 +1766,6 @@ export default function AddSalesInvoice() {
                               />
                             </div>
 
-                            {/* Discount */}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Discount %</label>
                               <input
@@ -1837,7 +1778,6 @@ export default function AddSalesInvoice() {
                               />
                             </div>
 
-                            {/* GST */}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">GST %</label>
                               <input
@@ -1850,7 +1790,6 @@ export default function AddSalesInvoice() {
                               />
                             </div>
 
-                            {/* Effective Price */}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Effective Price ₹</label>
                               <div className="w-full px-3 py-3 border border-gray-200 rounded-xl bg-gray-100 font-medium text-gray-700 text-right text-base">
@@ -1858,7 +1797,6 @@ export default function AddSalesInvoice() {
                               </div>
                             </div>
 
-                            {/* Line Total */}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">Line Total ₹</label>
                               <div className="w-full px-3 py-3 border border-gray-200 rounded-xl bg-blue-50 font-bold text-blue-700 text-right text-base">
@@ -1871,7 +1809,6 @@ export default function AddSalesInvoice() {
                     );
                   })}
 
-                  {/* Add Item Button */}
                   <div className="flex justify-center pt-4">
                     <button
                       type="button"
@@ -1895,50 +1832,213 @@ export default function AddSalesInvoice() {
                 <h2 className="text-xl font-semibold text-gray-900">Payment Information</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Payment Mode */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-purple-600" />
-                    Payment Mode
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-3">Payment Type</label>
+                <div className="flex space-x-4">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMode"
+                      value="single"
+                      checked={formData.paymentMode === "single"}
+                      onChange={handleChange}
+                      className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">Single Payment</span>
                   </label>
-                  <select
-                    name="paymentMode"
-                    value={formData.paymentMode}
-                    onChange={handleChange}
-                    className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white text-base"
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="upi">UPI</option>
-                    <option value="card">Card</option>
-                    <option value="wallet">Wallet</option>
-                    <option value="credit">Credit</option>
-                  </select>
-                </div>
-
-                {/* Payment Status */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-purple-600" />
-                    Payment Status
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMode"
+                      value="split"
+                      checked={formData.paymentMode === "split"}
+                      onChange={handleChange}
+                      className="w-4 h-4 text-purple-600 border-gray-300 focus:ring-purple-500"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">Split Payment</span>
                   </label>
-                  <div className="flex items-center space-x-3 mt-4">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        name="paymentStatus"
-                        checked={formData.paymentStatus}
-                        onChange={handleCheckboxChange}
-                        className="w-6 h-6 text-purple-600 border-2 border-gray-300 rounded-lg focus:ring-purple-500 focus:ring-2 transition-all duration-200"
-                        id="paymentStatus"
-                      />
-                    </div>
-                    <label htmlFor="paymentStatus" className="text-base font-medium text-gray-700 cursor-pointer select-none">
-                      Mark as Paid
-                    </label>
-                  </div>
                 </div>
               </div>
+
+              {formData.paymentMode === "single" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-purple-600" />
+                      Payment Mode
+                    </label>
+                    <select
+                      name="singlePaymentMode"
+                      value={formData.singlePaymentMode}
+                      onChange={handleChange}
+                      className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white text-base"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="upi">UPI</option>
+                      <option value="card">Card</option>
+                      <option value="wallet">Wallet</option>
+                      <option value="credit">Credit</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-purple-600" />
+                      Payment Status
+                    </label>
+                    <div className="flex items-center space-x-3 mt-4">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          name="paymentStatus"
+                          checked={formData.paymentStatus}
+                          onChange={handleCheckboxChange}
+                          className="w-6 h-6 text-purple-600 border-2 border-gray-300 rounded-lg focus:ring-purple-500 focus:ring-2 transition-all duration-200"
+                          id="paymentStatus"
+                        />
+                      </div>
+                      <label htmlFor="paymentStatus" className="text-base font-medium text-gray-700 cursor-pointer select-none">
+                        Mark as Paid
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
+                    <div className="flex justify-between items-center">
+                      <div className="text-sm text-gray-600">
+                        <span>Total Amount: </span>
+                        <span className="font-semibold text-gray-900">₹{calculateTotal().toFixed(2)}</span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <span>Split Total: </span>
+                        <span className={`font-semibold ${isSplitPaymentComplete() ? 'text-green-600' : 'text-red-600'}`}>
+                          ₹{getTotalSplitAmount().toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <span>Remaining: </span>
+                        <span className={`font-semibold ${getRemainingAmount() === 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                          ₹{getRemainingAmount().toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900">Payment Methods</h3>
+                    {formData.splitPayments.map((payment, index) => (
+                      <div key={index} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                            <select
+                              value={payment.method}
+                              onChange={(e) => handleSplitPaymentChange(index, 'method', e.target.value)}
+                              className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                            >
+                              <option value="cash">Cash</option>
+                              <option value="upi">UPI</option>
+                              <option value="card">Card</option>
+                              <option value="wallet">Wallet</option>
+                              <option value="credit">Credit</option>
+                            </select>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Amount ₹</label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              value={payment.amount}
+                              onChange={(e) => handleSplitPaymentChange(index, 'amount', e.target.value)}
+                              className="w-full px-3 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white text-base"
+                            />
+                          </div>
+
+                          <div className="flex items-center">
+                            <label className="flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={payment.paid}
+                                onChange={(e) => handleSplitPaymentChange(index, 'paid', e.target.checked)}
+                                className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 transition-all duration-200"
+                              />
+                              <span className="ml-2 text-sm font-medium text-gray-700">Paid</span>
+                            </label>
+                          </div>
+
+                          <div>
+                            <button
+                              type="button"
+                              onClick={() => removeSplitPayment(index)}
+                              disabled={formData.splitPayments.length <= 1}
+                              className={`w-full px-3 py-3 rounded-lg transition-all duration-200 flex items-center justify-center ${
+                                formData.splitPayments.length <= 1 
+                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                                  : 'bg-red-50 text-red-600 hover:bg-red-100'
+                              }`}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="flex justify-center">
+                      <button
+                        type="button"
+                        onClick={addSplitPayment}
+                        className="px-4 py-2 bg-purple-50 text-purple-600 font-medium rounded-lg hover:bg-purple-100 transition-all duration-200 flex items-center gap-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Payment Method
+                      </button>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">Overall Payment Status:</span>
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="checkbox"
+                            name="paymentStatus"
+                            checked={formData.paymentStatus}
+                            onChange={handleCheckboxChange}
+                            className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 transition-all duration-200"
+                            id="splitPaymentStatus"
+                          />
+                          <label htmlFor="splitPaymentStatus" className="text-sm font-medium text-gray-700 cursor-pointer">
+                            Mark invoice as fully paid
+                          </label>
+                        </div>
+                      </div>
+                      
+                      {!isSplitPaymentComplete() && getRemainingAmount() > 0 && (
+                        <div className="mt-2 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+                          <span>⚠️ Split payments don't cover the full amount. Remaining: ₹{getRemainingAmount().toFixed(2)}</span>
+                        </div>
+                      )}
+                      
+                      {getTotalSplitAmount() > calculateTotal() && (
+                        <div className="mt-2 text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+                          <span>⚠️ Split payment total exceeds invoice amount by ₹{(getTotalSplitAmount() - calculateTotal()).toFixed(2)}</span>
+                        </div>
+                      )}
+                      
+                      {isSplitPaymentComplete() && (
+                        <div className="mt-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                          <span>✓ Split payments match the invoice total perfectly</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Totals Section */}
@@ -1981,5 +2081,3 @@ export default function AddSalesInvoice() {
     </div>
   );
 }
-
-

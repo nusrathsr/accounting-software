@@ -16,7 +16,8 @@ import {
   ArrowLeft,
   Download,
   Filter,
-  AlertCircle
+  AlertCircle,
+  Edit3
 } from "lucide-react";
 
 export default function ViewSalesInvoices() {
@@ -25,6 +26,10 @@ export default function ViewSalesInvoices() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [editData, setEditData] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const itemsPerPage = 8;
 
   // Show notification
@@ -56,14 +61,29 @@ export default function ViewSalesInvoices() {
   // Filter sales based on search
   const filteredSales = sales.filter((sale) => {
     const s = search.toLowerCase();
-    return (
+    const matchesSearch =
       sale.invoiceNumber.toLowerCase().includes(s) ||
       (sale.customerName && sale.customerName.toLowerCase().includes(s)) ||
       (sale.products || []).some((item) =>
         (item.name || "").toLowerCase().includes(s)
-      )
-    );
+      );
+
+    const matchesStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "paid"
+          ? sale.paymentStatus === true
+          : sale.paymentStatus === false;
+
+    const saleDate = new Date(sale.saleDate || sale.date);
+
+    const matchesDate =
+      (!dateFrom || saleDate >= new Date(dateFrom)) &&
+      (!dateTo || saleDate <= new Date(dateTo));
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
+
 
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
   const startIndex = (page - 1) * itemsPerPage;
@@ -89,6 +109,40 @@ export default function ViewSalesInvoices() {
       setLoading(false);
     }
   };
+  const openEditModal = (sale) => {
+    setEditData(sale);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const saveEdit = async () => {
+    if (!editData) return;
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:4000/api/sales/${editData._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editData),
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      showNotification("success", "Updated!", "Invoice updated successfully.");
+      setEditData(null);
+      fetchSales();
+    } catch (err) {
+      showNotification("error", "Error", "Failed to update invoice. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "—";
@@ -120,8 +174,8 @@ export default function ViewSalesInvoices() {
         {/* Notification */}
         {notification && (
           <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg border max-w-md ${notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-              notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-                'bg-yellow-50 border-yellow-200 text-yellow-800'
+            notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+              'bg-yellow-50 border-yellow-200 text-yellow-800'
             }`}>
             <div className="flex items-start gap-3">
               {notification.type === 'success' && <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />}
@@ -165,6 +219,51 @@ export default function ViewSalesInvoices() {
           </div>
         </div>
 
+        {/* Summary Cards */}
+        {sales.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center">
+                <div className="bg-blue-100 rounded-xl p-3">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="ml-4">
+                  <div className="text-2xl font-bold text-gray-900">{sales.length}</div>
+                  <div className="text-sm text-gray-600">Total Invoices</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center">
+                <div className="bg-green-100 rounded-xl p-3">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="ml-4">
+                  <div className="text-2xl font-bold text-gray-900">
+                    {sales.filter(s => s.paymentStatus).length}
+                  </div>
+                  <div className="text-sm text-gray-600">Paid Invoices</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <div className="flex items-center">
+                <div className="bg-indigo-100 rounded-xl p-3">
+                  <IndianRupee className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div className="ml-4">
+                  <div className="text-2xl font-bold text-gray-900">
+                    ₹{sales.reduce((sum, sale) => sum + parseFloat(sale.totalAmount || 0), 0).toFixed(2)}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Revenue</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Search and Filters */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
           <div className="p-6">
@@ -182,10 +281,47 @@ export default function ViewSalesInvoices() {
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
                 />
               </div>
+              {/* Payment Status Filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Status</option>
+                <option value="paid">Paid</option>
+                <option value="unpaid">Unpaid</option>
+              </select>
+
+              {/* Date Filter */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => {
+                    setDateFrom(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-gray-500">to</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => {
+                    setDateTo(e.target.value);
+                    setPage(1);
+                  }}
+                  className="px-3 py-2 border border-gray-200 rounded-xl text-sm bg-gray-50 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Filter className="w-4 h-4" />
                 <span>Showing {currentSales.length} of {filteredSales.length} invoices</span>
               </div>
+
             </div>
           </div>
         </div>
@@ -267,19 +403,19 @@ export default function ViewSalesInvoices() {
                           </td>
 
                           {/* Items */}
-                          <td className="px-6 py-4">
+                          {/* <td className="px-6 py-4">
                             <div className="max-w-xs space-y-2">
                               {(sale.products || []).map((item, j) => (
                                 <div key={j} className="text-xs text-gray-600 bg-gray-50 rounded px-2 py-2">
                                   <div className="font-medium">{item.name || "Unnamed Product"}</div>
-                                  <div className="flex flex-wrap gap-2 mt-1">
-                                    {/* Main product */}
-                                    <span className="bg-blue-50 text-blue-700 rounded px-2 py-1">
+                                  <div className="flex flex-wrap gap-2 mt-1"> */}
+                          {/* Main product */}
+                          {/* <span className="bg-blue-50 text-blue-700 rounded px-2 py-1">
                                       Qty: {item.quantity || 0} × ₹{parseFloat(item.unitPrice || 0).toFixed(2)}
-                                    </span>
+                                    </span> */}
 
-                                    {/* Variants in same row */}
-                                    {(item.variants || []).map((variant, k) => (
+                          {/* Variants in same row */}
+                          {/* {(item.variants || []).map((variant, k) => (
                                       <span key={k} className="bg-gray-100 text-gray-700 rounded px-2 py-1">
                                         {variant.name} — Qty: {variant.quantity || 0} × ₹{parseFloat(variant.unitPrice || 0).toFixed(2)}
                                       </span>
@@ -288,7 +424,41 @@ export default function ViewSalesInvoices() {
                                 </div>
                               ))}
                             </div>
+                          </td> */}
+                          <td className="px-6 py-4 w-[550px]">   {/* wider column */}
+                            <div className="max-w-3xl space-y-2"> {/* more width before wrapping */}
+                              {(sale.products || []).map((item, j) => (
+                                <div
+                                  key={j}
+                                  className="text-sm text-gray-700 bg-gray-50 rounded px-3 py-2"
+                                >
+                                  {/* Product name */}
+                                  <div className="font-medium truncate whitespace-normal break-words">
+                                    {item.name || "Unnamed Product"}
+                                  </div>
+
+                                  {/* Quantity + Variants */}
+                                  <div className="flex flex-wrap gap-2 mt-1">
+                                    <span className="bg-blue-50 text-blue-700 rounded px-2 py-1">
+                                      Qty: {item.quantity || 0} × ₹{parseFloat(item.unitPrice || 0).toFixed(2)}
+                                    </span>
+
+                                    {(item.variants || []).map((variant, k) => (
+                                      <span
+                                        key={k}
+                                        className="bg-gray-100 text-gray-700 rounded px-2 py-1"
+                                      >
+                                        {variant.name} — Qty: {variant.quantity || 0} × ₹
+                                        {parseFloat(variant.unitPrice || 0).toFixed(2)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </td>
+
+
                           {/* Amounts */}
                           <td className="px-6 py-4 whitespace-nowrap text-right">
                             <div className="space-y-1">
@@ -314,8 +484,8 @@ export default function ViewSalesInvoices() {
                                 </span>
                               </div>
                               <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${sale.paymentStatus
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
                                 }`}>
                                 {sale.paymentStatus ? (
                                   <>
@@ -335,6 +505,15 @@ export default function ViewSalesInvoices() {
                           {/* Actions */}
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => openEditModal(sale)}
+                                disabled={loading}
+                                className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Edit Sale"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </button>
+
                               <button
                                 onClick={() => deleteSale(sale._id)}
                                 disabled={loading}
@@ -375,8 +554,8 @@ export default function ViewSalesInvoices() {
                             key={i}
                             onClick={() => setPage(i + 1)}
                             className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${page === i + 1
-                                ? "bg-blue-600 text-white shadow-md"
-                                : "text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200"
+                              ? "bg-blue-600 text-white shadow-md"
+                              : "text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200"
                               }`}
                           >
                             {i + 1}
@@ -395,55 +574,162 @@ export default function ViewSalesInvoices() {
                     </div>
                   </div>
                 </div>
+
+              )}
+              {editData && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                  <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
+                    <h2 className="text-xl font-bold mb-4">Edit Sale</h2>
+
+                    {/* Customer Name */}
+                    <label className="block text-sm font-medium mb-1">Customer Name</label>
+                    <input
+                      type="text"
+                      value={editData.customerName || ""}
+                      onChange={(e) =>
+                        setEditData({ ...editData, customerName: e.target.value })
+                      }
+                      className="w-full border rounded-lg p-2 mb-4"
+                      placeholder="Customer Name"
+                    />
+
+                    {/* Phone Number */}
+                    <label className="block text-sm font-medium mb-1">Phone Number</label>
+                    <input
+                      type="text"
+                      value={editData.number || ""}
+                      onChange={(e) => setEditData({ ...editData, number: e.target.value })}
+                      className="w-full border rounded-lg p-2 mb-4"
+                      placeholder="Phone Number"
+                    />
+
+                    {/* Payment Mode */}
+                    <label className="block text-sm font-medium mb-1">Payment Mode</label>
+                    <select
+                      value={editData.paymentMode || "cash"}
+                      onChange={(e) =>
+                        setEditData({ ...editData, paymentMode: e.target.value })
+                      }
+                      className="w-full border rounded-lg p-2 mb-4"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="upi">UPI</option>
+                      <option value="card">Card</option>
+                      <option value="bank">Bank Transfer</option>
+                    </select>
+
+                    {/* Payment Status */}
+                    <label className="block text-sm font-medium mb-1">Payment Status</label>
+                    <select
+                      value={editData.paymentStatus ? "paid" : "unpaid"}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          paymentStatus: e.target.value === "paid",
+                        })
+                      }
+                      className="w-full border rounded-lg p-2 mb-6"
+                    >
+                      <option value="paid">Paid</option>
+                      <option value="unpaid">Unpaid</option>
+                    </select>
+
+                    {/* Products Section */}
+                    <h3 className="text-lg font-semibold mb-2">Products</h3>
+                    {editData.products && editData.products.length > 0 ? (
+                      editData.products.map((prod, idx) => (
+                        <div
+                          key={idx}
+                          className="grid grid-cols-12 gap-2 items-center border p-2 rounded-lg mb-2"
+                        >
+                          <input
+                            type="text"
+                            value={prod.item || ""}
+                            onChange={(e) => {
+                              const updatedProducts = [...editData.products];
+                              updatedProducts[idx].item = e.target.value;
+                              setEditData({ ...editData, products: updatedProducts });
+                            }}
+                            className="col-span-4 border rounded-lg p-2"
+                            placeholder="Item"
+                          />
+                          <input
+                            type="number"
+                            value={prod.qty || 1}
+                            onChange={(e) => {
+                              const updatedProducts = [...editData.products];
+                              updatedProducts[idx].qty = parseInt(e.target.value) || 1;
+                              setEditData({ ...editData, products: updatedProducts });
+                            }}
+                            className="col-span-2 border rounded-lg p-2"
+                            placeholder="Qty"
+                          />
+                          <input
+                            type="number"
+                            value={prod.price || 0}
+                            onChange={(e) => {
+                              const updatedProducts = [...editData.products];
+                              updatedProducts[idx].price = parseFloat(e.target.value) || 0;
+                              setEditData({ ...editData, products: updatedProducts });
+                            }}
+                            className="col-span-3 border rounded-lg p-2"
+                            placeholder="Price"
+                          />
+                          <span className="col-span-2 font-semibold">
+                            ₹{(prod.qty || 0) * (prod.price || 0)}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const updatedProducts = editData.products.filter(
+                                (_, i) => i !== idx
+                              );
+                              setEditData({ ...editData, products: updatedProducts });
+                            }}
+                            className="col-span-1 text-red-500 hover:text-red-700"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500">No products added yet.</p>
+                    )}
+
+                    {/* Add Product Button */}
+                    <button
+                      onClick={() => {
+                        const updatedProducts = [
+                          ...editData.products,
+                          { item: "", qty: 1, price: 0 },
+                        ];
+                        setEditData({ ...editData, products: updatedProducts });
+                      }}
+                      className="mt-2 px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
+                    >
+                      + Add Product
+                    </button>
+
+                    {/* Save/Cancel */}
+                    <div className="flex justify-end space-x-2 mt-6">
+                      <button
+                        onClick={() => setEditData(null)}
+                        className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={saveEdit}
+                        className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )}
             </>
           )}
         </div>
-
-        {/* Summary Cards */}
-        {sales.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <div className="flex items-center">
-                <div className="bg-blue-100 rounded-xl p-3">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">{sales.length}</div>
-                  <div className="text-sm text-gray-600">Total Invoices</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <div className="flex items-center">
-                <div className="bg-green-100 rounded-xl p-3">
-                  <CheckCircle className="w-6 h-6 text-green-600" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">
-                    {sales.filter(s => s.paymentStatus).length}
-                  </div>
-                  <div className="text-sm text-gray-600">Paid Invoices</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <div className="flex items-center">
-                <div className="bg-indigo-100 rounded-xl p-3">
-                  <IndianRupee className="w-6 h-6 text-indigo-600" />
-                </div>
-                <div className="ml-4">
-                  <div className="text-2xl font-bold text-gray-900">
-                    ₹{sales.reduce((sum, sale) => sum + parseFloat(sale.totalAmount || 0), 0).toFixed(2)}
-                  </div>
-                  <div className="text-sm text-gray-600">Total Revenue</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
