@@ -263,6 +263,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+import TimePicker from "react-time-picker";
 import Swal from "sweetalert2";
 import { GlobalContext } from "../../context/GlobalContext";
 import {
@@ -320,25 +321,25 @@ const AddAttendance = () => {
     }
   }, [formData.checkIn, formData.checkOut, formData.shift]);
 
-const handleChange = (e) => {
-  const { name, value } = e.target;
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  if (name === "shift") {
-   
-    const selectedShift = shift.find((sh) => sh.shift === value);
-    if (selectedShift) {
-      setFormData((prev) => ({
-        ...prev,
-        shift: value,
-        checkIn: selectedShift.startTime,  // auto fill
-        checkOut: selectedShift.endTime,   // auto fill
-      }));
-      return;
+    if (name === "shift") {
+
+      const selectedShift = shift.find((sh) => sh.shift === value);
+      if (selectedShift) {
+        setFormData((prev) => ({
+          ...prev,
+          shift: value,
+          checkIn: selectedShift.startTime,  // auto fill
+          checkOut: selectedShift.endTime,   // auto fill
+        }));
+        return;
+      }
     }
-  }
 
-  setFormData({ ...formData, [name]: value });
-};
+    setFormData({ ...formData, [name]: value });
+  };
 
 
   // ✅ Submit to backend
@@ -481,7 +482,7 @@ const handleChange = (e) => {
                   <select
                     name="shift"
                     value={formData.shift}
-                    required
+                    
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
                   >
@@ -522,6 +523,12 @@ const handleChange = (e) => {
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
                   />
+                  {/* <TimePicker
+                    onChange={handleChange}
+                    value={formData.checkIn}
+                    disableClock={true} // hides the analog clock
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
+                  /> */}
                 </div>
 
                 {/* Check-out */}

@@ -1,4 +1,4 @@
-import React,{createContext,useState,useEffect} from "react";
+import React,{createContext,useState,useEffect, useContext} from "react";
 import axios from 'axios'
 
 export const GlobalContext =createContext();
@@ -12,6 +12,20 @@ export const GlobalProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [employees,setEmployees]=useState([])
    const [shift,setShift]=useState([])
+   const [product,setProduct]=useState([])
+   const [productVariant,setProductVariant]=useState([])
+
+
+
+   const fetchProduct =async()=>{
+    try {
+      const res =await axios.get(`${baseURL}/products`)
+      setProduct(res.data)
+      
+    } catch (error) {
+      console.log('error fetching product ',error);
+    }
+   }
 
 
 const fetchEmployees =async()=>{
@@ -23,7 +37,6 @@ const fetchEmployees =async()=>{
   }
 }
 
-console.log(employees);
 
 
 
@@ -55,6 +68,7 @@ useEffect(()=>{
   fetchCustomer()
   fetchEmployees()
   fetchShift()
+   fetchProduct()
 },[])
 
 
@@ -64,7 +78,9 @@ const value ={
   suppliers,
   loading,
   employees,
-  shift
+  shift,
+  product,
+  productVariant
 }
 return(
  <GlobalContext.Provider value={value}>

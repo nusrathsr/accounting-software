@@ -3,17 +3,18 @@ import Swal from 'sweetalert2';
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { GlobalContext } from "../../context/GlobalContext";
-import { 
-  FaEdit, 
-  FaTrash, 
-  FaUsers, 
-  FaSearch, 
-  FaFilter, 
+import {
+  FaEdit,
+  FaTrash,
+  FaUsers,
+  FaSearch,
+  FaFilter,
   FaUserPlus,
   FaEye,
   FaChevronLeft,
   FaChevronRight,
-  FaSortAmountDown
+  FaSortAmountDown,
+  FaUndo
 } from "react-icons/fa";
 
 const ListEmployees = () => {
@@ -63,7 +64,7 @@ const ListEmployees = () => {
     });
 
     if (!result.isConfirmed) return;
-    
+
     try {
       await axios.delete(`${baseURL}/employees/${id}`);
       setEmployees(employees.filter((emp) => emp._id !== id));
@@ -83,6 +84,15 @@ const ListEmployees = () => {
       });
     }
   };
+
+    // Reset filters
+  const handleResetFilters = () => {
+    setSearch("");
+    setEmploymentTypeFilter("");
+    setDesignationFilter("");
+    setPage(1);
+  };
+
 
   // Apply filters
   const filteredEmployees = employees.filter((emp) => {
@@ -140,7 +150,7 @@ const ListEmployees = () => {
                   <p className="text-indigo-100 text-sm">Manage your workforce</p>
                 </div>
               </div>
-              
+
               <Link
                 to="/addEmployees"
                 className="px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 w-fit"
@@ -194,19 +204,28 @@ const ListEmployees = () => {
             </div>
           </div>
 
-        
+
         </div>
 
         {/* Filters Section */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8">
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-2">
-                <FaFilter className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-xl font-semibold text-gray-900">Filters & Search</h2>
-            </div>
+            <div className="flex items-center justify-between mb-6">
 
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-2">
+                  <FaFilter className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Filters & Search</h2>
+              </div>
+              <button
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all duration-200 hover:shadow-md"
+              >
+                <FaUndo className="w-4 h-4" />
+                Reset Filters
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
@@ -228,7 +247,7 @@ const ListEmployees = () => {
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white"
                   value={employmentTypeFilter}
                   onChange={(e) => setEmploymentTypeFilter(e.target.value)}
-                >   
+                >
                   <option value="">All Types</option>
                   <option value="Full-time">Full-time</option>
                   <option value="Part-time">Part-time</option>
@@ -253,7 +272,7 @@ const ListEmployees = () => {
                 </select>
               </div>
 
-             
+
             </div>
           </div>
         </div>
@@ -294,14 +313,14 @@ const ListEmployees = () => {
                           </div>
                         </div>
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         <div className="text-sm">
                           <div className="text-gray-900">{emp.email || '--'}</div>
                           <div className="text-gray-500">{emp.phone || '--'}</div>
                         </div>
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         <div className="text-sm">
                           <div className="text-gray-900">{emp.designation || '--'}</div>
@@ -309,25 +328,23 @@ const ListEmployees = () => {
                           <div className="text-xs text-gray-400">Joined: {formatDate(emp.joiningDate)}</div>
                         </div>
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full ${
-                            emp.status === "Active"
-                              ? "bg-green-100 text-green-800 border border-green-200"
-                              : emp.status === "Inactive"
+                          className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full ${emp.status === "Active"
+                            ? "bg-green-100 text-green-800 border border-green-200"
+                            : emp.status === "Inactive"
                               ? "bg-yellow-100 text-yellow-800 border border-yellow-200"
                               : "bg-red-100 text-red-800 border border-red-200"
-                          }`}
+                            }`}
                         >
-                          <div className={`w-2 h-2 rounded-full mr-2 ${
-                            emp.status === "Active" ? "bg-green-400" :
+                          <div className={`w-2 h-2 rounded-full mr-2 ${emp.status === "Active" ? "bg-green-400" :
                             emp.status === "Inactive" ? "bg-yellow-400" : "bg-red-400"
-                          }`}></div>
+                            }`}></div>
                           {emp.status}
                         </span>
                       </td>
-                      
+
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-3">
                           <Link
@@ -337,7 +354,7 @@ const ListEmployees = () => {
                           >
                             <FaEdit className="w-4 h-4" />
                           </Link>
-                          
+
                           <button
                             onClick={() => handleDelete(emp._id)}
                             className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
@@ -377,7 +394,7 @@ const ListEmployees = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button 
+                  <button
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                     disabled={page === 1}
                     onClick={() => setPage(page - 1)}
@@ -400,18 +417,17 @@ const ListEmployees = () => {
                           pageNum = page - 2 + i;
                         }
                       }
-                      
+
                       if (pageNum < 1 || pageNum > totalPages) return null;
-                      
+
                       return (
                         <button
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                            page === pageNum
-                              ? 'bg-blue-600 text-white shadow-lg'
-                              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                          }`}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${page === pageNum
+                            ? 'bg-blue-600 text-white shadow-lg'
+                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
                         >
                           {pageNum}
                         </button>
@@ -419,7 +435,7 @@ const ListEmployees = () => {
                     })}
                   </div>
 
-                  <button 
+                  <button
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                     disabled={page === totalPages || totalPages === 0}
                     onClick={() => setPage(page + 1)}

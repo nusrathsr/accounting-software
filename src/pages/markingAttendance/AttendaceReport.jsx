@@ -1,352 +1,3 @@
-// import axios from "axios";
-// import React, { useState, useEffect, useContext } from "react";
-// import { GlobalContext } from "../../context/GlobalContext";
-// import { Link } from "react-router-dom";
-// import { FaEdit, FaTrash } from "react-icons/fa";
-// import Swal from 'sweetalert2';
-
-
-// // helper to format YYYY-MM-DD
-// const formatDate = (d) => d.toISOString().split("T")[0];
-
-// // quick filter presets
-// const quickFilters = {
-//   "This Week": () => {
-//     const today = new Date();
-//     const day = today.getDay();
-//     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-//     const start = new Date(today.setDate(diff));
-//     const end = new Date(start);
-//     end.setDate(start.getDate() + 6);
-//     return { startDate: formatDate(start), endDate: formatDate(end) };
-//   },
-//   "Last Week": () => {
-//     const today = new Date();
-//     const day = today.getDay();
-//     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-//     const end = new Date(today.setDate(diff - 1));
-//     const start = new Date(end);
-//     start.setDate(end.getDate() - 6);
-//     return { startDate: formatDate(start), endDate: formatDate(end) };
-//   },
-//   "This Month": () => {
-//     const now = new Date();
-//     const start = new Date(now.getFullYear(), now.getMonth(), 1);
-//     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-//     return { startDate: formatDate(start), endDate: formatDate(end) };
-//   },
-//   "Last Month": () => {
-//     const now = new Date();
-//     const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-//     const end = new Date(now.getFullYear(), now.getMonth(), 0);
-//     return { startDate: formatDate(start), endDate: formatDate(end) };
-//   },
-//   "This Year": () => {
-//     const now = new Date();
-//     const start = new Date(now.getFullYear(), 0, 1);
-//     const end = new Date(now.getFullYear(), 11, 31);
-//     return { startDate: formatDate(start), endDate: formatDate(end) };
-//   },
-//   "Last Year": () => {
-//     const now = new Date();
-//     const start = new Date(now.getFullYear() - 1, 0, 1);
-//     const end = new Date(now.getFullYear() - 1, 11, 31);
-//     return { startDate: formatDate(start), endDate: formatDate(end) };
-//   },
-// };
-
-// const AttendanceReport = () => {
-//   const [attendances, setAttendance] = useState([]);
-//   const [search, setSearch] = useState("");
-//   const [shift, setShift] = useState("");
-//   const [dates, setDates] = useState({ startDate: "", endDate: "" });
-//   const [filtered, setFiltered] = useState([]);
-//   const [page, setPage] = useState(1);
-//   const perPage = 4;
-//   const { baseURL } = useContext(GlobalContext)
-
-//   useEffect(() => {
-//     fetchEmployeesAttendance()
-//   }, [baseURL])
-
-
-//   const fetchEmployeesAttendance = async () => {
-//     try {
-//       const response = await axios.get(`${baseURL}/attendance`)
-//       console.log(response);
-
-//       setAttendance(response.data)
-//     } catch (error) {
-//       console.error("failed to load attendance ", error);
-//     }
-//   }
-
-//   const handleDelete = async (id) => {
-//     const result = await Swal.fire({
-//       title: 'Are you sure?',
-//       text: "You won't be able to revert this!",
-//       icon: 'warning',
-//       showCancelButton: true,
-//       confirmButtonColor: '#dc2626',
-//       cancelButtonColor: '#6b7280',
-//       confirmButtonText: 'Yes, delete it!',
-//       cancelButtonText: 'Cancel'
-//     });
-
-//     if (!result.isConfirmed) return;
-//     try {
-//       await axios.delete(`${baseURL}/attendance/${id}`)
-//       setAttendance(attendances.filter((att) => att._id !== id))
-//       Swal.fire({
-//         title: 'Deleted!',
-//         text: 'The attendance has been deleted.',
-//         icon: 'success',
-//         confirmButtonColor: '#16a34a'
-//       });
-//     } catch (error) {
-//       console.error("Error deleting attendance:", error);
-//       Swal.fire({
-//         title: 'Error!',
-//         text: 'Failed to delete attendance.',
-//         icon: 'error',
-//         confirmButtonColor: '#dc2626'
-//       });
-//     }
-//   }
-
-
-//   // filter logic
-//   useEffect(() => {
-//     let data = [...attendances];
-
-//     if (search) {
-//       data = data.filter(
-//         (a) =>
-//           (a.employee?.fullName || "")
-//             .toLowerCase()
-//             .includes(search.toLowerCase()) ||
-//           (a.employee?.employeeId || "").includes(search)
-//       );
-//     }
-//     if (shift) {
-//       data = data.filter((a) => a.shift === shift);
-//     }
-//     if (dates.startDate && dates.endDate) {
-//       data = data.filter(
-//         (a) => a.date >= dates.startDate && a.date <= dates.endDate
-//       );
-//     }
-
-//     setFiltered(data);
-//     setPage(1);
-//   }, [search, shift, dates, attendances]);
-
-//   // pagination
-//   const startIdx = (page - 1) * perPage;
-//   const paginated = filtered.slice(startIdx, startIdx + perPage);
-//   const totalPages = Math.ceil(filtered.length / perPage);
-
-//   // employee short report
-//   const report = search
-//     ? (() => {
-//       const empRecords = filtered.filter(
-//         (a) =>
-//           (a.employee?.fullName || "")
-//             .toLowerCase()
-//             .includes(search.toLowerCase()) ||
-//           (a.employee?.employeeId || "").includes(search)
-//       );
-//       if (empRecords.length === 0) return null;
-//       const totalDays = empRecords.length;
-//       const present = empRecords.filter((a) => a.status === "Present").length;
-//       const absent = empRecords.filter((a) => a.status === "Absent").length;
-//       const leave = empRecords.filter((a) => a.status === "Leave").length;
-//       const overtime = empRecords.reduce(
-//         (sum, a) => sum + a.overtimeHours,
-//         0
-//       );
-//       return { totalDays, present, absent, leave, overtime };
-//     })()
-//     : null;
-
-//   return (
-//     <div className="p-4 max-w-7xl mx-auto">
-//       <h1 className="text-3xl font-bold text-gray-800 mb-4">
-//         Attendance Report
-//       </h1>
-
-//       {/* Filters */}
-//       <div className="bg-gray-100 p-4 rounded mb-4 space-y-2">
-//         <input
-//           type="text"
-//           placeholder="Search by Employee Name or ID"
-//           value={search}
-//           onChange={(e) => setSearch(e.target.value)}
-//           className="border p-2 rounded w-full md:w-1/3"
-//         />
-
-//         <div className="flex gap-2 flex-wrap">
-//           <select
-//             value={shift}
-//             onChange={(e) => setShift(e.target.value)}
-//             className="border p-2 rounded"
-//           >
-//             <option value="">All Shifts</option>
-//             <option>Morning</option>
-//             <option>Evening</option>
-//             <option>Night</option>
-//           </select>
-
-//           <input
-//             type="date"
-//             value={dates.startDate}
-//             onChange={(e) =>
-//               setDates({ ...dates, startDate: e.target.value })
-//             }
-//             className="border p-2 rounded"
-//           />
-//           <input
-//             type="date"
-//             value={dates.endDate}
-//             onChange={(e) => setDates({ ...dates, endDate: e.target.value })}
-//             className="border p-2 rounded"
-//           />
-
-//           {/* Quick Filter Dropdown */}
-//           <select
-//             onChange={(e) => {
-//               if (e.target.value) setDates(quickFilters[e.target.value]());
-//             }}
-//             className="border p-2 rounded"
-//           >
-//             <option value="">Quick Filters</option>
-//             {Object.keys(quickFilters).map((key) => (
-//               <option key={key} value={key}>
-//                 {key}
-//               </option>
-//             ))}
-//           </select>
-//         </div>
-//       </div>
-
-//       {/* Employee short report */}
-//       {report && (
-//         <div className="mb-4 bg-white shadow rounded p-4">
-//           <h2 className="text-xl font-semibold mb-2">Employee Report</h2>
-//           <p>Total Days: {report.totalDays}</p>
-//           <p>Present: {report.present}</p>
-//           <p>Absent: {report.absent}</p>
-//           <p>Leave: {report.leave}</p>
-//           <p>Overtime Hours: {report.overtime.toFixed(2)}</p>
-//         </div>
-//       )}
-
-//       {/* Table */}
-//       {paginated.length === 0 ? (
-//         <p>No attendance records found.</p>
-//       ) : (
-//         <div className="overflow-x-auto">
-//           <table className="w-full table-auto border-collapse border border-gray-300">
-//             <thead className="bg-gray-200">
-//               <tr>
-//                 <th className="border px-2 py-1">Date</th>
-//                 <th className="border px-2 py-1">Employee ID</th>
-//                 <th className="border px-2 py-1">Employee</th>
-//                 <th className="border px-2 py-1">Check-In</th>
-//                 <th className="border px-2 py-1">Check-Out</th>
-//                 <th className="border px-2 py-1">Shift</th>
-//                 <th className="border px-2 py-1">Status</th>
-//                 <th className="border px-2 py-1">Work Hours</th>
-//                 <th className="border px-2 py-1">Overtime</th>
-//                 <th className="border px-2 py-1">Leave Type</th>
-//                 <th className="border px-2 py-1">Remarks</th>
-//                 <th className="border px-2 py-1">Actions</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {paginated.map((att, idx) => (
-//                 <tr key={idx} className="text-center">
-//                   <td className="border px-2 py-1"> {new Date(att.date).toLocaleString("en-GB", {
-//                     day: "2-digit",
-//                     month: "short",
-//                     year: "numeric",
-
-//                   })}</td>
-//                   <td className="border px-2 py-1">{att.employee.employeeId}</td>
-//                   <td className="border px-2 py-1">{att.employee.fullName}</td>
-//                   <td className="border px-2 py-1">{att.checkIn
-//                     ? new Date(`1970-01-01T${att.checkIn}:00`).toLocaleTimeString("en-US", {
-//                       hour: "numeric",
-//                       minute: "2-digit",
-//                       hour12: true,
-//                     })
-//                     : ""}</td>
-//                   <td className="border px-2 py-1">{att.checkOut
-//                     ? new Date(`1970-01-01T${att.checkOut}:00`).toLocaleTimeString("en-US", {
-//                       hour: "numeric",
-//                       minute: "2-digit",
-//                       hour12: true,
-//                     })
-//                     : ""}</td>
-//                   <td className="border px-2 py-1">{att.shift}</td>
-//                   <td className="border px-2 py-1">{att.status}</td>
-//                   <td className="border px-2 py-1">{att.workHours}</td>
-//                   <td className="border px-2 py-1">{att.overtimeHours}</td>
-//                   <td className="border px-2 py-1">{att.leaveType}</td>
-//                   <td className="border px-2 py-1">{att.remarks}</td>
-//                   <td className="border px-2 py-1"> <div className="flex items-center justify-center gap-3">
-//                     <Link
-//                       to={`/editAttendance/${att._id}`}
-//                       className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-all duration-200"
-//                       title="Edit attendance"
-//                     >
-//                       <FaEdit className="w-4 h-4" />
-//                     </Link>
-
-//                     <button
-//                       onClick={() => handleDelete(att._id)}
-//                       className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200"
-//                       title="Delete attendance"
-//                     >
-//                       <FaTrash className="w-4 h-4" />
-//                     </button>
-//                   </div></td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       )}
-
-//       {/* Pagination */}
-//       {totalPages > 1 && (
-//         <div className="flex justify-center gap-2 mt-4">
-//           <button
-//             disabled={page === 1}
-//             onClick={() => setPage(page - 1)}
-//             className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-//           >
-//             Prev
-//           </button>
-//           <span>
-//             Page {page} of {totalPages}
-//           </span>
-//           <button
-//             disabled={page === totalPages}
-//             onClick={() => setPage(page + 1)}
-//             className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-//           >
-//             Next
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default AttendanceReport;
-
-
 import axios from "axios";
 import React, { useState, useEffect, useContext } from "react";
 import { GlobalContext } from "../../context/GlobalContext";
@@ -362,7 +13,8 @@ import {
   FaUsers,
   FaChartLine,
   FaArrowLeft,
-  FaArrowRight
+  FaArrowRight,
+  FaUndo
 } from "react-icons/fa";
 import Swal from 'sweetalert2';
 
@@ -423,7 +75,7 @@ const AttendanceReport = () => {
   const [filtered, setFiltered] = useState([]);
   const [page, setPage] = useState(1);
   const perPage = 4;
-  const { baseURL,shift } = useContext(GlobalContext);
+  const { baseURL, shift } = useContext(GlobalContext);
 
   useEffect(() => {
     fetchEmployeesAttendance();
@@ -436,6 +88,14 @@ const AttendanceReport = () => {
     } catch (error) {
       console.error("failed to load attendance ", error);
     }
+  };
+
+  // Reset filters
+  const handleResetFilters = () => {
+    setSearch("");
+    setShifts("");
+    setDates({ startDate: "", endDate: "" });
+    setPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -563,11 +223,20 @@ const AttendanceReport = () => {
         {/* Filters Section */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-2">
-                <FaFilter className="w-5 h-5 text-white" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-2">
+                  <FaFilter className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
+              <button
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-all duration-200 hover:shadow-md"
+              >
+                <FaUndo className="w-4 h-4" />
+                Reset Filters
+              </button>
             </div>
 
             <div className="space-y-4">
@@ -664,7 +333,7 @@ const AttendanceReport = () => {
                 <h2 className="text-xl font-semibold text-gray-900">Employee Summary</h2>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="bg-blue-50 rounded-xl p-4 text-center">
                   <div className="text-2xl font-bold text-blue-600">{report.totalDays}</div>
                   <div className="text-sm text-blue-700 font-medium">Total Days</div>
@@ -673,7 +342,10 @@ const AttendanceReport = () => {
                   <div className="text-2xl font-bold text-green-600">{report.present}</div>
                   <div className="text-sm text-green-700 font-medium">Present</div>
                 </div>
-               
+                <div className="bg-red-50 rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-red-600">{report.absent}</div>
+                  <div className="text-sm text-red-700 font-medium">Absent</div>
+                </div>
                 <div className="bg-yellow-50 rounded-xl p-4 text-center">
                   <div className="text-2xl font-bold text-yellow-600">{report.leave}</div>
                   <div className="text-sm text-yellow-700 font-medium">Leave</div>

@@ -32,6 +32,14 @@ import EditAttendance from './pages/markingAttendance/EditAttendance';
 import AddShift from './pages/sgiftManagement/AddShift';
 import EditShift from './pages/sgiftManagement/EditShift';
 import ShiftList from './pages/sgiftManagement/ShiftList';
+import AddLeave from './pages/leaveManagement/AddLeave';
+import EditLeave from './pages/leaveManagement/EditLeave';
+import LeaveRecords from './pages/leaveManagement/LeaveRecords';
+import AddHoliday from './pages/holidayCalendar/AddHoliday';
+import ListHoliday from './pages/holidayCalendar/ListHoliday';
+import EditHoliday from './pages/holidayCalendar/EditHoliday';
+import AddAdjustment from './pages/adjustmentStock/AddAdjustment';
+import ListAdjustment from './pages/adjustmentStock/ListAdjustment';
 
 function App() {
 
@@ -65,7 +73,7 @@ function App() {
           <Route path="/purchase/dues" element={<PurchaseDue />} />
           <Route path='sales/report' element={<SalesReport />} />
           <Route path='expense/report' element={<ExpenseReport />} />
-          <Route path='stock/report' element={<StockReport/>} />
+          <Route path='stock/report' element={<StockReport />} />
           <Route path='purchase/report' element={<PurchaseReport />} />
           <Route path='/addEmployees' element={<AddEmployees />} />
           <Route path='/editEmployees/:id' element={<EditEmployees />} />
@@ -73,12 +81,22 @@ function App() {
           <Route path='/dailyAttendance' element={<AddAttendance />} />
           <Route path='/attendanceReport' element={<AttendanceReport />} />
           <Route path='/editAttendance/:id' element={<EditAttendance />} />
-           <Route path='/addShift' element={<AddShift />} />
-          <Route path='/editShift/:id' element={<EditShift/>} />
+          <Route path='/addShift' element={<AddShift />} />
+          <Route path='/editShift/:id' element={<EditShift />} />
           <Route path='/shift' element={<ShiftList />} />
 
+          <Route path='/addLeave' element={<AddLeave />} />
+          <Route path='/editLeave/:id' element={<EditLeave />} />
+          <Route path='/leave' element={<LeaveRecords />} />
 
-          
+          <Route path='/addHoliday' element={<AddHoliday />} />
+          <Route path='/editHoliday/:id' element={<EditHoliday />} />
+          <Route path='/holidays' element={<ListHoliday />} />
+           
+          <Route path='/addAdjustment' element={<AddAdjustment />} />
+          <Route path='/viewAdjustments' element={<ListAdjustment/>} />
+
+
         </Route>
       </Routes>
     </>
