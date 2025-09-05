@@ -475,7 +475,7 @@ export default function ViewSalesInvoices() {
                           </td>
 
                           {/* Payment */}
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {/* <td className="px-6 py-4 whitespace-nowrap text-center">
                             <div className="space-y-2">
                               <div className="flex items-center justify-center gap-1">
                                 <CreditCard className="w-4 h-4 text-gray-400" />
@@ -500,7 +500,34 @@ export default function ViewSalesInvoices() {
                                 )}
                               </div>
                             </div>
-                          </td>
+                          </td> */}
+                          {/* Payment */}
+                          {/* Payment */}
+<td className="px-6 py-4 whitespace-nowrap text-center">
+  <div className="space-y-2">
+    {sale.payments && sale.payments.length > 0 ? (
+  <div className="text-sm text-gray-700 space-y-1">
+    {sale.payments.length > 1 && (
+      <div className="font-semibold text-gray-800">Split</div>
+    )}
+    {sale.payments.map((p, idx) => (
+      <div key={idx} className="flex items-center justify-center gap-1 text-xs">
+        <span className="capitalize">{p.mode}:</span>
+        <span>₹{parseFloat(p.amount || 0).toFixed(2)}</span>
+      </div>
+    ))}
+  </div>
+) : (
+  <div className="flex items-center justify-center gap-1">
+    <CreditCard className="w-4 h-4 text-gray-400" />
+    <span className="text-sm text-gray-600 capitalize">
+      {sale.paymentMode || "—"}
+    </span>
+  </div>
+)}
+
+  </div>
+</td>
 
                           {/* Actions */}
                           <td className="px-6 py-4 whitespace-nowrap text-center">
