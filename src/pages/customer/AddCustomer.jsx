@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import Swal from 'sweetalert2';
 import api from '../../utils/api'; 
-import { GlobalContext } from '../../context/GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import { 
   FaUser, 
