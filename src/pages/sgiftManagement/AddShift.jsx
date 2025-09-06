@@ -158,13 +158,10 @@
 //   )
 // }
 
-// export default AddShift;
-
-
 import React, { useContext, useEffect, useState } from 'react'
 import Swal from "sweetalert2";
 import { GlobalContext } from '../../context/GlobalContext'
-import axios from 'axios'
+import api from "../../utils/api";
 import {
   FaClock,
   FaBriefcase,
@@ -209,7 +206,7 @@ const AddShift = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${baseURL}/shift`, formData);
+      await api.post(`/shift`, formData);
       
       Swal.fire({
         title: "Success!",

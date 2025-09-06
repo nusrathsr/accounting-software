@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import axios from "axios";
+import api from "../../utils/api";
 import {
   ResponsiveContainer,
   BarChart,
@@ -32,7 +32,6 @@ import { MdDashboard } from "react-icons/md";
 import { GlobalContext } from "../../context/GlobalContext";
 
 const ExpenseReport = () => {
-  const {baseURL}=useContext(GlobalContext)
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
@@ -47,7 +46,7 @@ const ExpenseReport = () => {
   const fetchReport = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${baseURL}/reports/expense`, {
+      const { data } = await api.get("/reports/expense", {
         params: { startDate, endDate },
       });
       setExpenses(data.expenses);

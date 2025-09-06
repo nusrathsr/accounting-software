@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import { GlobalContext } from "../../context/GlobalContext";
 import Swal from "sweetalert2";
 import {
@@ -70,7 +70,7 @@ const AddEmployee = () => {
     });
 
     try {
-      await axios.post(`${baseURL}/employees`, formData, {
+      await api.post(`/employees`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       Swal.fire({

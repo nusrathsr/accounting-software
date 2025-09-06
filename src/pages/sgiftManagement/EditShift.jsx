@@ -175,9 +175,8 @@
 // export default EditShift;
 
 import React, { useContext, useEffect, useState } from "react";
-import { GlobalContext } from "../../context/GlobalContext";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/api";
 import Swal from "sweetalert2";
 import {
   FaClock,
@@ -192,7 +191,6 @@ import {
 } from "react-icons/fa";
 
 const EditShift = () => {
-  const { baseURL } = useContext(GlobalContext);
   const { id } = useParams(); // get shift ID from URL
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -210,7 +208,7 @@ const EditShift = () => {
   useEffect(() => {
     const fetchShift = async () => {
       try {
-        const res = await axios.get(`${baseURL}/shift/${id}`);
+        const res = await api.get(`/shift/${id}`);
         setFormData(res.data); // prefill with backend data
       } catch (error) {
         Swal.fire({
@@ -222,7 +220,7 @@ const EditShift = () => {
       }
     };
     fetchShift();
-  }, [id, baseURL]);
+  }, [id]);
 
   // calculate duration when start/end changes
   useEffect(() => {
@@ -244,7 +242,7 @@ const EditShift = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      await axios.put(`${baseURL}/shift/${id}`, formData);
+      await api.put(`/shift/${id}`, formData);
       
       Swal.fire({
         title: "Success!",

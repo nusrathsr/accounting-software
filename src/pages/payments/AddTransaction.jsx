@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../../utils/api"; 
 import {
   CreditCard,
   User,
@@ -28,7 +29,7 @@ export default function AddTransaction() {
   const [notification, setNotification] = useState(null);
 
   const [customers, setCustomers] = useState([]);
-  const baseURL = "http://localhost:4000/api";
+  
 
   // Show notification
   const showNotification = (type, title, message, duration = 3000) => {
@@ -37,22 +38,18 @@ export default function AddTransaction() {
   };
 
   // Fetch all customers/vendors
-  useEffect(() => {
+useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await fetch(`${baseURL}/customer`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
+        const { data } = await api.get("/customer");
         setCustomers(data);
       } catch (err) {
         console.error("Error fetching customers:", err);
         showNotification("error", "Error", "Failed to fetch customers/vendors. Please check server connection.");
       }
     };
-
     fetchCustomers();
   }, []);
-
   const customerOptions = customers.filter((c) =>
     ["retail customer", "wholesale customer"].includes(c.type.toLowerCase())
   );
@@ -79,16 +76,7 @@ export default function AddTransaction() {
 
     try {
       setLoading(true);
-      const response = await fetch(`${baseURL}/payments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
+       await api.post("/payments", payload);
       showNotification("success", "Transaction Added!", `Amount ₹${amount} ${type} successfully recorded.`);
 
       // Reset form

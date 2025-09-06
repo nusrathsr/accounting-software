@@ -110,7 +110,7 @@
 
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from '../../utils/api';
 import { GlobalContext } from "../../context/GlobalContext";
 import Swal from "sweetalert2";
 import {
@@ -139,7 +139,7 @@ const EditHoliday = () => {
   useEffect(() => {
     const fetchHoliday = async () => {
       try {
-        const res = await axios.get(`${baseURL}/holiday/${id}`);
+        const res = await api.get(`/holiday/${id}`);
         const holiday = res.data;
         setFormData({
           name: holiday.name,
@@ -170,7 +170,7 @@ const EditHoliday = () => {
     e.preventDefault();
     setSubmitLoading(true);
     try {
-      await axios.put(`${baseURL}/holiday/${id}`, formData);
+      await api.put(`/holiday/${id}`, formData);
 
       Swal.fire({
         title: "Success!",

@@ -82,7 +82,7 @@
 
 
 import React, { useState, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import { GlobalContext } from "../../context/GlobalContext";
 import Swal from "sweetalert2";
 import {
@@ -112,7 +112,7 @@ const AddHoliday = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${baseURL}/holiday`, formData);
+      await api.post("/holiday", formData);
 
       Swal.fire({
         title: "Success!",

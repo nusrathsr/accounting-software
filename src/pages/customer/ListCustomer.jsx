@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import axios from 'axios';
+import api from '../../utils/api';
 import { GlobalContext } from '../../context/GlobalContext';
 import { 
   MdDeleteForever, 
@@ -34,13 +34,13 @@ const ListCustomer = () => {
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [itemsPerPage, setItemsPerPage] = useState(5); // Added items per page state
 
-  const customerTypes = ['Retail Customer', 'Wholesale Customer',  'supplier', 'seller'];
+  const customerTypes = ['Retail Customer', 'Wholesale Customer',  'supplier'];
 
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${baseURL}/customer`);
+        const res = await api.get("/customer");
         setCustomers(res.data);
       } catch (error) {
         console.error('Error fetching customers:', error);
@@ -83,7 +83,7 @@ const ListCustomer = () => {
 
   try {
     setDeleteLoading(id);
-    await axios.delete(`${baseURL}/customer/${id}`);
+    await api.delete(`/customer/${id}`);
     setCustomers((prev) => prev.filter((cust) => cust._id !== id));
 
     Swal.fire('Deleted!', 'The customer has been deleted.', 'success');
@@ -118,8 +118,7 @@ const ListCustomer = () => {
      
       case 'supplier':
         return <HiOutlineOfficeBuilding className="w-4 h-4" />;
-      case 'seller':
-        return <FaUserTie className="w-4 h-4" />;
+      
       default:
         return <MdPerson className="w-4 h-4" />;
     }
@@ -134,8 +133,6 @@ const ListCustomer = () => {
       
       case 'supplier':
         return "bg-orange-100 text-orange-800";
-      case 'seller':
-        return "bg-indigo-100 text-indigo-800";
       default:
         return "bg-gray-100 text-gray-800";
     }

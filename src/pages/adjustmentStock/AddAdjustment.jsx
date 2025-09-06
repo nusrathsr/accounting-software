@@ -328,7 +328,7 @@
 
 import React, { useState, useContext } from "react";
 import { GlobalContext } from "../../context/GlobalContext";
-import axios from "axios";
+import api from "../../utils/api";
 import Swal from "sweetalert2";
 import {
   FaBox,
@@ -346,7 +346,8 @@ import {
 } from "react-icons/fa";
 
 const AddAdjustment = () => {
-  const { product, baseURL } = useContext(GlobalContext); // products already fetched in context
+  const { product } = useContext(GlobalContext); // products already fetched in context
+  const baseURL = import.meta.env.VITE_API_BASE_URL;
   const today = new Date().toISOString().split("T")[0];
 
   const generateAdjustmentId = () => {
@@ -398,7 +399,7 @@ const AddAdjustment = () => {
         setLoading(false);
         return;
       }
-      const response = await axios.post(`${baseURL}/stockAdjustment`, formData)
+      const response = await api.post("/stockAdjustment", formData)
       Swal.fire({
         title: "Success!",
         text: "Stock adjustment saved successfully!",

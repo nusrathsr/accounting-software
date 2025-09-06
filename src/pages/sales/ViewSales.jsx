@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Edit3
 } from "lucide-react";
+import api from "../../utils/api";
 
 export default function ViewSalesInvoices() {
   const [sales, setSales] = useState([]);
@@ -42,10 +43,8 @@ export default function ViewSalesInvoices() {
   const fetchSales = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:4000/api/sales");
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      setSales(data);
+      const response = await api.get("/sales");
+      setSales(response.data);
     } catch (err) {
       console.error("Error fetching sales:", err);
       showNotification("error", "Error", "Failed to fetch sales invoices. Please check server connection.");
@@ -95,11 +94,7 @@ export default function ViewSalesInvoices() {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/api/sales/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
+      await api.delete(`/sales/${id}`);
       showNotification("success", "Deleted!", "Invoice deleted successfully.");
       fetchSales(); // Refresh list
     } catch (err) {
@@ -125,14 +120,7 @@ export default function ViewSalesInvoices() {
     if (!editData) return;
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/api/sales/${editData._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editData),
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
+      await api.put(`/sales/${editData._id}`, editData);
       showNotification("success", "Updated!", "Invoice updated successfully.");
       setEditData(null);
       fetchSales();

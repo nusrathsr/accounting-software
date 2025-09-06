@@ -262,7 +262,7 @@
 
 
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import TimePicker from "react-time-picker";
 import Swal from "sweetalert2";
 import { GlobalContext } from "../../context/GlobalContext";
@@ -281,7 +281,7 @@ import {
 } from "react-icons/fa";
 
 const AddAttendance = () => {
-  const { employees, baseURL, shift } = useContext(GlobalContext);
+  const { employees, shift } = useContext(GlobalContext);
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -347,7 +347,7 @@ const AddAttendance = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await axios.post(`${baseURL}/attendance`, formData);
+      const res = await api.post("/attendance", formData);
 
       Swal.fire({
         title: "Success!",

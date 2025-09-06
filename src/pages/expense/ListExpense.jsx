@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Swal from 'sweetalert2';
-import axios from 'axios';
+import api from '../../utils/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { GlobalContext } from '../../context/GlobalContext';
@@ -43,7 +43,7 @@ const ListExpenses = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${baseURL}/expense`);
+      const res = await api.get("/expense");
       setExpenses(res.data);
     } catch (err) {
       console.error(err);
@@ -80,7 +80,7 @@ const ListExpenses = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`${baseURL}/expense/${id}`);
+      await api.delete(`/expense/${id}`);
       setExpenses((prev) => prev.filter((exp) => exp._id !== id));
       Swal.fire('Deleted!', 'The expense has been deleted.', 'success');
     } catch (err) {

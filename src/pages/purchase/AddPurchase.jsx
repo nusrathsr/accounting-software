@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../../utils/api";
 import {
   FileText,
   User,
@@ -49,56 +50,29 @@ export default function AddPurchase() {
     setTimeout(() => setNotification(null), duration);
   };
 
-  // API functions using fetch
-  const api = {
-    getProducts: async () => {
-      try {
-        const response = await fetch("http://localhost:4000/api/products");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-        throw error;
-      }
-    },
-
-    getSuppliers: async () => {
-      try {
-        const response = await fetch("http://localhost:4000/api/customer/suppliers");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-      } catch (error) {
-        console.error("Failed to fetch suppliers:", error);
-        throw error;
-      }
-    },
-
-    savePurchase: async (data) => {
-      try {
-        const response = await fetch("http://localhost:4000/api/purchases", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        return response.json();
-      } catch (error) {
-        console.error("Failed to save purchase:", error);
-        throw error;
-      }
-    }
+  
+  // ✅ API calls using api.js
+  const getProducts = async () => {
+    const res = await api.get("/products");
+    return res.data;
   };
 
+  const getSuppliers = async () => {
+    const res = await api.get("/customer/suppliers");
+    return res.data;
+  };
+    const savePurchase = async (data) => {
+    const res = await api.post("/purchases", data);
+    return res.data;
+  };
   // Fetch products and suppliers
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const [productsData, suppliersData] = await Promise.all([
-          api.getProducts(),
-          api.getSuppliers()
+          getProducts(),
+          getSuppliers()
         ]);
         setProducts(productsData);
         setSuppliers(suppliersData);
@@ -218,7 +192,7 @@ export default function AddPurchase() {
         expiryDate: formData.expiryDate ? new Date(formData.expiryDate) : null,
       };
       console.log("➡️ Sending payload:", payload);
-      await api.savePurchase(payload);
+      await savePurchase(payload);
 
       showNotification("success", "Purchase Saved!", `Purchase of ${formData.product} saved successfully! Total: ₹${formData.totalAmount}`, 2500);
 

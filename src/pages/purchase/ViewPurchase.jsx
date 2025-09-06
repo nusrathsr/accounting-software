@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import api from "../../utils/api";
 import {
   FileText,
   User,
@@ -43,9 +44,8 @@ export default function ViewPurchase() {
   const fetchPurchases = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:4000/api/purchases');
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
+      const response = await await api.get("/purchases");
+      const data = response.data;
       const purchasesWithPaid = data.map(p => ({
         ...p,
         paidAmount: p.paidAmount ?? 0
@@ -104,11 +104,7 @@ export default function ViewPurchase() {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:4000/api/purchases/${id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
+      await api.delete(`/purchases/${id}`);
       showNotification("success", "Deleted!", "Purchase record deleted successfully.");
       fetchPurchases(); // Refresh list
     } catch (err) {
@@ -180,16 +176,8 @@ export default function ViewPurchase() {
         purchaseDate: editData.purchaseDate,
       };
 
-      const response = await fetch(`http://localhost:4000/api/purchases/${editData._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedPurchase),
-      });
-
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const result = await response.json();
+      const response = await api.put(`/purchases/${editData._id}`, updatedPurchase);
+      const result = response.data;
 
       setPurchases(purchases.map(p => p._id === editData._id ? result.purchase : p));
       closeEditModal();

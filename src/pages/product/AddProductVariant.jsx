@@ -2,13 +2,10 @@ import React, { useEffect, useState, useContext } from 'react';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { FaBox, FaBarcode, FaDollarSign, FaPercent, FaSave, FaArrowLeft, FaImage } from 'react-icons/fa';
-import axios from 'axios';
-import { GlobalContext } from '../../context/GlobalContext';
+import api from '../../utils/api';
 
 const AddProductVariant = () => {
     const navigate = useNavigate();
-    const { baseURL } = useContext(GlobalContext);
-
     const [products, setProducts] = useState([]);
     const [variantId, setVariantId] = useState('2100');
     const [productVariant, setProductVariant] = useState({
@@ -30,7 +27,7 @@ const AddProductVariant = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await axios.get(`${baseURL}/products`);
+                const res = await api.get("/products");
                 setProducts(res.data);
             } catch (err) {
                 console.error(err);
@@ -38,13 +35,13 @@ const AddProductVariant = () => {
             }
         };
         fetchProducts();
-    }, [baseURL]);
+    }, []);
 
     // Generate Variant ID
     useEffect(() => {
         const fetchLatestVariant = async () => {
             try {
-                const res = await axios.get(`${baseURL}/variants/latest`);
+                const res = await api.get("/variants/latest");
                 const lastId = res.data?.variantId || 2099;
                 setVariantId((lastId + 1).toString());
             } catch {
@@ -52,7 +49,7 @@ const AddProductVariant = () => {
             }
         };
         fetchLatestVariant();
-    }, [baseURL]);
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, type, checked, files } = e.target;
@@ -105,7 +102,7 @@ const AddProductVariant = () => {
                 formData.append('image', productVariant.image);
             }
 
-            await axios.post(`${baseURL}/variants`, formData, {
+            await api.post("/variants", formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Swal from 'sweetalert2';
-import axios from 'axios';
+import api from '../../utils/api';
 import { GlobalContext } from '../../context/GlobalContext';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -66,7 +66,7 @@ const handleSubmit = async (e) => {
       }
     }
 
-    const res = await axios.post(`${baseURL}/expense`, formData, {
+    const res = await api.post(`/expense`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
 

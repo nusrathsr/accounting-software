@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import Swal from "sweetalert2";
-import axios from "axios";
+import api from '../../utils/api';
 import { useParams, useNavigate } from "react-router-dom";
 import { GlobalContext } from "../../context/GlobalContext";
 import {
@@ -57,7 +57,7 @@ const EditEmployee = () => {
     const fetchEmployee = async () => {
       try {
         setFetchLoading(true);
-        const { data } = await axios.get(`${baseURL}/employees/${id}`);
+        const { data } = await api.get(`/employees/${id}`);
         console.log(data);
 
         setEmployee({
@@ -129,7 +129,7 @@ const EditEmployee = () => {
     });
 
     try {
-      await axios.put(`${baseURL}/employees/${id}`, formData, {
+      await api.put(`/employees/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       Swal.fire({

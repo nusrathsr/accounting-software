@@ -137,7 +137,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { GlobalContext } from "../../context/GlobalContext";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/api";
 import Swal from "sweetalert2";
 import { 
   FaEdit, 
@@ -153,7 +153,6 @@ import {
 } from "react-icons/fa";
 
 const ShiftList = () => {
-  const { baseURL } = useContext(GlobalContext);
   const [shifts, setShifts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -164,7 +163,7 @@ const ShiftList = () => {
     const fetchShifts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${baseURL}/shift`);
+        const res = await api.get(`/shift`);
         setShifts(res.data);
       } catch (error) {
         Swal.fire({
@@ -178,7 +177,7 @@ const ShiftList = () => {
       }
     };
     fetchShifts();
-  }, [baseURL]);
+  }, []);
 
   // Delete shift
   const handleDelete = async (id) => {
@@ -193,7 +192,7 @@ const ShiftList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`${baseURL}/shift/${id}`);
+          await api.delete(`/shift/${id}`);
           setShifts((prev) => prev.filter((s) => s._id !== id));
           Swal.fire({
             title: "Deleted!",

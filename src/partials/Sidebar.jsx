@@ -1,4 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import {
+  Box,
+  PlusCircle,
+  List,
+  Folder,
+  Users,
+} from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import SidebarLinkGroup from "./SidebarLinkGroup";
@@ -451,26 +458,22 @@ function Sidebar({
           <div className="flex items-center">
             {/* Master Data Icon */}
             <svg
-              className={`shrink-0 fill-current ${
-                open ? "text-violet-500" : "text-gray-400 dark:text-gray-500"
-              }`}
+              className={`shrink-0 fill-current ${open ? "text-violet-500" : "text-gray-400 dark:text-gray-500"}`}
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
+              width="12"  // smaller
+              height="12" // smaller
               viewBox="0 0 24 24"
             >
               <path d="M3 3h18v2H3V3zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
             </svg>
-            <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+            <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
               Master Data
             </span>
           </div>
           {/* Arrow */}
           <div className="flex shrink-0 ml-2">
             <svg
-              className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${
-                open && "rotate-180"
-              }`}
+              className={`w-2.5 h-2.5 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"}`}
               viewBox="0 0 12 12"
             >
               <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
@@ -479,10 +482,9 @@ function Sidebar({
         </div>
       </a>
 
-      {/* Submenus: Product, Categories, Customer */}
+      {/* Submenus */}
       <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
         <ul className={`pl-8 mt-1 ${!open && "hidden"}`}>
-          
           {/* Product */}
           <SidebarLinkGroup activecondition={pathname.includes("product")}>
             {(handleClick2, open2) => (
@@ -495,11 +497,9 @@ function Sidebar({
                   }}
                   className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  📦 Products
+                  <span className="text-sm">📦 Products</span>
                   <svg
-                    className={`w-3 h-3 ml-1 fill-current ${
-                      open2 && "rotate-180"
-                    }`}
+                    className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
                     viewBox="0 0 12 12"
                   >
                     <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
@@ -507,15 +507,13 @@ function Sidebar({
                 </a>
                 <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
                   <li>
-                    <NavLink to="/addProduct">➕ Add Product</NavLink>
+                    <NavLink to="/addProduct" className="text-sm whitespace-nowrap block">➕ Add Product</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/addProductVariant">
-                      ➕ Add Product Variant
-                    </NavLink>
+                    <NavLink to="/addProductVariant" className="text-sm whitespace-nowrap block">➕Add Product Variant</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/listProduct">📋 View Products</NavLink>
+                    <NavLink to="/listProduct" className="text-sm whitespace-nowrap block">📋 View Products</NavLink>
                   </li>
                 </ul>
               </>
@@ -534,11 +532,9 @@ function Sidebar({
                   }}
                   className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  🗂️ Categories
+                  <span className="text-sm">🗂️ Categories</span>
                   <svg
-                    className={`w-3 h-3 ml-1 fill-current ${
-                      open2 && "rotate-180"
-                    }`}
+                    className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
                     viewBox="0 0 12 12"
                   >
                     <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
@@ -546,10 +542,10 @@ function Sidebar({
                 </a>
                 <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
                   <li>
-                    <NavLink to="/addCategory">➕ Add Category</NavLink>
+                    <NavLink to="/addCategory" className="text-sm whitespace-nowrap block">➕ Add Category</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/listCategories">📋 View Categories</NavLink>
+                    <NavLink to="/listCategories" className="text-sm whitespace-nowrap block">📋 View Categories</NavLink>
                   </li>
                 </ul>
               </>
@@ -568,11 +564,9 @@ function Sidebar({
                   }}
                   className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  👥 Customers
+                  <span className="text-sm">👥 Customers</span>
                   <svg
-                    className={`w-3 h-3 ml-1 fill-current ${
-                      open2 && "rotate-180"
-                    }`}
+                    className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
                     viewBox="0 0 12 12"
                   >
                     <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
@@ -580,10 +574,10 @@ function Sidebar({
                 </a>
                 <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
                   <li>
-                    <NavLink to="/addCustomer">➕ Add Customer</NavLink>
+                    <NavLink to="/addCustomer" className="text-sm whitespace-nowrap block">➕ Add Customer</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/listCustomer">📋 View Customers</NavLink>
+                    <NavLink to="/listCustomer" className="text-sm whitespace-nowrap block">📋 View Customers</NavLink>
                   </li>
                 </ul>
               </>

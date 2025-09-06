@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import Swal from 'sweetalert2';
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from '../../utils/api';
 import { GlobalContext } from "../../context/GlobalContext";
 import {
   FaEdit,
@@ -31,7 +31,7 @@ const ListEmployees = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${baseURL}/employees`);
+      const { data } = await api.get("/employees");
       setEmployees(data);
     } catch (error) {
       console.error("Error fetching employees:", error);
@@ -66,7 +66,7 @@ const ListEmployees = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`${baseURL}/employees/${id}`);
+      await api.delete(`/employees/${id}`);
       setEmployees(employees.filter((emp) => emp._id !== id));
       Swal.fire({
         title: 'Deleted!',

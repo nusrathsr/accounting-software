@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/api";
 import { GlobalContext } from "../../context/GlobalContext";
 import {
   FaList,
@@ -16,7 +16,6 @@ import {
 } from "react-icons/fa";
 
 const ListAdjustment = () => {
-  const { baseURL } = useContext(GlobalContext);
   const [adjustments, setAdjustments] = useState([]);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -28,7 +27,7 @@ const ListAdjustment = () => {
   const fetchAdjustments = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${baseURL}/stockAdjustment`);
+      const { data } = await api.get("/stockAdjustment");
       setAdjustments(data);
     } catch (err) {
       console.error("Error fetching stock adjustments:", err);
@@ -57,7 +56,7 @@ const ListAdjustment = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`${baseURL}/stockAdjustment/${id}`);
+      await api.delete(`/stockAdjustment/${id}`);
       setAdjustments(adjustments.filter((adj) => adj._id !== id));
       Swal.fire("Deleted!", "The adjustment has been deleted.", "success");
     } catch (error) {

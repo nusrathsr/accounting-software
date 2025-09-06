@@ -275,7 +275,7 @@
 
 
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import Swal from "sweetalert2";
 import { GlobalContext } from "../../context/GlobalContext";
 import { useParams, useNavigate } from "react-router-dom";
@@ -294,7 +294,7 @@ import {
 } from "react-icons/fa";
 
 const EditAttendance = () => {
-  const { employees, baseURL, shift } = useContext(GlobalContext);
+  const { employees, shift } = useContext(GlobalContext);
   const { id } = useParams(); // get attendanceId from route
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -318,7 +318,7 @@ const EditAttendance = () => {
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const { data } = await axios.get(`${baseURL}/attendance/${id}`);
+        const { data } = await api.get(`/attendance/${id}`);
         setFormData({
           date: (data.date || "").slice(0, 10),
           employeeId: data.employee?._id || data.employeeId || "",
@@ -337,7 +337,7 @@ const EditAttendance = () => {
       }
     };
     fetchAttendance();
-  }, [id, baseURL]);
+  }, [id]);
 
   // Auto calculate work & overtime
   useEffect(() => {
@@ -387,7 +387,7 @@ const EditAttendance = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await axios.put(`${baseURL}/attendance/${id}`, formData);
+      const res = await api.put(`/attendance/${id}`, formData);
 
       Swal.fire({
         title: "Success!",

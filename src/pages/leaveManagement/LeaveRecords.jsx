@@ -226,7 +226,7 @@
 
 
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import { Link } from "react-router-dom";
 import { GlobalContext } from "../../context/GlobalContext";
 import Swal from "sweetalert2";
@@ -265,7 +265,7 @@ const LeaveRecord = () => {
   // Fetch all leaves
   const fetchLeaves = async () => {
     try {
-      const res = await axios.get(`${baseURL}/leaves`);
+      const res = await api.get("/leaves");
       setLeaves(res.data);
       setLoading(false);
     } catch (err) {
@@ -308,7 +308,7 @@ const LeaveRecord = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`${baseURL}/leaves/${id}`);
+          await api.delete(`/leaves/${id}`);
           setLeaves(leaves.filter((leave) => leave._id !== id));
           Swal.fire({
             title: "Deleted!",

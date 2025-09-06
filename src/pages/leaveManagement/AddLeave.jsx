@@ -204,7 +204,7 @@
 
 
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import Select from "react-select";
 import Swal from "sweetalert2";
 import { GlobalContext } from "../../context/GlobalContext";
@@ -258,7 +258,7 @@ const AddLeave = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${baseURL}/leaves`, formData);
+      await api.post("/leaves", formData);
 
       // ✅ SweetAlert success
       Swal.fire({

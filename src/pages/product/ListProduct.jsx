@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { GlobalContext } from '../../context/GlobalContext';
 import {
   MdDeleteForever,
@@ -50,7 +50,7 @@ const ListProduct = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${baseURL}/products`);
+      const response = await api.get("/products");
       setProducts(response.data);
       calculateStats(response.data);
     } catch (err) {
@@ -90,7 +90,7 @@ const ListProduct = () => {
   // Fetch categories
   const fetchCategories = async () => {
     try {
-      const response = await axios.get(`${baseURL}/categories`);
+      const response = await api.get("/categories");
       setCategories(response.data);
     } catch (err) {
       console.error(err);
@@ -140,7 +140,7 @@ const ListProduct = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`${baseURL}/products/${id}`);
+      await api.delete(`/products/${id}`);
       const updatedProducts = products.filter((prod) => prod._id !== id);
       setProducts(updatedProducts);
       calculateStats(updatedProducts);

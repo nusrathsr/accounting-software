@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import axios from "axios";
+import api from "../../utils/api";
 import { GlobalContext } from "../../context/GlobalContext";
 import {
   LineChart,
@@ -37,8 +37,7 @@ const SalesReport = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const rowsPerPage = 10; // 👈 adjust as needed
-  const { baseURL } = useContext(GlobalContext);
-
+ 
   // Fetch report function
   const fetchReport = async (startDate = "", endDate = "") => {
     try {
@@ -47,7 +46,7 @@ const SalesReport = () => {
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
-      const { data } = await axios.get(`${baseURL}/reports/sales`, { params });
+      const { data } = await api.get("/reports/sales", { params });
       setReport(data);
       setCurrentPage(1); // reset to first page whenever new data comes
     } catch (error) {

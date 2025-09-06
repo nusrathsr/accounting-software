@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/api"; 
 import {
   FileText,
   Edit3,
@@ -16,7 +16,7 @@ export default function ViewCategories() {
   // ✅ Fetch categories
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/categories");
+      const res = await api.get("/categories");
       setCategories(res.data);
       setLoading(false);
     } catch (err) {
@@ -33,7 +33,7 @@ export default function ViewCategories() {
   const deleteCategory = async (id) => {
     if (!window.confirm("Are you sure you want to delete this category?")) return;
     try {
-      await axios.delete(`http://localhost:4000/api/categories/${id}`);
+      await api.delete(`/categories/${id}`);
       setCategories(categories.filter((cat) => cat._id !== id));
     } catch (err) {
       console.error("Error deleting category:", err);

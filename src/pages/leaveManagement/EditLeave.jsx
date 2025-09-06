@@ -228,7 +228,7 @@
 // export default EditLeave;
 
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import Select from "react-select";
 import { useParams, useNavigate } from "react-router-dom";
 import { GlobalContext } from "../../context/GlobalContext";
@@ -246,7 +246,7 @@ import {
 } from "react-icons/fa";
 
 const EditLeave = () => {
-  const { employees, baseURL } = useContext(GlobalContext);
+  const { employees } = useContext(GlobalContext);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -277,7 +277,7 @@ const EditLeave = () => {
   useEffect(() => {
     const fetchLeave = async () => {
       try {
-        const res = await axios.get(`${baseURL}/leaves/${id}`);
+        const res = await api.get(`/leaves/${id}`);
         const leave = res.data;
         setFormData({
           employeeId: leave.employeeId?._id || "",
@@ -303,7 +303,7 @@ const EditLeave = () => {
       }
     };
     fetchLeave();
-  }, [id, baseURL, navigate]);
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -318,7 +318,7 @@ const EditLeave = () => {
     e.preventDefault();
     setSubmitLoading(true);
     try {
-      await axios.put(`${baseURL}/leaves/${id}`, formData);
+      await api.put(`/leaves/${id}`, formData);
 
       // ✅ SweetAlert success
       Swal.fire({

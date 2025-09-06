@@ -14,6 +14,7 @@ import {
   FileText,
   CheckCircle
 } from "lucide-react";
+import api from "../../utils/api";
 
 export default function AddSalesInvoice() {
   const invoiceRef = useRef();
@@ -24,8 +25,8 @@ export default function AddSalesInvoice() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/products");
-        const data = await res.json();
+        const res = await api.get("/products");
+        const data = res.data;
         const products = data.flatMap((p) =>
           p.variants && p.variants.length > 0
             ? p.variants.map((v) => ({
@@ -374,15 +375,7 @@ export default function AddSalesInvoice() {
     };
 
     try {
-      const response = await fetch("http://localhost:4000/api/sales", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(salesRecord),
-      });
-
-      if (response.ok) {
+      await api.post("/sales", salesRecord);
         showAlert("Success!", `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${totalAmount.toFixed(2)}`, "success");
 
         setFormData({
@@ -400,9 +393,6 @@ export default function AddSalesInvoice() {
           items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
         });
         setDropdownState([{ open: false, searchTerm: "" }]);
-      } else {
-        throw new Error("Failed to save invoice");
-      }
     } catch (err) {
       console.error(err);
       showAlert("Error!", "Failed to save invoice. Please check server connection.", "error");
@@ -411,8 +401,8 @@ export default function AddSalesInvoice() {
 
   const handleDownload = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/sales/latest");
-      const invoice = await res.json();
+      const res = await api.get("/sales/latest");
+      const invoice = res.data;
       if (!invoice) {
         showAlert("Error!", "No invoice found!", "error");
         return;
@@ -426,8 +416,8 @@ export default function AddSalesInvoice() {
 
   const handlePrint = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/sales/latest");
-      const invoice = await res.json();
+      const res = await api.get("/sales/latest");
+      const invoice = res.data;
       if (!invoice) {
         showAlert("Error!", "No invoice found!", "error");
         return;

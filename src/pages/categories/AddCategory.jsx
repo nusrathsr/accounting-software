@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Save, ArrowLeft } from "lucide-react";
+import api from "../../utils/api"; 
 
 export default function AddCategory() {
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ export default function AddCategory() {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:4000/api/categories", {
+      await api.post("/categories", {
         name,
         description,
         status,

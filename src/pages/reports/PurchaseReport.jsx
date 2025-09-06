@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../utils/api";
 import React, { useContext, useState, useEffect } from "react";
 import { GlobalContext } from "../../context/GlobalContext";
 import {
@@ -30,7 +30,6 @@ import {
 import { MdDashboard } from "react-icons/md";
 
 const PurchaseReport = () => {
-  const { baseURL } = useContext(GlobalContext);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [report, setReport] = useState(null);
@@ -47,7 +46,7 @@ const PurchaseReport = () => {
       if (start) params.startDate = start;
       if (end) params.endDate = end;
 
-      const { data } = await axios.get(`${baseURL}/reports/purchase`, {
+      const { data } = await api.get("/reports/purchase", {
         params,
       });
       setReport(data);

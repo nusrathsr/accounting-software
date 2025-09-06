@@ -172,7 +172,7 @@
 
 
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
+import api from '../../utils/api';
 import { Link } from "react-router-dom";
 import { GlobalContext } from "../../context/GlobalContext";
 import Swal from "sweetalert2";
@@ -199,7 +199,7 @@ const ListHoliday = () => {
 
   const fetchHolidays = async () => {
     try {
-      const res = await axios.get(`${baseURL}/holiday`);
+      const res = await api.get("/holiday");
       setHolidays(res.data);
       setFilteredHolidays(res.data);
     } catch (err) {
@@ -253,7 +253,7 @@ const ListHoliday = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`${baseURL}/holidays/${id}`);
+          await api.delete(`/holidays/${id}`);
           setHolidays(holidays.filter((holiday) => holiday._id !== id));
           Swal.fire("Deleted!", "Holiday has been deleted.", "success");
         } catch (err) {

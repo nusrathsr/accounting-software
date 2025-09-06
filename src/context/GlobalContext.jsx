@@ -1,11 +1,11 @@
 import React,{createContext,useState,useEffect, useContext} from "react";
-import axios from 'axios'
+import api from "../utils/api";
 
 export const GlobalContext =createContext();
 
 
 export const GlobalProvider = ({ children }) => {
-   const baseURL = "http://localhost:4000/api";
+   
  
   const [customers, setCustomers] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -19,7 +19,7 @@ export const GlobalProvider = ({ children }) => {
 
    const fetchProduct =async()=>{
     try {
-      const res =await axios.get(`${baseURL}/products`)
+      const res =await api.get("/products")
       setProduct(res.data)
       
     } catch (error) {
@@ -30,7 +30,7 @@ export const GlobalProvider = ({ children }) => {
 
 const fetchEmployees =async()=>{
   try {
-    const response =await axios.get(`${baseURL}/employees`)
+    const response =await api.get("/employees")
     setEmployees(response.data)
   } catch (error) {
     console.log('error fetching employees ',error);
@@ -43,7 +43,7 @@ const fetchEmployees =async()=>{
 
 const fetchCustomer =async()=>{
   try {
-    const response =await axios.get(`${baseURL}/customer`)
+    const response =await api.get("/customer")
     setCustomers(response.data)
     setSuppliers(response.data.filter(cust => cust.type === 'seller'))
     setLoading(false)
@@ -57,7 +57,7 @@ const fetchCustomer =async()=>{
   // fetch shift
 const fetchShift =async()=>{
   try {
-    const res =await axios.get(`${baseURL}/shift`)
+    const res =await api.get("/shift")
     setShift(res.data)
   } catch (error) {
     console.log(`error fetching shift`,error);
@@ -73,7 +73,6 @@ useEffect(()=>{
 
 
 const value ={
-  baseURL,
   customers,
   suppliers,
   loading,

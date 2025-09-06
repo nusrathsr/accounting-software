@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../utils/api"; 
 
 export default function EditCategory() {
   const { id } = useParams();
@@ -15,7 +15,7 @@ export default function EditCategory() {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/categories/${id}`);
+        const res = await api.get(`/categories/${id}`);
         setFormData(res.data);
       } catch (err) {
         console.error("Error fetching category:", err);
@@ -28,7 +28,7 @@ export default function EditCategory() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:4000/api/categories/${id}`, formData);
+      await api.put(`/categories/${id}`, formData);
       alert("✅ Category updated successfully");
       navigate("/viewCategories"); // go back to list
     } catch (err) {

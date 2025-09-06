@@ -347,17 +347,15 @@
 
 
 import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../utils/api";
 import {
   FaFilter,
   FaChevronLeft,
   FaChevronRight,
   FaSearch,
 } from "react-icons/fa";
-import { GlobalContext } from "../../context/GlobalContext";
 
 const StockReport = () => {
-  const { baseURL } = useContext(GlobalContext);
   const [report, setReport] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -367,7 +365,7 @@ const StockReport = () => {
   const fetchReport = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${baseURL}/reports/stock`);
+      const res = await api.get("/reports/stock");
 
       // 🔹 Directly use variant-level data
       const variantData = res.data.report.map((v) => ({

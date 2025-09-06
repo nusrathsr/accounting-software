@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from '../../utils/api';
 import React, { useState, useEffect, useContext } from "react";
 import { GlobalContext } from "../../context/GlobalContext";
 import { Link } from "react-router-dom";
@@ -83,7 +83,7 @@ const AttendanceReport = () => {
 
   const fetchEmployeesAttendance = async () => {
     try {
-      const response = await axios.get(`${baseURL}/attendance`);
+      const response = await api.get("/attendance");
       setAttendance(response.data);
     } catch (error) {
       console.error("failed to load attendance ", error);
@@ -112,7 +112,7 @@ const AttendanceReport = () => {
 
     if (!result.isConfirmed) return;
     try {
-      await axios.delete(`${baseURL}/attendance/${id}`);
+      await api.delete(`/attendance/${id}`);
       setAttendance(attendances.filter((att) => att._id !== id));
       Swal.fire({
         title: 'Deleted!',
