@@ -746,109 +746,80 @@ function Sidebar({
                 }}
               </SidebarLinkGroup>
 
-              {/* purchase*/}
-              <SidebarLinkGroup activecondition={pathname.includes("purchase")}>
-                {(handleClick, open) => (
-                  <>
-                    <a
-                      href="#0"
-                      className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${pathname.includes("purchase")
-                        ? ""
-                        : "hover:text-gray-900 dark:hover:text-white"
-                        }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleClick();
-                        setSidebarExpanded(true);
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          {/* Purchase Icon */}
-                          <svg
-                            className={`shrink-0 fill-current ${pathname.includes("purchase")
-                              ? "text-violet-500"
-                              : "text-gray-400 dark:text-gray-500"
-                              }`}
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                          >
-                            <path d="M3 1h10v14H3z" />
-                          </svg>
-                          <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                            Purchase
-                          </span>
+                  {/* sales*/}
+              <SidebarLinkGroup activecondition={pathname.includes("sales")}>
+                {(handleClick, open) => {
+                  return (
+                    <React.Fragment>
+                      <a
+                        href="#0"
+                        className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${pathname.includes("sales")
+                          ? ""
+                          : "hover:text-gray-900 dark:hover:text-white"
+                          }`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleClick();
+                          setSidebarExpanded(true);
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            {/* Sales Icon */}
+                            <svg
+                              className={`shrink-0 fill-current ${pathname.includes('pos')
+                                ? 'text-violet-500'
+                                : 'text-gray-400 dark:text-gray-500'
+                                }`}
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 16 16"
+                            >
+                              <path d="M3 1h10v14H3z" />
+                            </svg>
+                            <span className="text-sm font-medium ml-4 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                              POS
+                            </span>
+                          </div>
+                          <div className="flex shrink-0 ml-2">
+                            <svg
+                              className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"
+                                }`}
+                              viewBox="0 0 12 12"
+                            >
+                              <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                            </svg>
+                          </div>
                         </div>
-                        <div className="flex shrink-0 ml-2">
-                          <svg
-                            className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"
-                              }`}
-                            viewBox="0 0 12 12"
-                          >
-                            <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                          </svg>
-                        </div>
+                      </a>
+                      <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
+                        <ul className={`pl-8 mt-1 ${!open && "hidden"}`}>
+                          <li className="mb-1 last:mb-0">
+                            <NavLink
+                              end
+                              to="/pos/billing"
+                              className={({ isActive }) =>
+                                "block transition duration-150 truncate " +
+                                (isActive
+                                  ? "text-violet-500"
+                                  : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                              }
+                            >
+                              <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                                Billing Counter
+                              </span>
+                            </NavLink>
+                          </li>
+                       
+                        </ul>
                       </div>
-                    </a>
-                    <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
-                      <ul className={`pl-8 mt-1 ${!open && "hidden"}`}>
-                        <li className="mb-1 last:mb-0">
-                          <NavLink
-                            end
-                            to="/purchase/add"
-                            className={({ isActive }) =>
-                              "block transition duration-150 truncate " +
-                              (isActive
-                                ? "text-violet-500"
-                                : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                            }
-                          >
-                            <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                              Add Purchase
-                            </span>
-                          </NavLink>
-                        </li>
-                        <li className="mb-1 last:mb-0">
-                          <NavLink
-                            end
-                            to="/purchase/view"
-                            className={({ isActive }) =>
-                              "block transition duration-150 truncate " +
-                              (isActive
-                                ? "text-violet-500"
-                                : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                            }
-                          >
-                            <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                              View Purchases
-                            </span>
-                          </NavLink>
-                        </li>
-
-                        {/* New Purchase Dues Link */}
-                        <li className="mb-1 last:mb-0">
-                          <NavLink
-                            end
-                            to="/purchase/dues"
-                            className={({ isActive }) =>
-                              "block transition duration-150 truncate " +
-                              (isActive
-                                ? "text-violet-500"
-                                : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                            }
-                          >
-                            <span className="text-sm font-medium lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-                              Purchase Dues
-                            </span>
-                          </NavLink>
-                        </li>
-                      </ul>
-                    </div>
-                  </>
-                )}
+                    </React.Fragment>
+                  );
+                }}
               </SidebarLinkGroup>
+
+            
 
               <SidebarLinkGroup activecondition={pathname.includes("payments") || pathname.includes("receipts")}>
                 {(handleClick, open) => (
@@ -1211,7 +1182,7 @@ function Sidebar({
                   <ul className="mt-1 pl-4 space-y-1">
                     <li>
                       <NavLink
-                        to="/addPurchase"
+                        to="/purchase/add"
                         className={({ isActive }) =>
                           "block text-sm font-medium truncate " +
                           (isActive
@@ -1224,7 +1195,7 @@ function Sidebar({
                     </li>
                     <li>
                       <NavLink
-                        to="/viewPurchases"
+                        to="/purchase/view"
                         className={({ isActive }) =>
                           "block text-sm font-medium truncate " +
                           (isActive
@@ -1234,6 +1205,20 @@ function Sidebar({
                       >
                         
                           View Purchases
+                      </NavLink>
+                    </li>
+                      <li>
+                      <NavLink
+                        to="/purchase/dues"
+                        className={({ isActive }) =>
+                          "block text-sm font-medium truncate " +
+                          (isActive
+                            ? "text-violet-500"
+                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                        }
+                      >
+                        
+                           Purchases Dues
                       </NavLink>
                     </li>
                   </ul>
@@ -1326,7 +1311,7 @@ function Sidebar({
                   <ul className="mt-1 pl-4 space-y-1">
                     <li>
                       <NavLink
-                        to="/stockReports"
+                        to="/stockStatus"
                         className={({ isActive }) =>
                           "block text-sm font-medium truncate " +
                           (isActive
@@ -1334,12 +1319,12 @@ function Sidebar({
                             : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
                         }
                       >
-                         Current Stock
+                         Stock Status Report 
                       </NavLink>
                     </li>
                     <li>
                       <NavLink
-                        to="/lowStockAlerts"
+                        to="/lowStockAlert"
                         className={({ isActive }) =>
                           "block text-sm font-medium truncate " +
                           (isActive
@@ -1352,7 +1337,7 @@ function Sidebar({
                     </li>
                     <li>
                       <NavLink
-                        to="/expiryReports"
+                        to="/expiryReport"
                         className={({ isActive }) =>
                           "block text-sm font-medium truncate " +
                           (isActive
