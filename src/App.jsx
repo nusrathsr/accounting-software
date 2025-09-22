@@ -43,6 +43,10 @@ import ListHoliday from './pages/holidayCalendar/ListHoliday';
 import EditHoliday from './pages/holidayCalendar/EditHoliday';
 import AddAdjustment from './pages/adjustmentStock/AddAdjustment';
 import ListAdjustment from './pages/adjustmentStock/ListAdjustment';
+import StockStatusReport from './pages/stockStatusReport/StockStatusReport.jsx';
+import LowStockAlert from './pages/lowStock/LowStockAlert.jsx';
+import ExpiryReport from './pages/expiryReport/ExpiryReport.jsx';
+import BillingCounter from './pages/pos/BillingCounter.jsx';
 
 function App() {
 
@@ -101,6 +105,11 @@ function App() {
            
           <Route path='/addAdjustment' element={<AddAdjustment />} />
           <Route path='/viewAdjustments' element={<ListAdjustment/>} />
+          <Route path='/stockStatus' element={<StockStatusReport/>} />
+          <Route path='/lowStockAlert' element={<LowStockAlert/>} />
+          <Route path='/expiryReport' element={<ExpiryReport/>} />
+          <Route path='/pos/billing' element={<BillingCounter/>} />
+
 
 
         </Route>

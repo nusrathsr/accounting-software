@@ -1,25 +1,25 @@
-const PurchaseInvoice =require('../models/PurchaseInvoice')
-const SalesInvoice =require('../models/SalesInvoice')
-const Expense =require('../models/Expense')
-const Product =require("../models/Product")
-const ProductVariant =require("../models/ProductVariant")
+const PurchaseInvoice = require('../models/PurchaseInvoice')
+const SalesInvoice = require('../models/SalesInvoice')
+const Expense = require('../models/Expense')
+const Product = require("../models/Product")
+const ProductVariant = require("../models/ProductVariant")
 
 
 //sales report
 
-exports.getSalesReport = async(req,res)=>{
+exports.getSalesReport = async (req, res) => {
   try {
-    const {startDate,endDate}=req.query;
-    const filter={}
-    if(startDate && endDate){
-      filter.date = {$gte:new Date(startDate), $lte :new Date(endDate)}
+    const { startDate, endDate } = req.query;
+    const filter = {}
+    if (startDate && endDate) {
+      filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) }
     }
-    const sales =await SalesInvoice.find(filter)
-    const totalRevenue =sales.reduce((sum,s)=>sum+s.totalAmount,0)
-    const totalTax =sales.reduce((sum,s)=>sum + (s.tax || 0),0);
-    res.json({sales, totalRevenue,totalTax})
+    const sales = await SalesInvoice.find(filter)
+    const totalRevenue = sales.reduce((sum, s) => sum + s.totalAmount, 0)
+    const totalTax = sales.reduce((sum, s) => sum + (s.tax || 0), 0);
+    res.json({ sales, totalRevenue, totalTax })
   } catch (error) {
-    res.status(500).json({message:error.message})
+    res.status(500).json({ message: error.message })
   }
 }
 
@@ -83,65 +83,74 @@ exports.getPurchaseReport = async (req, res) => {
 
 
 
-      
-    
-//get stock report
+
+
 
 exports.getStockReport = async (req, res) => {
   try {
-    // 1️⃣ Fetch all product variants
     const variants = await ProductVariant.find().populate("product");
+    const purchases = await PurchaseInvoice.find();
+    const sales = await SalesInvoice.find();
 
-    // 2️⃣ Build report for each variant
-    const report = await Promise.all(
-      variants.map(async (v) => {
-        // ---- Purchases from PurchaseInvoice ----
-        const purchases = await PurchaseInvoice.aggregate([
-          { $match: { product: v.variantName } },  // match by product name
-          { $group: { _id: null, total: { $sum: "$quantity" } } },
-        ]);
+    const report = variants.map((variant) => {
+      const product = variant.product;
 
-        // ---- Sales from SalesInvoice (has array of products) ----
-        const sales = await SalesInvoice.aggregate([
-          { $unwind: "$products" },
-          { $match: { "products.variantId": v._id } },
-          { $group: { _id: null, total: { $sum: "$products.quantity" } } },
-        ]);
+      // Purchases for this variant (matching product + maybe variant name if you store it)
+      const purchaseQty = purchases
+        .filter((p) => p.product === product.name) // adjust if you store ObjectId instead of name
+        .reduce((sum, p) => sum + (p.quantity || 0), 0);
 
-        // Extract totals
-        const totalPurchases = purchases[0]?.total || 0;
-        const totalSales = sales[0]?.total || 0;
-        const closingStock = totalPurchases - totalSales;
+      // Sales for this variant
+      const salesQty = sales
+        .flatMap((s) => s.products)
+  .filter((sp) => sp.variantId && sp.variantId.toString() === variant._id.toString())
+        .reduce((sum, sp) => sum + (sp.quantity || 0), 0);
 
-        // 3️⃣ Return one row for this variant
-        return {
-          variantId: v._id,
-          variantName: v.variantName,
-          sku: v.sku,
-          product: {
-            productId: v.product?._id,
-            brand: v.product?.brand || "-",
-            category: v.product?.category || "-",
-            subcategory: v.product?.subcategory || "-",
-          },
-          openingStock: 0, // extend later if you want
-          purchases: totalPurchases,
-          sales: totalSales,
-          closing: closingStock,
-          purchasePrice: v.purchasePrice,
-          sellingPrice: v.sellingPrice,
-          stockValue: closingStock * (v.purchasePrice || 0),
-        };
-      })
-    );
 
-    // 4️⃣ Send response
-    res.json({ success: true, report });
-  } catch (err) {
-    console.error("Stock Report Error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+
+
+
+
+      const opening = 0; // set if you track separately
+      const closing = opening + purchaseQty - salesQty;
+
+      const costPerUnit = variant.purchasePrice || product.purchasePrice || 0;
+      const sellingPrice = variant.sellingPrice || product.sellingPrice || 0;
+      const stockValue = closing * costPerUnit;
+
+      // 🔔 Low stock alert (hardcoded reorder level = 10)
+      const lowStockAlert = closing < 10 ? "Low Stock - Reorder" : "OK";
+
+      return {
+        sku: variant.variantId,
+        variantName: variant.variantName,
+        category: product.category,
+        brand: product.brand,
+        sizeOrWeight: variant.sizeOrWeight,
+        opening,
+        purchases: purchaseQty,
+        sales: salesQty,
+        closing,
+        costPerUnit,
+        sellingPrice,
+        stockValue,
+        status: lowStockAlert
+      };
+    });
+
+    res.json({
+      totalVariants: report.length,
+      totalClosingStock: report.reduce((sum, r) => sum + r.closing, 0),
+      totalStockValue: report.reduce((sum, r) => sum + r.stockValue, 0),
+      report,
+    });
+  } catch (error) {
+    console.error("Error generating stock report:", error);
+    res.status(500).json({ message: "Server error", error });
   }
 };
+
+
 
 
 exports.getExpenseReport = async (req, res) => {

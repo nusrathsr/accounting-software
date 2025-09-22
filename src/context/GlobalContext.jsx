@@ -26,6 +26,9 @@ export const GlobalProvider = ({ children }) => {
       console.log('error fetching product ',error);
     }
    }
+// console.log(product);
+
+
 
 
 const fetchEmployees =async()=>{
@@ -39,6 +42,7 @@ const fetchEmployees =async()=>{
 
 
 
+console.log(productVariant);
 
 
 const fetchCustomer =async()=>{
