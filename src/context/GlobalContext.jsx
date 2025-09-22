@@ -28,9 +28,6 @@ export const GlobalProvider = ({ children }) => {
    }
 // console.log(product);
 
-
-
-
 const fetchEmployees =async()=>{
   try {
     const response =await api.get("/employees")
