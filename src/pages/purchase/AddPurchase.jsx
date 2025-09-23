@@ -16,12 +16,14 @@ import {
   CheckCircle,
   AlertCircle,
   X,
-  Truck
+  Truck,
+  Layers
 } from "lucide-react";
 
 export default function AddPurchase() {
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [variants, setVariants] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState(null);
 
@@ -29,6 +31,7 @@ export default function AddPurchase() {
     purchaseOrderNumber: "",
     supplierName: "",
     product: "",
+    variant: "",
     quantity: "",
     unitPrice: "",
     tax: "",
@@ -43,6 +46,8 @@ export default function AddPurchase() {
   const [supplierDropdownOpen, setSupplierDropdownOpen] = useState(false);
   const [productSearch, setProductSearch] = useState("");
   const [productDropdownOpen, setProductDropdownOpen] = useState(false);
+  const [variantSearch, setVariantSearch] = useState("");
+  const [variantDropdownOpen, setVariantDropdownOpen] = useState(false);
 
   // Show notification
   const showNotification = (type, title, message, duration = 3000) => {
@@ -53,32 +58,73 @@ export default function AddPurchase() {
   
   // ✅ API calls using api.js
   const getProducts = async () => {
-    const res = await api.get("/products");
-    return res.data;
+    try {
+      const res = await api.get("/products");
+      console.log("Products API response:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
   };
 
   const getSuppliers = async () => {
-    const res = await api.get("/customer/suppliers");
-    return res.data;
+    try {
+      const res = await api.get("/customer/suppliers");
+      console.log("Suppliers API response:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      throw error;
+    }
   };
-    const savePurchase = async (data) => {
+
+  // Get variants for a specific product
+  const getProductVariants = async (productId) => {
+    try {
+      const res = await api.get(`/products/${productId}/variants`);
+      console.log("Product variants API response:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching product variants:", error);
+      // Fallback to all variants if product-specific variants fail
+      try {
+        const res = await api.get("/variants");
+        return res.data;
+      } catch (fallbackError) {
+        console.error("Error fetching all variants:", fallbackError);
+        return [];
+      }
+    }
+  };
+
+  const savePurchase = async (data) => {
     const res = await api.post("/purchases", data);
     return res.data;
   };
-  // Fetch products and suppliers
+
+  // Fetch products and suppliers initially
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log("Starting to fetch initial data...");
+        
         const [productsData, suppliersData] = await Promise.all([
           getProducts(),
           getSuppliers()
         ]);
-        setProducts(productsData);
-        setSuppliers(suppliersData);
+        
+        console.log("Fetched initial data - Products:", productsData, "Suppliers:", suppliersData);
+        
+        setProducts(productsData || []);
+        setSuppliers(suppliersData || []);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        console.error("Error fetching initial data:", err);
         showNotification("error", "Error", "Failed to fetch data. Please check server connection.");
+        // Set empty arrays as fallback
+        setProducts([]);
+        setSuppliers([]);
       } finally {
         setLoading(false);
       }
@@ -105,6 +151,7 @@ export default function AddPurchase() {
       if (!event.target.closest('.dropdown-container')) {
         setSupplierDropdownOpen(false);
         setProductDropdownOpen(false);
+        setVariantDropdownOpen(false);
       }
     };
 
@@ -144,11 +191,31 @@ export default function AddPurchase() {
     setSupplierDropdownOpen(false);
   };
 
-  // Select product
-  const handleProductSelect = (product) => {
-    setFormData((prev) => ({ ...prev, product: product.name }));
+  // Select product and fetch its variants
+  const handleProductSelect = async (product) => {
+    setFormData((prev) => ({ ...prev, product: product.name, variant: "" }));
     setProductSearch(product.name);
+    setVariantSearch("");
     setProductDropdownOpen(false);
+
+    // Fetch variants for the selected product
+    try {
+      console.log("Fetching variants for product:", product._id);
+      const productVariants = await getProductVariants(product._id);
+      setVariants(productVariants || []);
+      console.log("Variants loaded for product:", productVariants);
+    } catch (error) {
+      console.error("Failed to load variants for product:", error);
+      setVariants([]);
+      showNotification("warning", "Warning", "Could not load variants for this product.");
+    }
+  };
+
+  // Select variant
+  const handleVariantSelect = (variant) => {
+    setFormData((prev) => ({ ...prev, variant: variant.name }));
+    setVariantSearch(variant.name);
+    setVariantDropdownOpen(false);
   };
 
   // Handle supplier search
@@ -161,14 +228,28 @@ export default function AddPurchase() {
   // Handle product search
   const handleProductSearchChange = (value) => {
     setProductSearch(value);
-    setFormData((prev) => ({ ...prev, product: value }));
+    setFormData((prev) => ({ ...prev, product: value, variant: "" }));
+    setVariantSearch("");
+    setVariants([]); // Clear variants when product changes
     setProductDropdownOpen(true);
+  };
+
+  // Handle variant search
+  const handleVariantSearchChange = (value) => {
+    setVariantSearch(value);
+    setFormData((prev) => ({ ...prev, variant: value }));
+    setVariantDropdownOpen(true);
   };
 
   // Submit form
   const handleSubmit = async () => {
     if (!formData.supplierName || !formData.product) {
       showNotification("warning", "Validation Error", "Please select a supplier and a product.");
+      return;
+    }
+
+    if (!formData.variant) {
+      showNotification("warning", "Validation Error", "Please select a variant.");
       return;
     }
 
@@ -183,6 +264,7 @@ export default function AddPurchase() {
         purchaseOrderNumber: formData.purchaseOrderNumber,
         supplierName: formData.supplierName,
         product: formData.product,
+        variant: formData.variant,
         quantity: Number(formData.quantity),
         unitPrice: Number(formData.unitPrice),
         tax: Number(formData.tax) || 0,
@@ -194,16 +276,18 @@ export default function AddPurchase() {
       console.log("➡️ Sending payload:", payload);
       await savePurchase(payload);
 
-      showNotification("success", "Purchase Saved!", `Purchase of ${formData.product} saved successfully! Total: ₹${formData.totalAmount}`, 2500);
+      showNotification("success", "Purchase Saved!", `Purchase of ${formData.product} (${formData.variant}) saved successfully! Total: ₹${formData.totalAmount}`, 2500);
 
       // Reset form
       setFormData({
         purchaseOrderNumber: generatePONumber(),
         supplierName: "",
         product: "",
+        variant: "",
         quantity: "",
         unitPrice: "",
         tax: "",
+        taxInclusive: "no",
         totalAmount: "",
         paidAmount: "",
         purchaseDate: new Date().toISOString().slice(0, 10),
@@ -211,6 +295,8 @@ export default function AddPurchase() {
       });
       setSupplierSearch("");
       setProductSearch("");
+      setVariantSearch("");
+      setVariants([]); // Clear variants after successful submission
     } catch (err) {
       console.error("Error saving purchase:", err);
       showNotification("error", "Error", "Failed to save purchase. Please try again!");
@@ -221,12 +307,19 @@ export default function AddPurchase() {
 
   // Filter functions
   const filteredSuppliers = suppliers.filter((s) =>
-    s.name.toLowerCase().includes(supplierSearch.toLowerCase())
+    s && s.name && s.name.toLowerCase().includes(supplierSearch.toLowerCase())
   );
 
   const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(productSearch.toLowerCase())
+    p && p.name && p.name.toLowerCase().includes(productSearch.toLowerCase())
   );
+
+  const filteredVariants = variants.filter((v) =>
+    v && v.name && v.name.toLowerCase().includes(variantSearch.toLowerCase())
+  );
+
+  console.log("Current state - Products:", products.length, "Suppliers:", suppliers.length, "Variants:", variants.length);
+  console.log("Filtered - Products:", filteredProducts.length, "Search term:", productSearch);
 
   if (loading && products.length === 0) {
     return (
@@ -378,7 +471,7 @@ export default function AddPurchase() {
                 <Package className="w-5 h-5 text-blue-600" />
                 Product Information
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="space-y-2 relative dropdown-container">
                   <label className="block text-sm font-medium text-gray-700">
                     Product
@@ -416,6 +509,47 @@ export default function AddPurchase() {
                   </div>
                 </div>
 
+                <div className="space-y-2 relative dropdown-container">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Variant
+                  </label>
+                  <div className="relative">
+                    <Layers className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 z-10" />
+                    <input
+                      type="text"
+                      value={variantSearch}
+                      onChange={(e) => handleVariantSearchChange(e.target.value)}
+                      onFocus={() => setVariantDropdownOpen(true)}
+                      placeholder="Search variant..."
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white relative z-10"
+                      disabled={!formData.product}
+                    />
+                    {variantDropdownOpen && formData.product && (
+                      <div className="absolute z-50 bg-white border border-gray-200 w-full max-h-60 overflow-y-auto mt-1 rounded-xl shadow-xl ring-1 ring-black ring-opacity-5">
+                        {filteredVariants.length > 0 ? (
+                          filteredVariants.map((variant) => (
+                            <div
+                              key={variant._id}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleVariantSelect(variant);
+                              }}
+                              className="cursor-pointer px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                            >
+                              <span className="font-medium text-gray-900">{variant.name}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-gray-500 text-center">No variants found</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {!formData.product && (
+                    <p className="text-xs text-gray-500">Please select a product first</p>
+                  )}
+                </div>
+
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Quantity
@@ -434,6 +568,9 @@ export default function AddPurchase() {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Expiry Date <span className="text-gray-400 text-xs">(optional)</span>
@@ -451,7 +588,6 @@ export default function AddPurchase() {
                     />
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
