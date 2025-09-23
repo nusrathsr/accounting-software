@@ -21,6 +21,7 @@ export default function AddSalesInvoice() {
   const n = (v) => parseFloat(v) || 0;
 
   const [productOptions, setProductOptions] = useState([]);
+  const [lastSavedInvoice, setLastSavedInvoice] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -317,47 +318,41 @@ export default function AddSalesInvoice() {
     );
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const validItems = formData.items.filter((item) => {
-      const product = productOptions.find(p => p.id === item.productId);
-      if (!item.productId || n(item.quantity) <= 0) return false;
-      if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
-      return true;
-    });
-
-    if (validItems.length === 0) {
-      showAlert("Warning", "Please add at least one product with quantity greater than 0", "warning");
-      return;
+  // Create invoice data from current form or API
+  const createInvoiceData = (invoiceData = null) => {
+    if (invoiceData) {
+      return invoiceData; // Use provided invoice data from API
     }
 
-    const formattedProducts = formData.items.map((item) => {
-      const basePrice = n(item.unitPrice);
-      const discountAmount = (basePrice * n(item.discount)) / 100;
-      const effectivePrice = basePrice - discountAmount;
-      const lineTotal = n(item.quantity) * effectivePrice;
-      const taxAmount = (lineTotal * n(item.tax)) / 100;
-      const total = lineTotal + taxAmount;
+    // Create from current form data
+    const formattedProducts = formData.items
+      .filter(item => item.productId && n(item.quantity) > 0)
+      .map((item) => {
+        const basePrice = n(item.unitPrice);
+        const discountAmount = (basePrice * n(item.discount)) / 100;
+        const effectivePrice = basePrice - discountAmount;
+        const lineTotal = n(item.quantity) * effectivePrice;
+        const taxAmount = (lineTotal * n(item.tax)) / 100;
+        const total = lineTotal + taxAmount;
 
-      return {
-        productId: item.productId,
-        variantId: item.variantId,
-        name: item.productName,
-        sizeOrWeight: item.sizeOrWeight || item.size || "",
-        quantity: n(item.quantity),
-        unitPrice: basePrice,
-        discount: discountAmount,
-        tax: taxAmount,
-        total
-      };
-    });
+        return {
+          productId: item.productId,
+          variantId: item.variantId,
+          name: item.productName,
+          sizeOrWeight: item.sizeOrWeight || item.size || "",
+          quantity: n(item.quantity),
+          unitPrice: basePrice,
+          discount: discountAmount,
+          tax: taxAmount,
+          total
+        };
+      });
 
     const subtotal = formattedProducts.reduce((sum, p) => sum + (p.unitPrice * p.quantity) - p.discount, 0);
     const totalTax = formattedProducts.reduce((sum, p) => sum + p.tax, 0);
     const totalAmount = subtotal + totalTax;
 
-    const salesRecord = {
+    return {
       invoiceNumber: formData.invoiceNumber,
       customerName: formData.customerName,
       number: formData.number,
@@ -373,26 +368,438 @@ export default function AddSalesInvoice() {
         : { splitPayments: formData.splitPayments.filter(payment => payment.amount && parseFloat(payment.amount) > 0) }
       )
     };
+  };
+
+  // Generate HTML content for invoice
+  const generateInvoiceHTML = (invoiceData) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Invoice ${invoiceData.invoiceNumber}</title>
+          <meta charset="UTF-8">
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              background: #f8fafc;
+              padding: 20px;
+            }
+            
+            .invoice-container {
+              max-width: 800px;
+              margin: 0 auto;
+              background: white;
+              border-radius: 12px;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+            }
+            
+            .header {
+              background: linear-gradient(135deg, #2563eb, #1d4ed8);
+              color: white;
+              padding: 30px;
+              text-align: center;
+            }
+            
+            .header h1 {
+              font-size: 32px;
+              font-weight: bold;
+              margin-bottom: 8px;
+            }
+            
+            .header p {
+              font-size: 16px;
+              opacity: 0.9;
+            }
+            
+            .content {
+              padding: 30px;
+            }
+            
+            .invoice-info {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 30px;
+              margin-bottom: 40px;
+              padding: 20px;
+              background: #f8fafc;
+              border-radius: 8px;
+              border: 1px solid #e5e7eb;
+            }
+            
+            .invoice-details h3 {
+              color: #1f2937;
+              font-size: 18px;
+              margin-bottom: 15px;
+              font-weight: 600;
+            }
+            
+            .invoice-details p {
+              margin-bottom: 8px;
+              font-size: 14px;
+            }
+            
+            .invoice-details strong {
+              color: #111827;
+              font-weight: 600;
+            }
+            
+            .total-summary {
+              text-align: right;
+              background: #eff6ff;
+              padding: 20px;
+              border-radius: 8px;
+              border: 2px solid #bfdbfe;
+            }
+            
+            .total-summary h3 {
+              color: #1e40af;
+              margin-bottom: 15px;
+            }
+            
+            .total-amount {
+              font-size: 28px;
+              font-weight: bold;
+              color: #2563eb;
+              margin-bottom: 10px;
+            }
+            
+            .payment-badge {
+              display: inline-block;
+              padding: 6px 12px;
+              border-radius: 6px;
+              font-size: 12px;
+              font-weight: 600;
+              text-transform: uppercase;
+            }
+            
+            .paid {
+              background: #dcfce7;
+              color: #166534;
+            }
+            
+            .pending {
+              background: #fee2e2;
+              color: #dc2626;
+            }
+            
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 30px;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+            
+            th {
+              background: linear-gradient(135deg, #374151, #1f2937);
+              color: white;
+              padding: 15px 12px;
+              text-align: left;
+              font-weight: 600;
+              font-size: 13px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
+            
+            th:first-child { border-radius: 8px 0 0 0; }
+            th:last-child { border-radius: 0 8px 0 0; }
+            
+            td {
+              padding: 15px 12px;
+              border-bottom: 1px solid #f3f4f6;
+              font-size: 14px;
+            }
+            
+            tr:nth-child(even) {
+              background: #f9fafb;
+            }
+            
+            tr:hover {
+              background: #f3f4f6;
+            }
+            
+            .product-name {
+              font-weight: 600;
+              color: #1f2937;
+            }
+            
+            .product-size {
+              font-size: 12px;
+              color: #6b7280;
+              margin-top: 4px;
+            }
+            
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            
+            .totals-section {
+              background: #f8fafc;
+              padding: 25px;
+              border-radius: 8px;
+              border: 1px solid #e5e7eb;
+              margin-bottom: 30px;
+            }
+            
+            .totals-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 12px;
+              font-size: 16px;
+            }
+            
+            .totals-row.final {
+              border-top: 2px solid #2563eb;
+              padding-top: 15px;
+              margin-top: 15px;
+              font-size: 20px;
+              font-weight: bold;
+              color: #2563eb;
+            }
+            
+            .discount-total { color: #dc2626; }
+            .tax-total { color: #059669; }
+            
+            .payment-section {
+              background: #f0f9ff;
+              padding: 25px;
+              border-radius: 8px;
+              border-left: 4px solid #2563eb;
+            }
+            
+            .payment-section h3 {
+              color: #1e40af;
+              font-size: 18px;
+              margin-bottom: 20px;
+              font-weight: 600;
+            }
+            
+            .payment-method {
+              background: white;
+              padding: 15px;
+              border-radius: 6px;
+              margin-bottom: 12px;
+              border: 1px solid #e5e7eb;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            
+            .payment-method:last-child {
+              margin-bottom: 0;
+            }
+            
+            .method-name {
+              font-weight: 600;
+              text-transform: uppercase;
+            }
+            
+            .method-amount {
+              font-weight: 600;
+            }
+            
+            .overall-status {
+              background: white;
+              padding: 15px;
+              border-radius: 6px;
+              margin-top: 20px;
+              text-align: center;
+              border: 2px solid #e5e7eb;
+            }
+            
+            @media print {
+              body {
+                background: white;
+                padding: 0;
+              }
+              .invoice-container {
+                box-shadow: none;
+                border-radius: 0;
+              }
+              .no-print {
+                display: none !important;
+              }
+            }
+            
+            @media (max-width: 768px) {
+              .invoice-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+              }
+              
+              table {
+                font-size: 12px;
+              }
+              
+              th, td {
+                padding: 10px 8px;
+              }
+              
+              .content {
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-container">
+            <div class="header">
+              <h1>📄 SALES INVOICE</h1>
+              <p>Professional Invoice Document</p>
+            </div>
+            
+            <div class="content">
+              <div class="invoice-info">
+                <div class="invoice-details">
+                  <h3>Invoice Details</h3>
+                  <p><strong>Invoice Number:</strong> ${invoiceData.invoiceNumber}</p>
+                  <p><strong>Date:</strong> ${new Date(invoiceData.date).toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}</p>
+                  ${invoiceData.customerName ? `<p><strong>Customer:</strong> ${invoiceData.customerName}</p>` : ''}
+                  ${invoiceData.number ? `<p><strong>Mobile:</strong> ${invoiceData.number}</p>` : ''}
+                </div>
+                
+                <div class="total-summary">
+                  <h3>Total Summary</h3>
+                  <div class="total-amount">₹${invoiceData.totalAmount.toFixed(2)}</div>
+                  <span class="payment-badge ${invoiceData.paymentStatus ? 'paid' : 'pending'}">
+                    ${invoiceData.paymentStatus ? '✅ PAID' : '⏳ PENDING'}
+                  </span>
+                </div>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 35%;">Item Details</th>
+                    <th style="width: 8%;" class="text-center">Qty</th>
+                    <th style="width: 12%;" class="text-right">Unit Price</th>
+                    <th style="width: 12%;" class="text-right">Discount</th>
+                    <th style="width: 12%;" class="text-right">Tax</th>
+                    <th style="width: 15%;" class="text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${invoiceData.products.map(product => `
+                    <tr>
+                      <td>
+                        <div class="product-name">${product.name}</div>
+                        ${product.sizeOrWeight ? `<div class="product-size">Size/Weight: ${product.sizeOrWeight}</div>` : ''}
+                      </td>
+                      <td class="text-center" style="font-weight: 600;">${product.quantity}</td>
+                      <td class="text-right">₹${product.unitPrice.toFixed(2)}</td>
+                      <td class="text-right discount-total">₹${product.discount.toFixed(2)}</td>
+                      <td class="text-right tax-total">₹${product.tax.toFixed(2)}</td>
+                      <td class="text-right" style="font-weight: 600; color: #2563eb;">₹${product.total.toFixed(2)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+
+              <div class="totals-section">
+                <div class="totals-row">
+                  <span><strong>Subtotal:</strong></span>
+                  <span style="color: #2563eb; font-weight: 600;">₹${invoiceData.subtotal.toFixed(2)}</span>
+                </div>
+                <div class="totals-row">
+                  <span><strong>Total Discount:</strong></span>
+                  <span class="discount-total" style="font-weight: 600;">₹${invoiceData.products.reduce((sum, p) => sum + p.discount, 0).toFixed(2)}</span>
+                </div>
+                <div class="totals-row">
+                  <span><strong>Total Tax (GST):</strong></span>
+                  <span class="tax-total" style="font-weight: 600;">₹${invoiceData.tax.toFixed(2)}</span>
+                </div>
+                <div class="totals-row final">
+                  <span>Grand Total:</span>
+                  <span>₹${invoiceData.totalAmount.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <div class="payment-section">
+                <h3>💳 Payment Information</h3>
+                ${invoiceData.paymentMode === 'single' 
+                  ? `<div class="payment-method">
+                       <span class="method-name">${invoiceData.singlePaymentMode}</span>
+                       <span class="method-amount">₹${invoiceData.totalAmount.toFixed(2)}</span>
+                     </div>`
+                  : `<div style="margin-bottom: 15px;"><strong>Split Payment Details:</strong></div>
+                     ${invoiceData.splitPayments.map(payment => 
+                       `<div class="payment-method">
+                          <span>
+                            <span class="method-name">${payment.method}</span>
+                            <span class="payment-badge ${payment.paid ? 'paid' : 'pending'}" style="margin-left: 10px;">
+                              ${payment.paid ? '✅ Paid' : '⏳ Pending'}
+                            </span>
+                          </span>
+                          <span class="method-amount">₹${parseFloat(payment.amount).toFixed(2)}</span>
+                        </div>`
+                     ).join('')}`
+                }
+                
+                <div class="overall-status">
+                  <strong style="color: ${invoiceData.paymentStatus ? '#166534' : '#dc2626'};">
+                    Overall Payment Status: ${invoiceData.paymentStatus ? '✅ FULLY PAID' : '⏳ PAYMENT PENDING'}
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const validItems = formData.items.filter((item) => {
+      const product = productOptions.find(p => p.id === item.productId);
+      if (!item.productId || n(item.quantity) <= 0) return false;
+      if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
+      return true;
+    });
+
+    if (validItems.length === 0) {
+      showAlert("Warning", "Please add at least one product with quantity greater than 0", "warning");
+      return;
+    }
+
+    const invoiceData = createInvoiceData();
 
     try {
-      await api.post("/sales", salesRecord);
-        showAlert("Success!", `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${totalAmount.toFixed(2)}`, "success");
+      await api.post("/sales", invoiceData);
+      setLastSavedInvoice(invoiceData);
+      
+      showAlert("Success!", `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${invoiceData.totalAmount.toFixed(2)}`, "success");
 
-        setFormData({
-          invoiceNumber: generateInvoiceNumber(),
-          customerName: "",
-          number: "",
-          saleDate: new Date().toISOString().slice(0, 10),
-          paymentMode: "single",
-          paymentStatus: false,
-          singlePaymentMode: "cash",
-          splitPayments: [
-            { method: "cash", amount: "", paid: false },
-            { method: "upi", amount: "", paid: false }
-          ],
-          items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
-        });
-        setDropdownState([{ open: false, searchTerm: "" }]);
+      setFormData({
+        invoiceNumber: generateInvoiceNumber(),
+        customerName: "",
+        number: "",
+        saleDate: new Date().toISOString().slice(0, 10),
+        paymentMode: "single",
+        paymentStatus: false,
+        singlePaymentMode: "cash",
+        splitPayments: [
+          { method: "cash", amount: "", paid: false },
+          { method: "upi", amount: "", paid: false }
+        ],
+        items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
+      });
+      setDropdownState([{ open: false, searchTerm: "" }]);
     } catch (err) {
       console.error(err);
       showAlert("Error!", "Failed to save invoice. Please check server connection.", "error");
@@ -401,31 +808,89 @@ export default function AddSalesInvoice() {
 
   const handleDownload = async () => {
     try {
-      const res = await api.get("/sales/latest");
-      const invoice = res.data;
-      if (!invoice) {
-        showAlert("Error!", "No invoice found!", "error");
+      let invoiceData;
+      
+      if (lastSavedInvoice) {
+        invoiceData = lastSavedInvoice;
+      } else {
+        try {
+          const res = await api.get("/sales/latest");
+          invoiceData = res.data;
+        } catch (apiError) {
+          showAlert("Error!", "No invoice found to download. Please save an invoice first.", "error");
+          return;
+        }
+      }
+
+      if (!invoiceData) {
+        showAlert("Error!", "No invoice data available for download.", "error");
         return;
       }
-      showAlert("Info", "PDF generation feature would be implemented here", "info");
+
+      const htmlContent = generateInvoiceHTML(invoiceData);
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Invoice-${invoiceData.invoiceNumber}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      showAlert("Success!", "Invoice downloaded successfully! Open the HTML file in your browser and use Ctrl+P to save as PDF.", "success");
+      
     } catch (err) {
-      console.error(err);
-      showAlert("Error!", "Error fetching the latest invoice.", "error");
+      console.error('Download error:', err);
+      showAlert("Error!", "Failed to generate download. Please try again.", "error");
     }
   };
 
   const handlePrint = async () => {
     try {
-      const res = await api.get("/sales/latest");
-      const invoice = res.data;
-      if (!invoice) {
-        showAlert("Error!", "No invoice found!", "error");
+      let invoiceData;
+      
+      if (lastSavedInvoice) {
+        invoiceData = lastSavedInvoice;
+      } else {
+        try {
+          const res = await api.get("/sales/latest");
+          invoiceData = res.data;
+        } catch (apiError) {
+          showAlert("Error!", "No invoice found to print. Please save an invoice first.", "error");
+          return;
+        }
+      }
+
+      if (!invoiceData) {
+        showAlert("Error!", "No invoice data available for printing.", "error");
         return;
       }
-      showAlert("Info", "Print functionality would be implemented here", "info");
+
+      const htmlContent = generateInvoiceHTML(invoiceData);
+      const printWindow = window.open('', '_blank');
+      
+      if (!printWindow) {
+        showAlert("Error!", "Pop-up blocked. Please allow pop-ups and try again.", "error");
+        return;
+      }
+
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      printWindow.onload = () => {
+        printWindow.print();
+        setTimeout(() => {
+          printWindow.close();
+        }, 100);
+      };
+
+      showAlert("Success!", "Print dialog opened successfully!", "success");
+      
     } catch (err) {
-      console.error(err);
-      showAlert("Error!", "Error fetching the latest invoice for printing.", "error");
+      console.error('Print error:', err);
+      showAlert("Error!", "Failed to prepare print. Please try again.", "error");
     }
   };
 
