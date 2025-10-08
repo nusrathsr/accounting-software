@@ -31,7 +31,9 @@ export default function AddPurchase() {
     purchaseOrderNumber: "",
     supplierName: "",
     product: "",
+    productId: "",
     variant: "",
+    variantId: "",
     quantity: "",
     unitPrice: "",
     tax: "",
@@ -60,7 +62,7 @@ export default function AddPurchase() {
   const getProducts = async () => {
     try {
       const res = await api.get("/products");
-      console.log("Products API response:", res.data);
+      console.log("Products fetched:", res.data);
       return res.data;
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -71,7 +73,7 @@ export default function AddPurchase() {
   const getSuppliers = async () => {
     try {
       const res = await api.get("/customer/suppliers");
-      console.log("Suppliers API response:", res.data);
+      
       return res.data;
     } catch (error) {
       console.error("Error fetching suppliers:", error);
@@ -81,20 +83,26 @@ export default function AddPurchase() {
 
   // Get variants for a specific product
   const getProductVariants = async (productId) => {
-    try {
-      const res = await api.get(`/products/${productId}/variants`);
-      console.log("Product variants API response:", res.data);
-      return res.data;
-    } catch (error) {
-      console.error("Error fetching product variants:", error);
+    if (!productId) return [];  // Avoid calling API with undefined ID
+  try {
+    const res = await api.get(`/products/${productId}/variants`);
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching product variants:", error);
+    // try {
+    //   const res = await api.get(`/products/${productId}/variants`);
+    //   console.log("Product variants API response:", res.data);
+    //   return res.data;
+    // } catch (error) {
+    //   console.error("Error fetching product variants:", error);
       // Fallback to all variants if product-specific variants fail
-      try {
-        const res = await api.get("/variants");
-        return res.data;
-      } catch (fallbackError) {
-        console.error("Error fetching all variants:", fallbackError);
+      // try {
+      //   const res = await api.get("/variants");
+      //   return res.data;
+      // } catch (fallbackError) {
+      //   console.error("Error fetching all variants:", fallbackError);
         return [];
-      }
+      
     }
   };
 
@@ -108,14 +116,11 @@ export default function AddPurchase() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        console.log("Starting to fetch initial data...");
         
         const [productsData, suppliersData] = await Promise.all([
           getProducts(),
           getSuppliers()
         ]);
-        
-        console.log("Fetched initial data - Products:", productsData, "Suppliers:", suppliersData);
         
         setProducts(productsData || []);
         setSuppliers(suppliersData || []);
@@ -172,14 +177,17 @@ export default function AddPurchase() {
       const price = parseFloat(updated.unitPrice) || 0;
       const taxPct = parseFloat(updated.tax) || 0;
 
-      if (updated.taxInclusive === "yes") {
-        updated.totalAmount = (qty * price + (qty * price * taxPct) / 100).toFixed(2);
-      } else {
-        updated.totalAmount = (qty * price).toFixed(2);
-      }
+      // if (updated.taxInclusive === "yes") {
+      //   updated.totalAmount = (qty * price + (qty * price * taxPct) / 100).toFixed(2);
+      // } else {
+      //   updated.totalAmount = (qty * price).toFixed(2);
+      // }
+      updated.totalAmount = updated.taxInclusive === "yes"
+          ? (qty * price + (qty * price * taxPct) / 100).toFixed(2)
+          : (qty * price).toFixed(2);
     }
 
-    return updated; // ✅ always return
+    return updated;
   });
 };
 
@@ -193,17 +201,15 @@ export default function AddPurchase() {
 
   // Select product and fetch its variants
   const handleProductSelect = async (product) => {
-    setFormData((prev) => ({ ...prev, product: product.name, variant: "" }));
+    setFormData((prev) => ({ ...prev, product: product.name, productId: product._id, variant: "", variantId: "" }));
     setProductSearch(product.name);
     setVariantSearch("");
     setProductDropdownOpen(false);
 
     // Fetch variants for the selected product
     try {
-      console.log("Fetching variants for product:", product._id);
       const productVariants = await getProductVariants(product._id);
       setVariants(productVariants || []);
-      console.log("Variants loaded for product:", productVariants);
     } catch (error) {
       console.error("Failed to load variants for product:", error);
       setVariants([]);
@@ -213,8 +219,9 @@ export default function AddPurchase() {
 
   // Select variant
   const handleVariantSelect = (variant) => {
-    setFormData((prev) => ({ ...prev, variant: variant.name }));
-    setVariantSearch(variant.name);
+    setFormData((prev) => ({ ...prev,  variant: variant.variantName || variant.name,
+      variantId: variant._id }));
+    setVariantSearch(variant.variantName || variant.name);
     setVariantDropdownOpen(false);
   };
 
@@ -228,7 +235,7 @@ export default function AddPurchase() {
   // Handle product search
   const handleProductSearchChange = (value) => {
     setProductSearch(value);
-    setFormData((prev) => ({ ...prev, product: value, variant: "" }));
+    setFormData((prev) => ({ ...prev, product: value, variant: "", variantId: "" }));
     setVariantSearch("");
     setVariants([]); // Clear variants when product changes
     setProductDropdownOpen(true);
@@ -248,7 +255,7 @@ export default function AddPurchase() {
       return;
     }
 
-    if (!formData.variant) {
+    if (!formData.variant || !formData.variantId) {
       showNotification("warning", "Validation Error", "Please select a variant.");
       return;
     }
@@ -264,7 +271,9 @@ export default function AddPurchase() {
         purchaseOrderNumber: formData.purchaseOrderNumber,
         supplierName: formData.supplierName,
         product: formData.product,
+        productId: formData.productId,
         variant: formData.variant,
+        variantId: formData.variantId,
         quantity: Number(formData.quantity),
         unitPrice: Number(formData.unitPrice),
         tax: Number(formData.tax) || 0,
@@ -273,17 +282,33 @@ export default function AddPurchase() {
         purchaseDate: new Date(formData.purchaseDate),
         expiryDate: formData.expiryDate ? new Date(formData.expiryDate) : null,
       };
-      console.log("➡️ Sending payload:", payload);
       await savePurchase(payload);
 
-      showNotification("success", "Purchase Saved!", `Purchase of ${formData.product} (${formData.variant}) saved successfully! Total: ₹${formData.totalAmount}`, 2500);
+      // 🆕 Update stock after saving purchase
+try {
+  // await api.put(`/products/${formData.productId}/stock`, {
+  //   variantId: formData.variantId,
+  //   quantity: Number(formData.quantity)
+  // });
+  // Trigger a refresh on the products list after stock update
+window.dispatchEvent(new Event('productsUpdated'));
+  console.log("✅ Stock updated successfully");
+} catch (error) {
+  console.error("❌ Failed to update stock:", error);
+  showNotification("warning", "Stock Update Failed", "Purchase saved but stock not updated.");
+}
+      
 
+      showNotification("success", "Purchase Saved!", `Purchase of ${formData.product} (${formData.variant}) saved successfully! Total: ₹${formData.totalAmount}`, 2500);
+ 
       // Reset form
       setFormData({
         purchaseOrderNumber: generatePONumber(),
         supplierName: "",
         product: "",
+        productId: "",
         variant: "",
+        variantId: "",
         quantity: "",
         unitPrice: "",
         tax: "",
@@ -315,12 +340,9 @@ export default function AddPurchase() {
   );
 
   const filteredVariants = variants.filter((v) =>
-    v && v.name && v.name.toLowerCase().includes(variantSearch.toLowerCase())
+    v && (v.variantName || v.name).toLowerCase().includes(variantSearch.toLowerCase())
   );
-
-  console.log("Current state - Products:", products.length, "Suppliers:", suppliers.length, "Variants:", variants.length);
-  console.log("Filtered - Products:", filteredProducts.length, "Search term:", productSearch);
-
+  
   if (loading && products.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
@@ -527,8 +549,11 @@ export default function AddPurchase() {
                     {variantDropdownOpen && formData.product && (
                       <div className="absolute z-50 bg-white border border-gray-200 w-full max-h-60 overflow-y-auto mt-1 rounded-xl shadow-xl ring-1 ring-black ring-opacity-5">
                         {filteredVariants.length > 0 ? (
-                          filteredVariants.map((variant) => (
-                            <div
+                          filteredVariants.map((variant) => {
+                            console.log(variant);
+                            console.log(variant._id);
+                            return(
+                               <div
                               key={variant._id}
                               onMouseDown={(e) => {
                                 e.preventDefault();
@@ -536,9 +561,12 @@ export default function AddPurchase() {
                               }}
                               className="cursor-pointer px-4 py-3 hover:bg-blue-50 border-b border-gray-100 last:border-b-0 transition-colors duration-150"
                             >
-                              <span className="font-medium text-gray-900">{variant.name}</span>
+                              <span className="font-medium text-gray-900">{variant.variantName}</span>
                             </div>
-                          ))
+                            )
+                          }
+                           
+                          )
                         ) : (
                           <div className="px-4 py-3 text-gray-500 text-center">No variants found</div>
                         )}

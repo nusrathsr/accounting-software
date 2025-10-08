@@ -116,3 +116,19 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch products" });
   }
 };
+
+exports.getProductVariants = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const variants = await ProductVariant.find({ product: productId });
+
+    if (!variants || variants.length === 0) {
+      return res.status(404).json({ message: "No variants found for this product" });
+    }
+
+    res.json(variants);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch product variants" });
+  }
+};

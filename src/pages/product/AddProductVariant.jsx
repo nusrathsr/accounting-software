@@ -12,9 +12,13 @@ const AddProductVariant = () => {
         product: '',
         variantName: '',
         size: '',
+        company: '',
+        unit: '',
         quantity: '',
-        sellingPrice: '',
-        purchasePrice: '',
+        sellingPrice: 0,
+        purchasePrice: 0,
+        wholesalePrice: '',
+        stockThreshold: '',
         taxInclusive: false,
         taxPercentage: '',
         taxType: '',
@@ -86,9 +90,13 @@ const AddProductVariant = () => {
             formData.append('product', productVariant.product);
             formData.append('variantName', productVariant.variantName);
             formData.append('sizeOrWeight', productVariant.size); // <-- Must match backend
+            formData.append('company', productVariant.company || '');
+            formData.append('unit', productVariant.unit || '');
             formData.append('quantity', Number(productVariant.quantity));
             formData.append('sellingPrice', Number(productVariant.sellingPrice));
             formData.append('purchasePrice', Number(productVariant.purchasePrice || 0));
+            formData.append('wholesalePrice', Number(productVariant.wholesalePrice || 0));
+            formData.append('stockThreshold', Number(productVariant.stockThreshold || 0));
             formData.append('taxInclusive', productVariant.taxInclusive);
             if (productVariant.taxInclusive) {
                 formData.append('taxPercentage', Number(productVariant.taxPercentage || 0));
@@ -113,9 +121,13 @@ const AddProductVariant = () => {
                 product: '',
                 variantName: '',
                 size: '',
+                company: '',
+                unit: '',
                 quantity: '',
                 sellingPrice: '',
                 purchasePrice: '',
+                wholesalePrice: '',
+                stockThreshold: '',
                 taxInclusive: false,
                 taxPercentage: '',
                 taxType: '',
@@ -220,6 +232,36 @@ const AddProductVariant = () => {
                                 />
                             </div>
 
+
+                            {/* Company Name (Optional) */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                                <input
+                                    type="text"
+                                    name="company"
+                                    value={productVariant.company}
+                                    onChange={handleChange}
+                                    placeholder="e.g., Nestle"
+                                    className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all duration-200"
+                                />
+                            </div>
+
+                            {/* Unit Dropdown */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Unit</label>
+                                <select
+                                    name="unit"
+                                    value={productVariant.unit || ''}
+                                    onChange={handleChange}
+                                    className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:bg-white"
+                                >
+                                    <option value="">Select Unit</option>
+                                    <option value="Number">Number</option>
+                                    <option value="Litre">Litre</option>
+                                    <option value="Kg">Kg</option>
+                                </select>
+                            </div>
+
                             {/* Quantity */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">Quantity <span className="text-red-500">*</span></label>
@@ -308,6 +350,36 @@ const AddProductVariant = () => {
                                     />
                                 </div>
                             )}
+
+                            {/* Wholesale Price (Optional) */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium text-gray-700">Wholesale Price</label>
+                                <div className="relative">
+                                    <FaDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                    <input
+                                        type="number"
+                                        name="wholesalePrice"
+                                        value={productVariant.wholesalePrice || ''}
+                                        onChange={handleChange}
+                                        placeholder="e.g., 500"
+                                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all duration-200"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Stock Threshold */}
+                            <div className="space-y-2 col-span-1 md:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">Stock Threshold</label>
+                                <input
+                                    type="number"
+                                    name="stockThreshold"
+                                    value={productVariant.stockThreshold || ''}
+                                    onChange={handleChange}
+                                    placeholder="e.g., 5"
+                                    className="w-full pl-4 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white transition-all duration-200"
+                                />
+                            </div>
+
 
                             {/* Product Image */}
                             <div className="space-y-2 col-span-1 md:col-span-2">

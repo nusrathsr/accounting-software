@@ -51,6 +51,7 @@ const ListProduct = () => {
     try {
       setLoading(true);
       const response = await api.get("/products");
+      console.log("📦 Products from backend:", response.data);   // 👈 check here
       setProducts(response.data);
       calculateStats(response.data);
     } catch (err) {
