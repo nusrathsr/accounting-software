@@ -47,6 +47,9 @@ import StockStatusReport from './pages/stockStatusReport/StockStatusReport.jsx';
 import LowStockAlert from './pages/lowStock/LowStockAlert.jsx';
 import ExpiryReport from './pages/expiryReport/ExpiryReport.jsx';
 import BillingCounter from './pages/pos/BillingCounter.jsx';
+import FinancialYear from './pages/settings/FinancialYear.jsx';
+import ProductUnits from './pages/settings/ProductUnit.jsx';
+import TaxBands from './pages/settings/TaxBands.jsx';
 
 function App() {
 
@@ -109,6 +112,9 @@ function App() {
           <Route path='/lowStockAlert' element={<LowStockAlert/>} />
           <Route path='/expiryReport' element={<ExpiryReport/>} />
           <Route path='/pos/billing' element={<BillingCounter/>} />
+          <Route path='/financialYear' element={<FinancialYear/>} />
+          <Route path='/units' element={<ProductUnits/>} />
+          <Route path='/taxBands' element={<TaxBands/>} />
 
 
 

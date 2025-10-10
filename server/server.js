@@ -20,6 +20,11 @@ const shiftRoutes=require('./routes/shiftRoutes')
 const leaveRoutes = require("./routes/leaveRoutes");
 const holidayRoutes =require("./routes/holidatyRoutes")
 const stockAdjustmentRoutes =require("./routes/stockAdjustmentRoutes")
+const saleRoutes =require('./routes/saleRoutes')
+const financialYearRoutes =require("./routes/financialYearRoutes")
+const unitRoutes = require("./routes/unitRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const taxBandRoutes =require("./routes/taxBandRoutes")
 // Load env variables
 dotenv.config();
 
@@ -53,11 +58,13 @@ app.use('/api/employees',employeesRoutes)
 app.use('/api/attendance',attendanceRoutes)
 app.use('/api/shift',shiftRoutes)
 app.use("/api/leaves", leaveRoutes);
-app.use("/api/holiday",holidayRoutes)
-app.use("/api/stockAdjustment",stockAdjustmentRoutes)
-
-
-
+app.use("/api/holiday",holidayRoutes);
+app.use("/api/stockAdjustment",stockAdjustmentRoutes);
+app.use('/api/sale',saleRoutes)
+app.use("/api/financialYear",financialYearRoutes)
+app.use("/api/units", unitRoutes);
+app.use("/api/dashboard",dashboardRoutes)
+app.use("/api/taxBand",taxBandRoutes)
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')
