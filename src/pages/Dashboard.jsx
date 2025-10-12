@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { Outlet } from 'react-router-dom';
 import Sidebar from '../partials/Sidebar';
 import Header from '../partials/Header';
 import FilterButton from '../components/DropdownFilter';
@@ -24,7 +25,7 @@ function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden ">
 
       {/* Sidebar */}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -62,9 +63,12 @@ function Dashboard() {
               </div>
 
             </div>
+           
 
             {/* Cards */}
             <div className="grid grid-cols-12 gap-6">
+               {location.pathname === "/" && (
+              <>
 
               {/* Line chart (Acme Plus) */}
               <DashboardCard01 />
@@ -92,14 +96,13 @@ function Dashboard() {
               <DashboardCard12 />
               {/* Card (Income/Expenses) */}
               <DashboardCard13 />
-              
+              </>  
+               )}
             </div>
-
+            <Outlet/>
           </div>
         </main>
-
         <Banner />
-
       </div>
     </div>
   );

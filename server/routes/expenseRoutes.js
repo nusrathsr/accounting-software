@@ -1,0 +1,9 @@
+const express = require('express');
+const router = express.Router();
+const expenseController = require('../controllers/expenseController');
+const upload = require('../middleware/multer');
+
+router.post('/', upload.single('attachment'), expenseController.addExpense);
+router.get('/', expenseController.getExpenses);
+
+module.exports = router;
