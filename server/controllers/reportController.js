@@ -95,6 +95,7 @@ exports.getStockReport = async (req, res) => {
     const report = variants.map((variant) => {
       const product = variant.product;
 
+      if (!product) return null;
       // Purchases for this variant (matching product + maybe variant name if you store it)
       const purchaseQty = purchases
         .filter((p) => p.product === product.name) // adjust if you store ObjectId instead of name
@@ -105,11 +106,6 @@ exports.getStockReport = async (req, res) => {
         .flatMap((s) => s.products)
   .filter((sp) => sp.variantId && sp.variantId.toString() === variant._id.toString())
         .reduce((sum, sp) => sum + (sp.quantity || 0), 0);
-
-
-
-
-
 
       const opening = 0; // set if you track separately
       const closing = opening + purchaseQty - salesQty;
@@ -136,7 +132,7 @@ exports.getStockReport = async (req, res) => {
         stockValue,
         status: lowStockAlert
       };
-    });
+    }).filter(r => r !== null);
 
     res.json({
       totalVariants: report.length,
