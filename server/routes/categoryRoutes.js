@@ -1,0 +1,42 @@
+// const express = require('express');
+// const router = express.Router();
+// const categoryController = require('../controllers/categoryController');
+
+// // Get all categories
+// router.get('/', categoryController.getAllCategories);
+
+// // Get single category by ID
+// router.get('/:id', categoryController.getCategoryById);
+
+// // Create a new category
+// router.post('/', categoryController.addCategory);
+
+// // Update a category by ID
+// router.put('/:id', categoryController.updateCategory);
+
+// // Delete a category by ID
+// router.delete('/:id', categoryController.deleteCategory);
+
+// module.exports = router;
+
+
+const express = require("express");
+const router = express.Router();
+const categoryController = require("../controllers/categoryController");
+
+// Add Category
+router.post("/", categoryController.addCategory);
+
+// Get All Categories
+router.get("/", categoryController.getCategories);
+
+router.get("/:id", categoryController.getCategoryById);
+
+
+// Update Category
+router.put("/:id", categoryController.updateCategory);
+
+// Delete Category
+router.delete("/:id", categoryController.deleteCategory);
+
+module.exports = router;

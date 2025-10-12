@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../utils/api';
 import { GlobalContext } from '../../context/GlobalContext';
 import { 
   FaUser, 
@@ -31,11 +31,15 @@ const EditCustomer = () => {
     const fetchCustomer = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${baseURL}/customer/${id}`);
+        const res = await api.get(`/customer/${id}`);
         setCustomer(res.data);
       } catch (error) {
         console.error('Error fetching customer:', error);
-        alert('Failed to load customer data');
+       Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to load customer data',
+        });
         navigate('/listCustomer');
       } finally {
         setLoading(false);
@@ -51,13 +55,12 @@ const EditCustomer = () => {
     const { name, value } = e.target;
     setCustomer((prev) => ({ ...prev, [name]: value }));
   };
-
 const handleSubmit = async (e) => {
   e.preventDefault();
   setSaving(true);
 
   try {
-    await axios.put(`${baseURL}/customer/${id}`, customer);
+    await api.put(`/customer/${id}`, customer);
     
     Swal.fire({
       icon: 'success',
@@ -89,10 +92,10 @@ const handleSubmit = async (e) => {
     { value: 'Retail Customer', label: 'Retail Customer', color: 'blue' },
     { value: 'Wholesale Customer', label: 'Wholesale Customer', color: 'green' },
     { value: 'Supplier', label: 'Supplier', color: 'purple' },
-    { value: 'seller', label: 'Seller', color: 'orange' },
+    // { value: 'seller', label: 'Seller', color: 'orange' },
   ];
 
-  const showGSTField = customer && ['Wholesale Customer', 'Supplier', 'seller'].includes(customer.type);
+  const showGSTField = customer && ['Wholesale Customer', 'Supplier'].includes(customer.type);
 
   if (loading) {
     return (
@@ -377,13 +380,13 @@ const handleSubmit = async (e) => {
               <p className="font-medium mb-1">Tips for editing customers:</p>
               <ul className="list-disc list-inside space-y-1 text-blue-700">
                 <li>Fields marked with <span className="text-red-500">*</span> are required</li>
-                <li>GST number field appears automatically for wholesale customers, suppliers, and sellers</li>
+                <li>GST number field appears automatically for wholesale customers, suppliers</li>
                 <li>All changes are saved immediately when you click "Update Customer"</li>
                 <li>Use the cancel button to discard changes and return to the customer list</li>
               </ul>
             </div>
           </div>
-        </div>
+          </div>
       </div>
     </div>
   );

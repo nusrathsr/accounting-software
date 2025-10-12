@@ -1,7 +1,6 @@
 import React, { useContext, useState } from 'react';
 import Swal from 'sweetalert2';
-import axios from 'axios';
-import { GlobalContext } from '../../context/GlobalContext';
+import api from '../../utils/api'; 
 import { useNavigate } from 'react-router-dom';
 import { 
   FaUser, 
@@ -19,7 +18,6 @@ import {
 import { MdLocationCity } from 'react-icons/md';
 
 const AddCustomer = () => {
-  const { baseURL } = useContext(GlobalContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [customer, setCustomer] = useState({
@@ -44,7 +42,7 @@ const AddCustomer = () => {
   setLoading(true);
 
   try {
-    const res = await axios.post(`${baseURL}/customer`, customer);
+    const res = await api.post("/customer", customer);
     console.log('Customer Added:', res.data);
 
     // ✅ Success notification
@@ -80,10 +78,10 @@ const AddCustomer = () => {
     { value: 'Retail Customer', label: 'Retail Customer', color: 'blue' },
     { value: 'Wholesale Customer', label: 'Wholesale Customer', color: 'green' },
     { value: 'Supplier', label: 'Supplier', color: 'purple' },
-    { value: 'seller', label: 'Seller', color: 'orange' },
+    
   ];
 
-  const showGSTField = ['Wholesale Customer', 'Supplier', 'seller'].includes(customer.type);
+  const showGSTField = ['Wholesale Customer', 'Supplier'].includes(customer.type);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
@@ -338,7 +336,7 @@ const AddCustomer = () => {
               <p className="font-medium mb-1">Tips for adding customers:</p>
               <ul className="list-disc list-inside space-y-1 text-blue-700">
                 <li>Fields marked with <span className="text-red-500">*</span> are required</li>
-                <li>GST number is automatically required for wholesale customers, suppliers, and sellers</li>
+                <li>GST number is automatically required for wholesale customers, suppliers</li>
                 <li>Phone number should include country code for international customers</li>
               </ul>
             </div>

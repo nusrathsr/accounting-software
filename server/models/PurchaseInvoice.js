@@ -1,48 +1,22 @@
 const mongoose = require('mongoose');
 
-const purchaseSchema = new mongoose.Schema(
+const purchaseInvoiceSchema = new mongoose.Schema(
   {
-    purchaseOrderNumber: {
-      type: String,
-      required: true,
-      unique: true, // Matches your auto-generated PO number in frontend
-    },
-    sellerName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    product: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    purchaseOrderNumber: { type: String, required: true, unique: true },
+    supplierName: { type: String, required: true, trim: true },
+    vendor: { type: mongoose.Schema.Types.ObjectId, ref: "Customer"}, // <-- Add this
+    product: { type: String, required: true, trim: true },
     size: { type: String },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    unitPrice: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    tax: {
-      type: Number, // percentage
-      default: 0,
-    },
-    totalAmount: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-    purchaseDate: {
-      type: Date,
-      required: true,
-    },
+    quantity: { type: Number, required: true, min: 1 },
+    unitPrice: { type: Number, required: true, min: 0 },
+    tax: { type: Number, default: 0 },
+    totalAmount: { type: Number, required: true, min: 0 },
+    purchaseDate: { type: Date, required: true },
+    paidAmount: { type: Number, default: 0, min: 0 },
+    expiryDate: { type: Date },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Purchase', purchaseSchema);
+module.exports = mongoose.model('PurchaseInvoice', purchaseInvoiceSchema);
+

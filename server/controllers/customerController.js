@@ -60,6 +60,18 @@ exports.getSellers = async (req, res) => {
   }
 };
 
+// Get only customers of type "Supplier"
+exports.getSuppliers = async (req, res) => {
+  try {
+    const suppliers = await Customer.find({
+      type: { $regex: /^supplier$/i }  // matches Supplier, supplier, SUPPLIER
+    }).select("name email phone");
+    res.json(suppliers);
+  } catch (err) {
+    console.error("Error fetching suppliers:", err);
+    res.status(500).json({ error: "Failed to fetch suppliers" });
+  }
+};
 // Get single customer by ID
 exports.getCustomerById = async (req, res) => {
   try {

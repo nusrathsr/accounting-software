@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import Swal from 'sweetalert2';
+import api from '../../utils/api';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { GlobalContext } from '../../context/GlobalContext';
@@ -42,7 +43,7 @@ const ListExpenses = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get(`${baseURL}/expense`);
+      const res = await api.get("/expense");
       setExpenses(res.data);
     } catch (err) {
       console.error(err);
@@ -65,14 +66,26 @@ const ListExpenses = () => {
 
   // Delete expense from backend
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it!'
+  });
+
+  if (!result.isConfirmed) return;  
+
     try {
       setDeleteLoading(id);
-      await axios.delete(`${baseURL}/expense/${id}`);
+      await api.delete(`/expense/${id}`);
       setExpenses((prev) => prev.filter((exp) => exp._id !== id));
+      Swal.fire('Deleted!', 'The expense has been deleted.', 'success');
     } catch (err) {
       console.error(err);
-      alert("Failed to delete expense");
+     Swal.fire('Error!', 'Failed to delete expense.', 'error');
     } finally {
       setDeleteLoading(null);
     }
@@ -561,5 +574,4 @@ const ListExpenses = () => {
 };
 
 export default ListExpenses;
-
 

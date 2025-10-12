@@ -1,16 +1,17 @@
-const express =require("express")
-const router = express.Router()
-const productController =require('../controllers/productController');
-const upload =require("../middleware/multer")
+const express = require("express");
+const router = express.Router();
+const productController = require('../controllers/productController');
 
-//Routes
+const { getProductVariants } = productController;
 
-router.post('/',upload.single("image"),productController.addProduct);
-router.put('/:id', upload.single("image"),productController.editProduct);
-router.delete('/:id',productController.deleteProduct);
-router.get('/:id',productController.getProductById);
-router.get('/',productController.getAllProducts);
-router.put('/stock', productController.updateStock);
+// Routes
+router.post('/', productController.addProduct);          // Add product
+router.put('/:id', productController.editProduct);      // Edit product
+router.delete('/:id', productController.deleteProduct); // Delete product
+router.get('/:id', productController.getProductById);   // Get product by ID
+router.get('/', productController.getAllProducts);      // Get all products
+
+router.get("/:productId/variants", productController.getProductVariants);
 
 
-module.exports =router
+module.exports = router;

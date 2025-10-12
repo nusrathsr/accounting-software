@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import Swal from 'sweetalert2';
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from '../../utils/api';
 import { GlobalContext } from "../../context/GlobalContext";
 import { 
   FaBox, 
@@ -25,15 +25,11 @@ import { MdCategory, MdBrandingWatermark } from 'react-icons/md';
 const EditProduct = () => {
   const { id } = useParams(); // product _id from URL
   const navigate = useNavigate();
-  const { suppliers, baseURL, loading } = useContext(GlobalContext);
+  const { suppliers, categories: contextCategories, loading } = useContext(GlobalContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [categories, setCategories] = useState([
-    { name: 'clothing', subcategories: ['Shirts', 'T-Shirts', 'Pants', 'Kids Wear','top','dress','shawls'] },
-    { name: 'grocery', subcategories: ['Fruits', 'Vegetables', 'Snacks', 'dairy products','spices',"essentials","cookware","dinnerware"] },
-    { name: 'electronics', subcategories: ['Mobiles', 'Laptops', 'Chargers','speaker',"tv","washing machine","mixer grinder","refrigerator","fan","light","vacuum cleaner","headphones","oven","kettle","electric stove","intention cooker"] },
-  ]);
+  const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
   const [taxInclusive, setTaxInclusive] = useState(false);
 
@@ -56,16 +52,21 @@ const EditProduct = () => {
     productId: "",
   });
 
+  // Fetch categories from context or fallback
+  useEffect(() => {
+    setCategories(contextCategories || []);
+  }, [contextCategories]);
+
+
   // 1️⃣ Fetch product details on load
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`${baseURL}/products/${id}`);
-        const data = res.data;
+        const { data } = await api.get(`/products/${id}`);
 
         // update subcategories list
-        const selectedCat = categories.find((cat) => cat.name === data.category);
+        const selectedCat = (contextCategories || []).find(cat => cat.name === data.category);
         setSubcategories(selectedCat ? selectedCat.subcategories : []);
 
         setProduct({
@@ -96,7 +97,7 @@ const EditProduct = () => {
     };
 
     fetchProduct();
-  }, [id, baseURL, categories]);
+  }, [id, contextCategories]);
 
   // 2️⃣ Handle input changes
   const handleChange = (e) => {
@@ -155,7 +156,7 @@ const EditProduct = () => {
         }
       }
 
-      await axios.put(`${baseURL}/products/${id}`, formData, {
+      await api.put(`/products/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

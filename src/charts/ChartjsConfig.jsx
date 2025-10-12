@@ -32,31 +32,31 @@ export const chartAreaGradient = (ctx, chartArea, colorStops) => {
 
 export const chartColors = {
   textColor: {
-    light: getCssVariable('--color-gray-400'),
-    dark: getCssVariable('--color-gray-500'),
+    light: getCssVariable('--color-gray-400') || '#9CA3AF', // fallback gray-400
+    dark: getCssVariable('--color-gray-500') || '#6B7280', // fallback gray-500
   },
   gridColor: {
-    light: getCssVariable('--color-gray-100'),
-    dark: adjustColorOpacity(getCssVariable('--color-gray-700'), 0.6),
+    light: getCssVariable('--color-gray-100') || '#F3F4F6', // fallback gray-100
+    dark: adjustColorOpacity(getCssVariable('--color-gray-700') || '#374151', 0.6), // fallback gray-700
   },
   backdropColor: {
-    light: getCssVariable('--color-white'),
-    dark: getCssVariable('--color-gray-800'),
+    light: getCssVariable('--color-white') || '#FFFFFF',
+    dark: getCssVariable('--color-gray-800') || '#1F2937', // fallback gray-800
   },
   tooltipTitleColor: {
-    light: getCssVariable('--color-gray-800'),
-    dark: getCssVariable('--color-gray-100'),
+    light: getCssVariable('--color-gray-800') || '#1F2937',
+    dark: getCssVariable('--color-gray-100') || '#F3F4F6',
   },
-  tooltipBodyColor : {
-    light: getCssVariable('--color-gray-500'),
-    dark: getCssVariable('--color-gray-400')
+  tooltipBodyColor: {
+    light: getCssVariable('--color-gray-500') || '#6B7280',
+    dark: getCssVariable('--color-gray-400') || '#9CA3AF',
   },
   tooltipBgColor: {
-    light: getCssVariable('--color-white'),
-    dark: getCssVariable('--color-gray-700'),
+    light: getCssVariable('--color-white') || '#FFFFFF',
+    dark: getCssVariable('--color-gray-700') || '#374151',
   },
   tooltipBorderColor: {
-    light: getCssVariable('--color-gray-200'),
-    dark: getCssVariable('--color-gray-600'),
+    light: getCssVariable('--color-gray-200') || '#E5E7EB',
+    dark: getCssVariable('--color-gray-600') || '#4B5563',
   },
 };
