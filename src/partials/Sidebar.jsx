@@ -1194,7 +1194,7 @@ function Sidebar({
                             : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
                         }
                       >
-                         Add Purchase
+                        Purchase Billing
                       </NavLink>
                     </li>
                     <li>
