@@ -108,9 +108,6 @@
 // }
 
 // export default Dashboard;
-
-
-<<<<<<< HEAD
 // import React, { useEffect, useState } from 'react';
 // import { Outlet, useLocation } from 'react-router-dom';
 // import Sidebar from '../partials/Sidebar';
@@ -217,11 +214,7 @@
 
 // export default Dashboard;
 
-
-import React, { useEffect, useState } from 'react';
-=======
 import React, { useContext, useEffect, useState } from 'react';
->>>>>>> 9659b8b2a45565a214fab225f669a94923061fdb
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../partials/Sidebar';
 import Header from '../partials/Header';

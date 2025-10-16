@@ -25,11 +25,8 @@ const financialYearRoutes =require("./routes/financialYearRoutes")
 const unitRoutes = require("./routes/unitRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const taxBandRoutes =require("./routes/taxBandRoutes")
-<<<<<<< HEAD
 const customerCategoryRoutes = require("./routes/customerCategoryRoutes");
-=======
 const businessRoutes =require("./routes/businessRoutes")
->>>>>>> 9659b8b2a45565a214fab225f669a94923061fdb
 // Load env variables
 dotenv.config();
 

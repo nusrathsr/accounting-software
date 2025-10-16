@@ -50,13 +50,10 @@ import BillingCounter from './pages/pos/BillingCounter.jsx';
 import FinancialYear from './pages/settings/FinancialYear.jsx';
 import ProductUnits from './pages/settings/ProductUnit.jsx';
 import TaxBands from './pages/settings/TaxBands.jsx';
-<<<<<<< HEAD
 import CustomerCategories from './pages/customer/customerCategories.jsx';
-=======
 import BusinessRegister from './pages/settings/BusinessRegister.jsx';
 import MyProfile from './pages/settings/MyProfile.jsx';
 import UpdateProfile from './pages/settings/UpdateProfile.jsx';
->>>>>>> 9659b8b2a45565a214fab225f669a94923061fdb
 
 function App() {
   const location = useLocation();
@@ -126,11 +123,6 @@ function App() {
          <Route path='/businessRegister' element={<BusinessRegister/>}/>
          <Route path='/myProfile' element={<MyProfile/>}/>
          <Route path='/updateProfile' element={<UpdateProfile/>}/>
-
-
-
-
-
         </Route>
         
       </Routes>
