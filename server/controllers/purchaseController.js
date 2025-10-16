@@ -26,13 +26,13 @@ exports.addPurchase = async (req, res) => {
       purchaseOrderNumber,
       supplierName,
       product: productName,
-      variantId: variantId || null, // ✅ store variantId for tracking
+      variantId: variantId || null,
       quantity: qtyToAdd,
       unitPrice: Number(unitPrice) || 0,
       tax,
       totalAmount: Number(totalAmount) || 0,
       paidAmount: Number(paidAmount) || 0,
-      purchaseDate,
+      purchaseDate: purchaseDate ? new Date(purchaseDate) : new Date(),
       expiryDate: expiryDate ? new Date(expiryDate) : null,
     });
 
@@ -48,7 +48,7 @@ exports.addPurchase = async (req, res) => {
 
       variant.quantity = (variant.quantity || 0) + qtyToAdd;
       console.log("Total variant quantity", variant.quantity);
-      
+
       variant.purchasePrice = Number(unitPrice) || variant.purchasePrice;
       variant.expiryDate = expiryDate ? new Date(expiryDate) : variant.expiryDate;
       await variant.save();
@@ -94,7 +94,7 @@ exports.addPurchase = async (req, res) => {
 //     } = req.body;
 
 //     console.log(req.body);
-    
+
 //     const qtyToAdd = Number(quantity) || 0;
 
 //     // 🔹 Check if purchaseOrderNumber already exists to avoid duplicates
@@ -123,8 +123,8 @@ exports.addPurchase = async (req, res) => {
 //     if (variantId) {
 //       // 🔹 Update variant stock
 //       const variant = await ProductVariant.findById(variantId);
-      
-      
+
+
 //       if (!variant) return res.status(404).json({ error: "Variant not found" });
 
 //       // console.log("Before update - Variant:", JSON.stringify(variant, null, 2));

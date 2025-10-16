@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import AddSales from './pages/sales/AddSales';
 import ViewSales from './pages/sales/ViewSales';
@@ -50,10 +50,15 @@ import BillingCounter from './pages/pos/BillingCounter.jsx';
 import FinancialYear from './pages/settings/FinancialYear.jsx';
 import ProductUnits from './pages/settings/ProductUnit.jsx';
 import TaxBands from './pages/settings/TaxBands.jsx';
+<<<<<<< HEAD
 import CustomerCategories from './pages/customer/customerCategories.jsx';
+=======
+import BusinessRegister from './pages/settings/BusinessRegister.jsx';
+import MyProfile from './pages/settings/MyProfile.jsx';
+import UpdateProfile from './pages/settings/UpdateProfile.jsx';
+>>>>>>> 9659b8b2a45565a214fab225f669a94923061fdb
 
 function App() {
-
   const location = useLocation();
 
   useEffect(() => {
@@ -65,7 +70,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Dashboard />} >
+          <Route path="/" element={<Dashboard />} >
           <Route path="sales/add" element={<AddSales />} />
           <Route path="sales/view" element={<ViewSales />} />
           <Route path="purchase/add" element={<AddPurchase />} />
@@ -117,10 +122,17 @@ function App() {
           <Route path='/financialYear' element={<FinancialYear/>} />
           <Route path='/units' element={<ProductUnits/>} />
           <Route path='/taxBands' element={<TaxBands/>} />
+          
+         <Route path='/businessRegister' element={<BusinessRegister/>}/>
+         <Route path='/myProfile' element={<MyProfile/>}/>
+         <Route path='/updateProfile' element={<UpdateProfile/>}/>
+
+
 
 
 
         </Route>
+        
       </Routes>
     </>
   );

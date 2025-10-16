@@ -95,26 +95,34 @@ exports.getStockReport = async (req, res) => {
     const report = variants.map((variant) => {
       const product = variant.product;
 
+<<<<<<< HEAD
       if (!product) return null;
       // Purchases for this variant (matching product + maybe variant name if you store it)
+=======
+      // skip if product reference is missing
+      if (!product) return null;
+
+>>>>>>> 9659b8b2a45565a214fab225f669a94923061fdb
       const purchaseQty = purchases
-        .filter((p) => p.product === product.name) // adjust if you store ObjectId instead of name
+        .filter((p) => p.product === product.name && (!p.size || p.size === variant.sizeOrWeight))
         .reduce((sum, p) => sum + (p.quantity || 0), 0);
 
-      // Sales for this variant
       const salesQty = sales
         .flatMap((s) => s.products)
-  .filter((sp) => sp.variantId && sp.variantId.toString() === variant._id.toString())
+        .filter((sp) => sp.variantId && sp.variantId.toString() === variant._id.toString())
         .reduce((sum, sp) => sum + (sp.quantity || 0), 0);
 
+<<<<<<< HEAD
       const opening = 0; // set if you track separately
+=======
+      const opening = 10;
+>>>>>>> 9659b8b2a45565a214fab225f669a94923061fdb
       const closing = opening + purchaseQty - salesQty;
 
       const costPerUnit = variant.purchasePrice || product.purchasePrice || 0;
       const sellingPrice = variant.sellingPrice || product.sellingPrice || 0;
       const stockValue = closing * costPerUnit;
 
-      // 🔔 Low stock alert (hardcoded reorder level = 10)
       const lowStockAlert = closing < 10 ? "Low Stock - Reorder" : "OK";
 
       return {
@@ -132,7 +140,12 @@ exports.getStockReport = async (req, res) => {
         stockValue,
         status: lowStockAlert
       };
+<<<<<<< HEAD
     }).filter(r => r !== null);
+=======
+    }).filter(r => r !== null); // remove null entries
+
+>>>>>>> 9659b8b2a45565a214fab225f669a94923061fdb
 
     res.json({
       totalVariants: report.length,
