@@ -25,6 +25,7 @@ const financialYearRoutes =require("./routes/financialYearRoutes")
 const unitRoutes = require("./routes/unitRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const taxBandRoutes =require("./routes/taxBandRoutes")
+const businessRoutes =require("./routes/businessRoutes")
 // Load env variables
 dotenv.config();
 
@@ -65,6 +66,7 @@ app.use("/api/financialYear",financialYearRoutes)
 app.use("/api/units", unitRoutes);
 app.use("/api/dashboard",dashboardRoutes)
 app.use("/api/taxBand",taxBandRoutes)
+app.use("/api/business",businessRoutes)
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')

@@ -110,7 +110,7 @@
 // export default Dashboard;
 
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../partials/Sidebar';
 import Header from '../partials/Header';
@@ -140,8 +140,12 @@ import DashboardCard11 from '../partials/dashboard/DashboardCard11';
 import DashboardCard12 from '../partials/dashboard/DashboardCard12';
 import DashboardCard13 from '../partials/dashboard/DashboardCard13';
 import api from "../utils/api";
+import { GlobalContext } from '../context/GlobalContext';
+import BusinessRegister from './settings/BusinessRegister';
 
 function Dashboard() {
+    const {isRegistered}=useContext(GlobalContext)
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   
@@ -180,7 +184,7 @@ function Dashboard() {
         {/* Header */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        <main className="grow">
+        {isRegistered?<main className="grow">
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
 
             {/* Top section: Stats cards */}
@@ -203,12 +207,12 @@ function Dashboard() {
                 
               </>
             )}
-
+            
             <Outlet />
           </div>
-        </main>
-
-        {/* <Banner /> */}
+        </main>:
+        <BusinessRegister/>
+}
       </div>
     </div>
   );
