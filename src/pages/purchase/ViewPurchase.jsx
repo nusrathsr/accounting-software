@@ -927,7 +927,7 @@ export default function ViewPurchase() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="Search by PO number, supplier, product, or variant..."
+                  placeholder="Search by supplier, PO number, product, or variant..."
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
@@ -953,6 +953,7 @@ export default function ViewPurchase() {
 
               {/* Date Filters */}
               <div className="flex items-center gap-2">
+                <span className="text-gray-600">From</span>
                 <input
                   type="date"
                   value={startDate}

@@ -25,6 +25,7 @@ const financialYearRoutes =require("./routes/financialYearRoutes")
 const unitRoutes = require("./routes/unitRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const taxBandRoutes =require("./routes/taxBandRoutes")
+const customerCategoryRoutes = require("./routes/customerCategoryRoutes");
 // Load env variables
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/variants', variantRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/customer', customerRoutes)
+app.use("/api/customer-categories", customerCategoryRoutes);
 app.use('/api/expense', expenseRoutes)
 app.use("/api/sales", salesRoutes);
 app.use("/api/purchases", purchaseRoutes);

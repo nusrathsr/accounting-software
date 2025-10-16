@@ -50,6 +50,7 @@ import BillingCounter from './pages/pos/BillingCounter.jsx';
 import FinancialYear from './pages/settings/FinancialYear.jsx';
 import ProductUnits from './pages/settings/ProductUnit.jsx';
 import TaxBands from './pages/settings/TaxBands.jsx';
+import CustomerCategories from './pages/customer/customerCategories.jsx';
 
 function App() {
 
@@ -79,6 +80,7 @@ function App() {
           <Route path='/addCustomer' element={<AddCustomer />} />
           <Route path='/editCustomer/:id' element={<EditCustomer />} />
           <Route path='/listCustomer' element={<ListCustomer />} />
+          <Route path="/customerCategories" element={<CustomerCategories />} />
           <Route path='/addExpense' element={<AddExpense />} />
           <Route path='/listExpense' element={<ListExpenses />} />
           <Route path='/payments/add' element={<AddTransaction />} />

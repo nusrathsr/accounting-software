@@ -498,7 +498,7 @@ function Sidebar({
                   }}
                   className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  <span className="text-sm">📦 Products</span>
+                  <span className="text-sm">Products</span>
                   <svg
                     className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
                     viewBox="0 0 12 12"
@@ -508,13 +508,13 @@ function Sidebar({
                 </a>
                 <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
                   <li>
-                    <NavLink to="/addProduct" className="text-sm whitespace-nowrap block">➕ Add Product</NavLink>
+                    <NavLink to="/addProduct" className="text-sm whitespace-nowrap block">Add Product</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/addProductVariant" className="text-sm whitespace-nowrap block">➕Add Product Variant</NavLink>
+                    <NavLink to="/addProductVariant" className="text-sm whitespace-nowrap block">Add Product Variant</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/listProduct" className="text-sm whitespace-nowrap block">📋 View Products</NavLink>
+                    <NavLink to="/listProduct" className="text-sm whitespace-nowrap block">View Products</NavLink>
                   </li>
                 </ul>
               </>
@@ -533,7 +533,7 @@ function Sidebar({
                   }}
                   className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  <span className="text-sm">🗂️ Categories</span>
+                  <span className="text-sm">Categories</span>
                   <svg
                     className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
                     viewBox="0 0 12 12"
@@ -543,10 +543,10 @@ function Sidebar({
                 </a>
                 <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
                   <li>
-                    <NavLink to="/addCategory" className="text-sm whitespace-nowrap block">➕ Add Category</NavLink>
+                    <NavLink to="/addCategory" className="text-sm whitespace-nowrap block">Add Category</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/listCategories" className="text-sm whitespace-nowrap block">📋 View Categories</NavLink>
+                    <NavLink to="/listCategories" className="text-sm whitespace-nowrap block">View Categories</NavLink>
                   </li>
                 </ul>
               </>
@@ -565,7 +565,7 @@ function Sidebar({
                   }}
                   className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
-                  <span className="text-sm">👥 Customers</span>
+                  <span className="text-sm">Customers</span>
                   <svg
                     className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
                     viewBox="0 0 12 12"
@@ -575,11 +575,14 @@ function Sidebar({
                 </a>
                 <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
                   <li>
-                    <NavLink to="/addCustomer" className="text-sm whitespace-nowrap block">➕ Add Customer</NavLink>
+                    <NavLink to="/addCustomer" className="text-sm whitespace-nowrap block">Add Customer</NavLink>
                   </li>
                   <li>
-                    <NavLink to="/listCustomer" className="text-sm whitespace-nowrap block">📋 View Customers</NavLink>
+                    <NavLink to="/listCustomer" className="text-sm whitespace-nowrap block">View Customers</NavLink>
                   </li>
+                  <li>
+                    <NavLink to="/customerCategories" className="text-sm whitespace-nowrap block">Customer Categories</NavLink>
+                </li>
                 </ul>
               </>
             )}
@@ -1205,7 +1208,7 @@ function Sidebar({
                         }
                       >
                         
-                          View Purchases
+                        Purchase History
                       </NavLink>
                     </li>
                       <li>
