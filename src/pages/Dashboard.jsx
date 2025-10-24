@@ -214,43 +214,188 @@
 
 // export default Dashboard;
 
+// import React, { useContext, useEffect, useState } from 'react';
+// import { Outlet, useLocation } from 'react-router-dom';
+// import Sidebar from '../partials/Sidebar';
+// import Header from '../partials/Header';
+// import Banner from '../partials/Banner';
+// import {
+//   ShoppingCart,
+//   Users,
+//   Package,
+//   TrendingUp,
+//   TrendingDown,
+//   Calendar
+// } from "lucide-react";
+// import Card from '../components/Card';
+
+// // Dashboard widgets
+// import DashboardCard01 from '../partials/dashboard/DashboardCard01';
+// import DashboardCard02 from '../partials/dashboard/DashboardCard02';
+// import DashboardCard03 from '../partials/dashboard/DashboardCard03';
+// import DashboardCard04 from '../partials/dashboard/DashboardCard04';
+// import DashboardCard05 from '../partials/dashboard/DashboardCard05';
+// import DashboardCard06 from '../partials/dashboard/DashboardCard06';
+// import DashboardCard07 from '../partials/dashboard/DashboardCard07';
+// import DashboardCard08 from '../partials/dashboard/DashboardCard08';
+// import DashboardCard09 from '../partials/dashboard/DashboardCard09';
+// import DashboardCard10 from '../partials/dashboard/DashboardCard10';
+// import DashboardCard11 from '../partials/dashboard/DashboardCard11';
+// import DashboardCard12 from '../partials/dashboard/DashboardCard12';
+// import DashboardCard13 from '../partials/dashboard/DashboardCard13';
+// import api from "../utils/api";
+// import { GlobalContext } from '../context/GlobalContext';
+// import BusinessRegister from './settings/BusinessRegister';
+
+// // 📊 Recharts for graph
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer,
+// } from "recharts";
+
+// function Dashboard() {
+//     const {isRegistered}=useContext(GlobalContext)
+
+//   const [sidebarOpen, setSidebarOpen] = useState(false);
+//   const location = useLocation();
+
+//   const [stats, setStats] = useState({
+//     financialYear: "",
+//     totalProducts: 0,
+//     outOfStock: 0,
+//     totalCustomers: 0,
+//     totalSuppliers: 0,
+//     todaySales: 0,
+//     todayPurchases: 0
+//   });
+
+//   const [chartData, setChartData] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const fetchStats = async () => {
+//       try {
+//         const { data } = await api.get("/dashboard");
+//         setStats(data);
+
+//         // 📈 Example trend data (replace with real backend data if available)
+//         const salesTrends = data.salesTrends || [
+//           { month: "Jan", sales: 4000, purchases: 2400 },
+//           { month: "Feb", sales: 3000, purchases: 2210 },
+//           { month: "Mar", sales: 5000, purchases: 2900 },
+//           { month: "Apr", sales: 4780, purchases: 3000 },
+//           { month: "May", sales: 5890, purchases: 3200 },
+//           { month: "Jun", sales: 6390, purchases: 3600 },
+//         ];
+
+//         setChartData(salesTrends);
+//       } catch (err) {
+//         console.error(err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     fetchStats();
+//   }, []);
+
+//   return (
+//     <div className="flex h-screen overflow-hidden">
+
+//       {/* Sidebar */}
+//       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+//       {/* Main content */}
+//       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+
+//         {/* Header */}
+//         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
+//         {isRegistered?<main className="grow">
+//           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+
+//             {/* Top section: Stats cards */}
+//             {location.pathname === "/" && (
+//               <>
+//                 {/* 🟩 Stats Cards */}
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-3 gap-6 mb-8">
+//                   <Card icon={Calendar} heading="Financial Year" result={stats.financialYear} bgColor="bg-pink-500" />
+//                   <Card icon={Package} heading="Total Products" result={stats.totalProducts} bgColor="bg-purple-500" />
+//                   <Card icon={ShoppingCart} heading="Out of Stocks" result={stats.outOfStock} bgColor="bg-indigo-500" />
+//                   <Card icon={Users} heading="Customers" result={stats.totalCustomers} bgColor="bg-green-500" />
+//                   <Card icon={Users} heading="Suppliers" result={stats.totalSuppliers} bgColor="bg-blue-500" />
+//                   <Card icon={TrendingUp} heading="Today Sales" result={stats.todaySales} bgColor="bg-orange-400" />
+//                   <Card icon={TrendingUp} heading="Today Purchases" result={stats.todayPurchases} bgColor="bg-yellow-500" />
+//                 </div>
+
+//                 {/* 📊 Graph Section */}
+//                 <div className="bg-white p-6 rounded-2xl shadow-md mb-8">
+//                   <h2 className="text-xl font-semibold mb-4 text-gray-800">
+//                     Sales & Purchases Overview
+//                   </h2>
+//                   {loading ? (
+//                     <div className="text-gray-500 text-center py-10">Loading chart...</div>
+//                   ) : chartData.length > 0 ? (
+//                     <ResponsiveContainer width="100%" height={300}>
+//                       <LineChart data={chartData}>
+//                         <CartesianGrid strokeDasharray="3 3" />
+//                         <XAxis dataKey="month" />
+//                         <YAxis />
+//                         <Tooltip />
+//                         <Legend />
+//                         <Line type="monotone" dataKey="sales" stroke="#10b981" strokeWidth={3} />
+//                         <Line type="monotone" dataKey="purchases" stroke="#3b82f6" strokeWidth={3} />
+//                       </LineChart>
+//                     </ResponsiveContainer>
+//                   ) : (
+//                     <p className="text-gray-500">No data available for chart.</p>
+//                   )}
+//                 </div>
+//               </>
+//             )}
+            
+//             <Outlet />
+//           </div>
+//         </main>:
+//         <BusinessRegister/>
+// }
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Dashboard;
 import React, { useContext, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../partials/Sidebar';
 import Header from '../partials/Header';
-import Banner from '../partials/Banner';
 import {
   ShoppingCart,
   Users,
   Package,
   TrendingUp,
-  TrendingDown,
-  Calendar
+  Calendar,
+  UserCheck,
+  AlertCircle
 } from "lucide-react";
 import Card from '../components/Card';
-
-// Dashboard widgets
-import DashboardCard01 from '../partials/dashboard/DashboardCard01';
-import DashboardCard02 from '../partials/dashboard/DashboardCard02';
-import DashboardCard03 from '../partials/dashboard/DashboardCard03';
-import DashboardCard04 from '../partials/dashboard/DashboardCard04';
-import DashboardCard05 from '../partials/dashboard/DashboardCard05';
-import DashboardCard06 from '../partials/dashboard/DashboardCard06';
-import DashboardCard07 from '../partials/dashboard/DashboardCard07';
-import DashboardCard08 from '../partials/dashboard/DashboardCard08';
-import DashboardCard09 from '../partials/dashboard/DashboardCard09';
-import DashboardCard10 from '../partials/dashboard/DashboardCard10';
-import DashboardCard11 from '../partials/dashboard/DashboardCard11';
-import DashboardCard12 from '../partials/dashboard/DashboardCard12';
-import DashboardCard13 from '../partials/dashboard/DashboardCard13';
 import api from "../utils/api";
 import { GlobalContext } from '../context/GlobalContext';
 import BusinessRegister from './settings/BusinessRegister';
 
-// 📊 Recharts for graph
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -259,9 +404,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-function Dashboard() {
-    const {isRegistered}=useContext(GlobalContext)
+const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
+function Dashboard() {
+  const { isRegistered } = useContext(GlobalContext);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -275,95 +421,520 @@ function Dashboard() {
     todayPurchases: 0
   });
 
-  const [chartData, setChartData] = useState([]);
+  const [salesTrends, setSalesTrends] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [categoryDistribution, setCategoryDistribution] = useState([]);
+  const [recentTransactions, setRecentTransactions] = useState([]);
+  const [monthlySummary, setMonthlySummary] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [topCustomers, setTopCustomers] = useState([]);
+  const [inventoryValue, setInventoryValue] = useState({});
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const { data } = await api.get("/dashboard");
-        setStats(data);
+        setLoading(true);
+        setError(null);
 
-        // 📈 Example trend data (replace with real backend data if available)
-        const salesTrends = data.salesTrends || [
-          { month: "Jan", sales: 4000, purchases: 2400 },
-          { month: "Feb", sales: 3000, purchases: 2210 },
-          { month: "Mar", sales: 5000, purchases: 2900 },
-          { month: "Apr", sales: 4780, purchases: 3000 },
-          { month: "May", sales: 5890, purchases: 3200 },
-          { month: "Jun", sales: 6390, purchases: 3600 },
-        ];
+        const { data: dashboardData } = await api.get("/dashboard");
+        console.log("Dashboard Data:", dashboardData);
+        setStats(dashboardData);
 
-        setChartData(salesTrends);
+        try {
+          const { data: trendsData } = await api.get("/dashboard/sales-trends");
+          setSalesTrends(trendsData || []);
+        } catch (err) {
+          console.error("Sales trends error:", err);
+          setSalesTrends([]);
+        }
+
+        try {
+          const { data: topProductsData } = await api.get("/dashboard/top-products");
+          setTopProducts(topProductsData || []);
+        } catch (err) {
+          console.error("Top products error:", err);
+          setTopProducts([]);
+        }
+
+        try {
+          const { data: categoryData } = await api.get("/dashboard/category-distribution");
+          setCategoryDistribution(categoryData || []);
+        } catch (err) {
+          console.error("Category distribution error:", err);
+          setCategoryDistribution([]);
+        }
+
+        try {
+          const { data: transactionsData } = await api.get("/dashboard/recent-transactions?limit=5");
+          setRecentTransactions(transactionsData || []);
+        } catch (err) {
+          console.error("Transactions error:", err);
+          setRecentTransactions([]);
+        }
+
+        try {
+          const { data: monthlyData } = await api.get("/dashboard/monthly-summary");
+          setMonthlySummary(monthlyData || []);
+        } catch (err) {
+          console.error("Monthly summary error:", err);
+          setMonthlySummary([]);
+        }
+
+        try {
+          const { data: lowStockData } = await api.get("/dashboard/low-stock");
+          setLowStockProducts(lowStockData || []);
+        } catch (err) {
+          console.error("Low stock error:", err);
+          setLowStockProducts([]);
+        }
+
+        try {
+          const { data: customersData } = await api.get("/dashboard/customer-performance");
+          setTopCustomers(customersData || []);
+        } catch (err) {
+          console.error("Top customers error:", err);
+          setTopCustomers([]);
+        }
+
+        try {
+          const { data: inventoryData } = await api.get("/dashboard/inventory-value");
+          console.log("Inventory Data:", inventoryData);
+          setInventoryValue(inventoryData || {});
+        } catch (err) {
+          console.error("Inventory value error:", err);
+          setInventoryValue({ totalValue: 0, totalItems: 0, productCount: 0 });
+        }
+
+        try {
+          const { data: paymentData } = await api.get("/dashboard/payment-methods");
+          setPaymentMethods(paymentData || []);
+        } catch (err) {
+          console.error("Payment methods error:", err);
+          setPaymentMethods([]);
+        }
+
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching dashboard data:", err);
+        setError(err.response?.data?.message || "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
-  }, []);
+
+    if (isRegistered) {
+      fetchDashboardData();
+    }
+  }, [isRegistered]);
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
+          <p className="font-semibold text-gray-800">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.color }} className="text-sm">
+              {entry.name}: ₹{entry.value?.toLocaleString('en-IN')}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  if (!isRegistered) {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <BusinessRegister />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden">
-
-      {/* Sidebar */}
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      {/* Main content */}
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-
-        {/* Header */}
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        {isRegistered?<main className="grow">
+        <main className="grow bg-gray-50">
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+            
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                <AlertCircle size={20} />
+                <span>{error}</span>
+              </div>
+            )}
 
-            {/* Top section: Stats cards */}
-            {location.pathname === "/" && (
+            {location.pathname === "/" ? (
               <>
-                {/* 🟩 Stats Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-3 gap-6 mb-8">
-                  <Card icon={Calendar} heading="Financial Year" result={stats.financialYear} bgColor="bg-pink-500" />
-                  <Card icon={Package} heading="Total Products" result={stats.totalProducts} bgColor="bg-purple-500" />
-                  <Card icon={ShoppingCart} heading="Out of Stocks" result={stats.outOfStock} bgColor="bg-indigo-500" />
-                  <Card icon={Users} heading="Customers" result={stats.totalCustomers} bgColor="bg-green-500" />
-                  <Card icon={Users} heading="Suppliers" result={stats.totalSuppliers} bgColor="bg-blue-500" />
-                  <Card icon={TrendingUp} heading="Today Sales" result={stats.todaySales} bgColor="bg-orange-400" />
-                  <Card icon={TrendingUp} heading="Today Purchases" result={stats.todayPurchases} bgColor="bg-yellow-500" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-6 mb-8">
+                  <Card 
+                    icon={Calendar} 
+                    heading="Financial Year" 
+                    result={stats.financialYear || "N/A"} 
+                    bgColor="bg-gradient-to-br from-pink-500 to-pink-600" 
+                  />
+                  <Card 
+                    icon={Package} 
+                    heading="Total Products" 
+                    result={loading ? "..." : stats.totalProducts} 
+                    bgColor="bg-gradient-to-br from-purple-500 to-purple-600" 
+                  />
+                  <Card 
+                    icon={ShoppingCart} 
+                    heading="Out of Stock" 
+                    result={loading ? "..." : stats.outOfStock} 
+                    bgColor="bg-gradient-to-br from-red-500 to-red-600" 
+                  />
+                  <Card 
+                    icon={Users} 
+                    heading="Total Customers" 
+                    result={loading ? "..." : stats.totalCustomers} 
+                    bgColor="bg-gradient-to-br from-green-500 to-green-600" 
+                  />
+                  <Card 
+                    icon={UserCheck} 
+                    heading="Total Suppliers" 
+                    result={loading ? "..." : stats.totalSuppliers} 
+                    bgColor="bg-gradient-to-br from-blue-500 to-blue-600" 
+                  />
+                  <Card 
+                    icon={TrendingUp} 
+                    heading="Today Sales" 
+                    result={loading ? "..." : `₹${stats.todaySales?.toLocaleString('en-IN')}`} 
+                    bgColor="bg-gradient-to-br from-orange-400 to-orange-500" 
+                  />
+                  <Card 
+                    icon={TrendingUp} 
+                    heading="Today Purchases" 
+                    result={loading ? "..." : `₹${stats.todayPurchases?.toLocaleString('en-IN')}`} 
+                    bgColor="bg-gradient-to-br from-yellow-500 to-yellow-600" 
+                  />
+                  <Card 
+                    icon={Package} 
+                    heading="Inventory Value" 
+                    result={loading ? "..." : `₹${inventoryValue.totalValue?.toLocaleString('en-IN')}`} 
+                    bgColor="bg-gradient-to-br from-cyan-500 to-cyan-600" 
+                  />
                 </div>
 
-                {/* 📊 Graph Section */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                  
+                  <div className="bg-white p-6 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                      Sales & Purchases Trend
+                    </h2>
+                    {loading ? (
+                      <div className="text-gray-500 text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="mt-4">Loading chart...</p>
+                      </div>
+                    ) : salesTrends.length > 0 && salesTrends.some(d => d.sales > 0 || d.purchases > 0) ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={salesTrends}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="month" stroke="#6b7280" />
+                          <YAxis stroke="#6b7280" />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend />
+                          <Line 
+                            type="monotone" 
+                            dataKey="sales" 
+                            stroke="#10b981" 
+                            strokeWidth={3}
+                            name="Sales"
+                            dot={{ fill: '#10b981', r: 4 }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="purchases" 
+                            stroke="#3b82f6" 
+                            strokeWidth={3}
+                            name="Purchases"
+                            dot={{ fill: '#3b82f6', r: 4 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="text-gray-500 text-center py-20">
+                        <p className="text-lg">No sales or purchase data available</p>
+                        <p className="text-sm mt-2">Start adding sales and purchases to see trends</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                      Sales by Category
+                    </h2>
+                    {loading ? (
+                      <div className="text-gray-500 text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="mt-4">Loading chart...</p>
+                      </div>
+                    ) : categoryDistribution.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={categoryDistribution}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                            outerRadius={100}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {categoryDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="text-gray-500 text-center py-20">
+                        <p className="text-lg">No category data available</p>
+                        <p className="text-sm mt-2">Add products with categories and make sales to see distribution</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                  
+                  <div className="bg-white p-6 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                      Top Selling Products
+                    </h2>
+                    {loading ? (
+                      <div className="text-gray-500 text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="mt-4">Loading...</p>
+                      </div>
+                    ) : topProducts.length > 0 ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={topProducts}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="name" stroke="#6b7280" />
+                          <YAxis stroke="#6b7280" />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Bar dataKey="quantity" fill="#10b981" name="Quantity Sold" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="text-gray-500 text-center py-20">
+                        <p className="text-lg">No product sales data</p>
+                        <p className="text-sm mt-2">Make some sales to see top products</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                      Monthly Revenue vs Expenses
+                    </h2>
+                    {loading ? (
+                      <div className="text-gray-500 text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="mt-4">Loading...</p>
+                      </div>
+                    ) : monthlySummary.length > 0 && monthlySummary.some(d => d.revenue > 0 || d.expenses > 0) ? (
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={monthlySummary}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                          <XAxis dataKey="month" stroke="#6b7280" />
+                          <YAxis stroke="#6b7280" />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend />
+                          <Bar dataKey="revenue" fill="#10b981" name="Revenue" />
+                          <Bar dataKey="expenses" fill="#ef4444" name="Expenses" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="text-gray-500 text-center py-20">
+                        <p className="text-lg">No revenue or expense data</p>
+                        <p className="text-sm mt-2">Add sales and expenses to see monthly summary</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="bg-white p-6 rounded-2xl shadow-md mb-8">
                   <h2 className="text-xl font-semibold mb-4 text-gray-800">
-                    Sales & Purchases Overview
+                    Recent Transactions
                   </h2>
                   {loading ? (
-                    <div className="text-gray-500 text-center py-10">Loading chart...</div>
-                  ) : chartData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="sales" stroke="#10b981" strokeWidth={3} />
-                        <Line type="monotone" dataKey="purchases" stroke="#3b82f6" strokeWidth={3} />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <div className="text-gray-500 text-center py-10">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                      <p className="mt-4">Loading transactions...</p>
+                    </div>
+                  ) : recentTransactions.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Type
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Customer/Supplier
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Amount
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {recentTransactions.map((transaction, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {new Date(transaction.date).toLocaleDateString('en-IN')}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  transaction.type === 'sale' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                                }`}>
+                                  {transaction.type}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {transaction.customer || transaction.supplier || 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ₹{transaction.amount?.toLocaleString('en-IN')}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  transaction.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                  transaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}>
+                                  {transaction.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   ) : (
-                    <p className="text-gray-500">No data available for chart.</p>
+                    <div className="text-gray-500 text-center py-10">
+                      <p className="text-lg">No recent transactions</p>
+                      <p className="text-sm mt-2">Transactions will appear here once you make sales</p>
+                    </div>
                   )}
                 </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+                  
+                  <div className="bg-white p-6 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
+                      <AlertCircle className="text-red-500" size={24} />
+                      Low Stock Alert
+                    </h2>
+                    {loading ? (
+                      <div className="text-gray-500 text-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="mt-4">Loading...</p>
+                      </div>
+                    ) : lowStockProducts.length > 0 ? (
+                      <div className="space-y-3">
+                        {lowStockProducts.map((product, index) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <div>
+                              <p className="font-medium text-gray-800">{product.name}</p>
+                              <p className="text-sm text-gray-600">Reorder Level: {product.reorderLevel || 'N/A'}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-red-600">{product.stock}</p>
+                              <p className="text-xs text-gray-500">units left</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-gray-500 text-center py-10">
+                        <p className="text-lg">All products are well stocked!</p>
+                        <p className="text-sm mt-2">No products are running low</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-white p-6 rounded-2xl shadow-md">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                      Top Customers
+                    </h2>
+                    {loading ? (
+                      <div className="text-gray-500 text-center py-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="mt-4">Loading...</p>
+                      </div>
+                    ) : topCustomers.length > 0 ? (
+                      <div className="space-y-3">
+                        {topCustomers.slice(0, 5).map((customer, index) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-800">{customer.name}</p>
+                              <p className="text-sm text-gray-600">{customer.email}</p>
+                              <p className="text-xs text-gray-500">{customer.orderCount} orders</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-green-600">₹{customer.totalSales?.toLocaleString('en-IN')}</p>
+                              <p className="text-xs text-gray-500">Avg: ₹{customer.averageOrder?.toLocaleString('en-IN')}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-gray-500 text-center py-10">
+                        <p className="text-lg">No customer data available</p>
+                        <p className="text-sm mt-2">Make sales to customers to see top performers</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {paymentMethods.length > 0 && (
+                  <div className="bg-white p-6 rounded-2xl shadow-md mb-8">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                      Payment Methods (Last 30 Days)
+                    </h2>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={paymentMethods}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis dataKey="method" stroke="#6b7280" />
+                        <YAxis stroke="#6b7280" />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend />
+                        <Bar dataKey="total" fill="#8b5cf6" name="Total Amount" />
+                        <Bar dataKey="count" fill="#ec4899" name="Transaction Count" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </>
+            ) : (
+              <Outlet />
             )}
-            
-            <Outlet />
           </div>
-        </main>:
-        <BusinessRegister/>
-}
+        </main>
       </div>
     </div>
   );

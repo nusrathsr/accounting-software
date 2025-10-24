@@ -30,6 +30,7 @@ export const GlobalProvider = ({ children }) => {
 
 
   const fetchMyBusiness = async () => {
+     if (!businessId) return;
     try {
       const res = await api.get(`/business/${businessId}`);
       setBusiness(res.data);
@@ -37,9 +38,6 @@ export const GlobalProvider = ({ children }) => {
       console.error("Error fetching business:", error);
     }
   };
-
-
-
 
 // console.log(business);
 
@@ -63,10 +61,6 @@ export const GlobalProvider = ({ children }) => {
     }
   }
 
-
-
-
-
   const fetchCustomer = async () => {
     try {
       const response = await api.get("/customer")
@@ -78,7 +72,6 @@ export const GlobalProvider = ({ children }) => {
 
     }
   }
-
 
   // fetch shift
   const fetchShift = async () => {
@@ -95,8 +88,15 @@ export const GlobalProvider = ({ children }) => {
     fetchEmployees()
     fetchShift()
     fetchProduct()
-    fetchMyBusiness();
-  }, [businessId])
+    // fetchMyBusiness();
+  }, [])
+
+  // ✅ Fetch business only when businessId is set
+  useEffect(() => {
+    if (businessId) {
+      fetchMyBusiness();
+    }
+  }, [businessId]);
 
 
   const value = {
