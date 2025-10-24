@@ -210,11 +210,11 @@ export default function ViewCategories() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 px-8 py-6">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
@@ -222,12 +222,12 @@ export default function ViewCategories() {
                 </div>
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold text-white">Categories</h1>
-                  <p className="text-purple-100 text-sm">Manage product categories</p>
+                  <p className="text-blue-100 text-sm">Manage product categories</p>
                 </div>
               </div>
               <Link
                 to="/addCategory"
-                className="flex items-center justify-center gap-2 bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="flex items-center justify-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <FaPlus className="w-4 h-4" />
                 Add Category
@@ -259,8 +259,8 @@ export default function ViewCategories() {
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="bg-purple-50 rounded-full p-6 mb-4">
-                <FaTag className="w-12 h-12 text-purple-400" />
+              <div className="bg-blue-50 rounded-full p-6 mb-4">
+                <FaTag className="w-12 h-12 text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-2">
                 {searchTerm ? "No categories found" : "No categories yet"}
@@ -273,7 +273,7 @@ export default function ViewCategories() {
               {!searchTerm && (
                 <Link
                   to="/addCategory"
-                  className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
                 >
                   <FaPlus className="w-4 h-4" />
                   Add First Category
@@ -283,10 +283,10 @@ export default function ViewCategories() {
           ) : (
             <>
               {/* Stats Bar */}
-              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray-600">
-                    Showing <span className="font-semibold text-purple-600">{filteredCategories.length}</span> of <span className="font-semibold">{categories.length}</span> categories
+                    Showing <span className="font-semibold text-blue-600">{filteredCategories.length}</span> of <span className="font-semibold">{categories.length}</span> categories
                   </p>
                   <div className="flex gap-4 text-sm">
                     <span className="text-gray-600">
@@ -329,7 +329,7 @@ export default function ViewCategories() {
                     {filteredCategories.map((cat, index) => (
                       <tr 
                         key={cat._id} 
-                        className="hover:bg-purple-50 transition-colors duration-150"
+                        className="hover:bg-blue-50 transition-colors duration-150"
                       >
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                           {index + 1}
@@ -337,7 +337,7 @@ export default function ViewCategories() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div className="bg-purple-100 rounded-lg p-2">
-                              <FaTag className="w-4 h-4 text-purple-600" />
+                              <FaTag className="w-4 h-4 text-blue-600" />
                             </div>
                             <span className="text-sm font-semibold text-gray-800">
                               {cat.name}

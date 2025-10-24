@@ -394,7 +394,7 @@ const ExpiryReport = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-700 px-8 py-6">
+          <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 px-8 py-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">

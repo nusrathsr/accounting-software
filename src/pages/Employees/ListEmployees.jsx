@@ -139,7 +139,7 @@ const ListEmployees = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-700 px-8 py-6">
+          <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 px-8 py-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
@@ -194,11 +194,11 @@ const ListEmployees = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Full-time</p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-2xl font-bold text-blue-600">
                   {employees.filter(emp => emp.employmentType === 'Full-time').length}
                 </p>
               </div>
-              <div className="bg-purple-500 rounded-lg p-3">
+              <div className="bg-blue-500 rounded-lg p-3">
                 <FaUsers className="w-6 h-6 text-white" />
               </div>
             </div>

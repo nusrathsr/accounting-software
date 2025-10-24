@@ -72,11 +72,11 @@ export default function AddCategory() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 px-8 py-6">
+          <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={handleCancel}
@@ -89,7 +89,7 @@ export default function AddCategory() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-white">Add New Category</h1>
-                <p className="text-purple-100 text-sm">Create a new product category</p>
+                <p className="text-blue-100 text-sm">Create a new product category</p>
               </div>
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function AddCategory() {
             {/* Category Information Section */}
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                <FaTag className="w-5 h-5 text-purple-600" />
+                <FaTag className="w-5 h-5 text-blue-600" />
                 Category Information
               </h2>
               
@@ -184,7 +184,7 @@ export default function AddCategory() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-8 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 justify-center"
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 justify-center"
                 >
                   {loading ? (
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

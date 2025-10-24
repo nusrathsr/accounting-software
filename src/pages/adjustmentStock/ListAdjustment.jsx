@@ -117,7 +117,7 @@ const ListAdjustment = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8 overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-700 px-8 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 px-8 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="bg-white/10 p-3 rounded-xl">
                 <FaList className="w-6 h-6 text-white" />
