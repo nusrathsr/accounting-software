@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // import React, { useContext, useState } from "react";
 // import api from "../../utils/api";
 // import { GlobalContext } from "../../context/GlobalContext";
@@ -1068,6 +1069,8 @@
 
 // export default BusinessRegister;
 
+=======
+>>>>>>> 367c3a062da603795931a813675027d0b1c0cbbe
 import React, { useContext, useState } from "react";
 import { 
   Building, 
@@ -1130,32 +1133,71 @@ const BusinessRegister = () => {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataToSend.append(key, value);
-    });
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   try {
+//     const formDataToSend = new FormData();
+//     Object.entries(formData).forEach(([key, value]) => {
+//       formDataToSend.append(key, value);
+//     });
 
-    const { data } = await api.post(
-      "/business",
-      formDataToSend,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+//     const { data } = await api.post(
+//       "/business",
+//       formDataToSend,
+//       {
+//         headers: { "Content-Type": "multipart/form-data" },
+//       }
+//     );
    
-    alert("✅ " + data.message);
-    console.log("Response:", data);
-   localStorage.setItem("businessId", data.business._id);
-   setIsRegistered(true)
+//     alert("✅ " + data.message);
+//     console.log("Response:", data);
+//    localStorage.setItem("businessId", data.business._id);
+//    setIsRegistered(true)
+//   } catch (err) {
+//     console.error(err);
+//     alert("❌ Failed to register business");
+//   }
+// };
+
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // List all required fields
+  const requiredFields = [
+    "businessName",
+    "businessType",
+    "industryType",
+    "email",
+    "phone",
+    "ownerName",
+    "password",
+  ];
+
+  // Check if any required field is empty
+  const emptyField = requiredFields.find(field => !formData[field] || formData[field].toString().trim() === "");
+
+  if (emptyField) {
+    alert(`Please fill the required field: ${emptyField}`);
+    return; // Stop form submission
+  }
+
+  // If all required fields are filled, continue submitting
+  try {
+    const fd = new FormData();
+    Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
+    const { data } = await api.post("/business", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    alert(data.message);
+    localStorage.setItem("businessId", data.business._id);
+    setIsRegistered(true);
   } catch (err) {
     console.error(err);
-    alert("❌ Failed to register business");
+    alert("Failed to register business");
   }
 };
-
 
 
   return (
@@ -1207,11 +1249,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Business Type
+                      Business Type<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <select
+                        required
                         name="businessType"
                         value={formData.businessType}
                         onChange={handleChange}
@@ -1227,11 +1270,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Industry Type
+                      Industry Type<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <select
+                        required
                         name="industryType"
                         value={formData.industryType}
                         onChange={handleChange}
@@ -1283,11 +1327,12 @@ const BusinessRegister = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Email Address
+                      Email Address<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
+                        required
                         type="email"
                         name="email"
                         value={formData.email}
@@ -1300,13 +1345,14 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Phone Number
+                      Phone Number<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
                         type="number"
                         name="phone"
+                        required
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="Enter phone number"
@@ -1557,11 +1603,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Email (Login)
+                      Email (Login)<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
+                      required
                         type="email"
                         name="ownerEmail"
                         value={formData.ownerEmail}
@@ -1574,11 +1621,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Mobile (Login)
+                      Mobile (Login)<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
+                      required
                         type="number"
                         name="ownerMobile"
                         value={formData.ownerMobile}
@@ -1591,9 +1639,10 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Password
+                      Password<span className="text-red-500">*</span>
                     </label>
                     <input
+                    required
                       type="password"
                       name="password"
                       value={formData.password}
@@ -1629,11 +1678,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Currency
+                      Currency<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <select
+                      required
                         name="currency"
                         value={formData.currency}
                         onChange={handleChange}

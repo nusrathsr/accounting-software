@@ -20,6 +20,7 @@ import {
   Edit3
 } from "lucide-react";
 import api from "../../utils/api";
+import PrintButton from "../../components/PrintButton";
 
 export default function ViewSalesInvoices() {
   const [sales, setSales] = useState([]);
@@ -155,6 +156,105 @@ export default function ViewSalesInvoices() {
       </div>
     );
   }
+
+
+  // Generate printable HTML for a single invoice
+const generateSingleSaleHtml = (sale) => {
+  const saleDate = new Date(sale.saleDate || sale.date).toLocaleDateString('en-IN');
+  const total = parseFloat(sale.totalAmount || 0).toFixed(2);
+
+  // build table rows
+  const itemRows = (sale.products || [])
+    .map((item, i) => {
+      const mainRow = `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${item.name || "Unnamed Product"}</td>
+          <td>${item.quantity || 0}</td>
+          <td>₹${parseFloat(item.unitPrice || 0).toFixed(2)}</td>
+          <td>₹${(item.quantity * item.unitPrice).toFixed(2)}</td>
+        </tr>
+      `;
+
+      const variantRows = (item.variants || [])
+        .map(
+          (v) => `
+            <tr class="variant">
+              <td></td>
+              <td>${v.name}</td>
+              <td>${v.quantity}</td>
+              <td>₹${parseFloat(v.unitPrice || 0).toFixed(2)}</td>
+              <td>₹${(v.quantity * v.unitPrice).toFixed(2)}</td>
+            </tr>
+          `
+        )
+        .join("");
+
+      return mainRow + variantRows;
+    })
+    .join("");
+
+  // return printable HTML
+  return `
+    <html>
+      <head>
+        <title>Invoice ${sale.invoiceNumber}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          h1, h2, h3 { margin: 0; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .info { margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+          th { background: #f4f4f4; }
+          .total { font-weight: bold; text-align: right; }
+          .variant td { background: #f9f9f9; font-size: 13px; }
+          .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #777; }
+          @media print {
+            button, .no-print { display: none !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Sales Invoice</h1>
+          <h3>#${sale.invoiceNumber}</h3>
+          <p>Date: ${saleDate}</p>
+        </div>
+
+        <div class="info">
+          <strong>Customer:</strong> ${sale.customerName || "Walk-in Customer"} <br/>
+          <strong>Phone:</strong> ${sale.number || "—"} <br/>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Rate</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemRows}
+          </tbody>
+        </table>
+
+        <div class="summary" style="margin-top:20px; text-align:right;">
+          <p>Subtotal: ₹${parseFloat(sale.subtotal || 0).toFixed(2)}</p>
+          <p>GST: ₹${parseFloat(sale.tax || 0).toFixed(2)}</p>
+          <h2>Total: ₹${total}</h2>
+        </div>
+
+        <div class="footer">
+          <p>Thank you for your purchase!</p>
+        </div>
+      </body>
+    </html>
+  `;
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
@@ -491,31 +591,31 @@ export default function ViewSalesInvoices() {
                           </td> */}
                           {/* Payment */}
                           {/* Payment */}
-<td className="px-6 py-4 whitespace-nowrap text-center">
-  <div className="space-y-2">
-    {sale.payments && sale.payments.length > 0 ? (
-  <div className="text-sm text-gray-700 space-y-1">
-    {sale.payments.length > 1 && (
-      <div className="font-semibold text-gray-800">Split</div>
-    )}
-    {sale.payments.map((p, idx) => (
-      <div key={idx} className="flex items-center justify-center gap-1 text-xs">
-        <span className="capitalize">{p.mode}:</span>
-        <span>₹{parseFloat(p.amount || 0).toFixed(2)}</span>
-      </div>
-    ))}
-  </div>
-) : (
-  <div className="flex items-center justify-center gap-1">
-    <CreditCard className="w-4 h-4 text-gray-400" />
-    <span className="text-sm text-gray-600 capitalize">
-      {sale.paymentMode || "—"}
-    </span>
-  </div>
-)}
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="space-y-2">
+                              {sale.payments && sale.payments.length > 0 ? (
+                                <div className="text-sm text-gray-700 space-y-1">
+                                  {sale.payments.length > 1 && (
+                                    <div className="font-semibold text-gray-800">Split</div>
+                                  )}
+                                  {sale.payments.map((p, idx) => (
+                                    <div key={idx} className="flex items-center justify-center gap-1 text-xs">
+                                      <span className="capitalize">{p.mode}:</span>
+                                      <span>₹{parseFloat(p.amount || 0).toFixed(2)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-center gap-1">
+                                  <CreditCard className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm text-gray-600 capitalize">
+                                    {sale.paymentMode || "—"}
+                                  </span>
+                                </div>
+                              )}
 
-  </div>
-</td>
+                            </div>
+                          </td>
 
                           {/* Actions */}
                           <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -537,6 +637,11 @@ export default function ViewSalesInvoices() {
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
+                             <PrintButton
+                                printData={sale}
+                                generateHtml={() => generateSingleSaleHtml(sale)}
+                                showAlert={(title, message, type) => showNotification(type, title, message)}
+                              />
                             </div>
                           </td>
                         </tr>

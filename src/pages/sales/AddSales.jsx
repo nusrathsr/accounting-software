@@ -15,6 +15,8 @@ import {
   CheckCircle
 } from "lucide-react";
 import api from "../../utils/api";
+import DownloadButton from "../../components/DownloadButton";
+import PrintButton from "../../components/PrintButton";
 
 export default function AddSalesInvoice() {
   const invoiceRef = useRef();
@@ -363,7 +365,7 @@ export default function AddSalesInvoice() {
       totalAmount,
       paymentMode: formData.paymentMode,
       paymentStatus: formData.paymentStatus,
-      ...(formData.paymentMode === "single" 
+      ...(formData.paymentMode === "single"
         ? { singlePaymentMode: formData.singlePaymentMode }
         : { splitPayments: formData.splitPayments.filter(payment => payment.amount && parseFloat(payment.amount) > 0) }
       )
@@ -664,10 +666,10 @@ export default function AddSalesInvoice() {
                   <h3>Invoice Details</h3>
                   <p><strong>Invoice Number:</strong> ${invoiceData.invoiceNumber}</p>
                   <p><strong>Date:</strong> ${new Date(invoiceData.date).toLocaleDateString('en-IN', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}</p>
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })}</p>
                   ${invoiceData.customerName ? `<p><strong>Customer:</strong> ${invoiceData.customerName}</p>` : ''}
                   ${invoiceData.number ? `<p><strong>Mobile:</strong> ${invoiceData.number}</p>` : ''}
                 </div>
@@ -730,14 +732,14 @@ export default function AddSalesInvoice() {
 
               <div class="payment-section">
                 <h3>💳 Payment Information</h3>
-                ${invoiceData.paymentMode === 'single' 
-                  ? `<div class="payment-method">
+                ${invoiceData.paymentMode === 'single'
+        ? `<div class="payment-method">
                        <span class="method-name">${invoiceData.singlePaymentMode}</span>
                        <span class="method-amount">₹${invoiceData.totalAmount.toFixed(2)}</span>
                      </div>`
-                  : `<div style="margin-bottom: 15px;"><strong>Split Payment Details:</strong></div>
-                     ${invoiceData.splitPayments.map(payment => 
-                       `<div class="payment-method">
+        : `<div style="margin-bottom: 15px;"><strong>Split Payment Details:</strong></div>
+                     ${invoiceData.splitPayments.map(payment =>
+          `<div class="payment-method">
                           <span>
                             <span class="method-name">${payment.method}</span>
                             <span class="payment-badge ${payment.paid ? 'paid' : 'pending'}" style="margin-left: 10px;">
@@ -746,8 +748,8 @@ export default function AddSalesInvoice() {
                           </span>
                           <span class="method-amount">₹${parseFloat(payment.amount).toFixed(2)}</span>
                         </div>`
-                     ).join('')}`
-                }
+        ).join('')}`
+      }
                 
                 <div class="overall-status">
                   <strong style="color: ${invoiceData.paymentStatus ? '#166534' : '#dc2626'};">
@@ -782,7 +784,7 @@ export default function AddSalesInvoice() {
     try {
       await api.post("/sales", invoiceData);
       setLastSavedInvoice(invoiceData);
-      
+
       showAlert("Success!", `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${invoiceData.totalAmount.toFixed(2)}`, "success");
 
       setFormData({
@@ -806,95 +808,7 @@ export default function AddSalesInvoice() {
     }
   };
 
-  const handleDownload = async () => {
-    try {
-      let invoiceData;
-      
-      if (lastSavedInvoice) {
-        invoiceData = lastSavedInvoice;
-      } else {
-        try {
-          const res = await api.get("/sales/latest");
-          invoiceData = res.data;
-        } catch (apiError) {
-          showAlert("Error!", "No invoice found to download. Please save an invoice first.", "error");
-          return;
-        }
-      }
-
-      if (!invoiceData) {
-        showAlert("Error!", "No invoice data available for download.", "error");
-        return;
-      }
-
-      const htmlContent = generateInvoiceHTML(invoiceData);
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Invoice-${invoiceData.invoiceNumber}.html`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
-      showAlert("Success!", "Invoice downloaded successfully! Open the HTML file in your browser and use Ctrl+P to save as PDF.", "success");
-      
-    } catch (err) {
-      console.error('Download error:', err);
-      showAlert("Error!", "Failed to generate download. Please try again.", "error");
-    }
-  };
-
-  const handlePrint = async () => {
-    try {
-      let invoiceData;
-      
-      if (lastSavedInvoice) {
-        invoiceData = lastSavedInvoice;
-      } else {
-        try {
-          const res = await api.get("/sales/latest");
-          invoiceData = res.data;
-        } catch (apiError) {
-          showAlert("Error!", "No invoice found to print. Please save an invoice first.", "error");
-          return;
-        }
-      }
-
-      if (!invoiceData) {
-        showAlert("Error!", "No invoice data available for printing.", "error");
-        return;
-      }
-
-      const htmlContent = generateInvoiceHTML(invoiceData);
-      const printWindow = window.open('', '_blank');
-      
-      if (!printWindow) {
-        showAlert("Error!", "Pop-up blocked. Please allow pop-ups and try again.", "error");
-        return;
-      }
-
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-      
-      printWindow.onload = () => {
-        printWindow.print();
-        setTimeout(() => {
-          printWindow.close();
-        }, 100);
-      };
-
-      showAlert("Success!", "Print dialog opened successfully!", "success");
-      
-    } catch (err) {
-      console.error('Print error:', err);
-      showAlert("Error!", "Failed to prepare print. Please try again.", "error");
-    }
-  };
-
-  return (
+return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
       <CustomAlert />
       <div className="max-w-7xl mx-auto">
@@ -914,20 +828,27 @@ export default function AddSalesInvoice() {
                 </div>
               </div>
               <div className="flex space-x-3">
-                <button
+                {/* <button
                   onClick={handleDownload}
                   className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
                   Download
-                </button>
-                <button
-                  onClick={handlePrint}
-                  className="bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-200 flex items-center gap-2"
-                >
-                  <Printer className="w-4 h-4" />
-                  Print
-                </button>
+                </button> */}
+                <DownloadButton
+                  downloadData={lastSavedInvoice}         
+                  apiUrl="/sales/latest"                  
+                  fileName="Invoice"                      
+                  generateHtml={generateInvoiceHTML}     
+                  showAlert={showAlert}                  
+                />
+                <PrintButton
+                  printData={lastSavedInvoice}
+                  apiUrl="/sales/latest"
+                  generateHtml={generateInvoiceHTML}
+                  showAlert={showAlert}
+                />
+                
               </div>
             </div>
           </div>
@@ -1299,7 +1220,7 @@ export default function AddSalesInvoice() {
                               <option value="credit">Credit</option>
                             </select>
                           </div>
-                          
+
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Amount ₹</label>
                             <input
@@ -1330,11 +1251,10 @@ export default function AddSalesInvoice() {
                               type="button"
                               onClick={() => removeSplitPayment(index)}
                               disabled={formData.splitPayments.length <= 1}
-                              className={`w-full px-3 py-3 rounded-lg transition-all duration-200 flex items-center justify-center ${
-                                formData.splitPayments.length <= 1 
-                                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                                  : 'bg-red-50 text-red-600 hover:bg-red-100'
-                              }`}
+                              className={`w-full px-3 py-3 rounded-lg transition-all duration-200 flex items-center justify-center ${formData.splitPayments.length <= 1
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                : 'bg-red-50 text-red-600 hover:bg-red-100'
+                                }`}
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -1371,19 +1291,19 @@ export default function AddSalesInvoice() {
                           </label>
                         </div>
                       </div>
-                      
+
                       {!isSplitPaymentComplete() && getRemainingAmount() > 0 && (
                         <div className="mt-2 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
                           <span>⚠️ Split payments don't cover the full amount. Remaining: ₹{getRemainingAmount().toFixed(2)}</span>
                         </div>
                       )}
-                      
+
                       {getTotalSplitAmount() > calculateTotal() && (
                         <div className="mt-2 text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">
                           <span>⚠️ Split payment total exceeds invoice amount by ₹{(getTotalSplitAmount() - calculateTotal()).toFixed(2)}</span>
                         </div>
                       )}
-                      
+
                       {isSplitPaymentComplete() && (
                         <div className="mt-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
                           <span>✓ Split payments match the invoice total perfectly</span>

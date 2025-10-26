@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Swal from 'sweetalert2';
 import api from '../../utils/api';
 import jsPDF from 'jspdf';
@@ -24,8 +24,10 @@ import {
   FaMobile,
   FaUniversity
 } from "react-icons/fa";
+import PrintButton from '../../components/PrintButton';
 
 const ListExpenses = () => {
+  const tableRef =useRef(null)
   const { baseURL } = useContext(GlobalContext);
   const [page, setPage] = useState(1);
   const [expenses, setExpenses] = useState([]);
@@ -138,57 +140,88 @@ const ListExpenses = () => {
 };
 
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
+  // const generatePDF = () => {
+  //   const doc = new jsPDF();
     
-    // Add title with better formatting
-    doc.setFontSize(20);
-    doc.setTextColor(44, 82, 130);
-    doc.text('Expense Report', 14, 25);
+  //   // Add title with better formatting
+  //   doc.setFontSize(20);
+  //   doc.setTextColor(44, 82, 130);
+  //   doc.text('Expense Report', 14, 25);
     
-    // Add date range info
-    doc.setFontSize(12);
-    doc.setTextColor(100, 100, 100);
-    if (filter.startDate || filter.endDate) {
-      const dateRange = `Period: ${filter.startDate || 'Beginning'} to ${filter.endDate || 'Present'}`;
-      doc.text(dateRange, 14, 35);
-    }
+  //   // Add date range info
+  //   doc.setFontSize(12);
+  //   doc.setTextColor(100, 100, 100);
+  //   if (filter.startDate || filter.endDate) {
+  //     const dateRange = `Period: ${filter.startDate || 'Beginning'} to ${filter.endDate || 'Present'}`;
+  //     doc.text(dateRange, 14, 35);
+  //   }
     
-    // Add total
-    doc.setFontSize(14);
-    doc.setTextColor(220, 38, 127);
-    doc.text(`Total Expense: ₹${totalMonthlyExpense.toFixed(2)}`, 14, filter.startDate || filter.endDate ? 45 : 35);
+  //   // Add total
+  //   doc.setFontSize(14);
+  //   doc.setTextColor(220, 38, 127);
+  //   doc.text(`Total Expense: ₹${totalMonthlyExpense.toFixed(2)}`, 14, filter.startDate || filter.endDate ? 45 : 35);
 
-    const tableColumn = ["ID", "Date", "Category", "Amount", "Paid To", "Payment Method"];
-    const tableRows = filteredExpenses.map(exp => [
-      exp.expenseId,
-      new Date(exp.date).toLocaleDateString(),
-      exp.category,
-      `₹${exp.amount}`,
-      exp.paidTo,
-      exp.paymentMethod
-    ]);
+  //   const tableColumn = ["ID", "Date", "Category", "Amount", "Paid To", "Payment Method"];
+  //   const tableRows = filteredExpenses.map(exp => [
+  //     exp.expenseId,
+  //     new Date(exp.date).toLocaleDateString(),
+  //     exp.category,
+  //     `₹${exp.amount}`,
+  //     exp.paidTo,
+  //     exp.paymentMethod
+  //   ]);
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: filter.startDate || filter.endDate ? 55 : 45,
-      headStyles: {
-        fillColor: [59, 130, 246],
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      bodyStyles: {
-        textColor: 50,
-      },
-      alternateRowStyles: {
-        fillColor: [248, 250, 252]
-      }
-    });
+  //   autoTable(doc, {
+  //     head: [tableColumn],
+  //     body: tableRows,
+  //     startY: filter.startDate || filter.endDate ? 55 : 45,
+  //     headStyles: {
+  //       fillColor: [59, 130, 246],
+  //       textColor: 255,
+  //       fontStyle: 'bold'
+  //     },
+  //     bodyStyles: {
+  //       textColor: 50,
+  //     },
+  //     alternateRowStyles: {
+  //       fillColor: [248, 250, 252]
+  //     }
+  //   });
 
-    doc.autoPrint();
-    doc.output('dataurlnewwindow');
-  };
+  //   doc.autoPrint();
+  //   doc.output('dataurlnewwindow');
+  // };
+const generateTableHtml = () => {
+  if (!tableRef.current) return "<p>No data available</p>";
+
+  // Clone the table
+  const clonedTable = tableRef.current.cloneNode(true);
+
+  // Remove the "Actions" column (last column) from both header and rows
+  clonedTable.querySelectorAll("th:last-child, td:last-child").forEach((el) => el.remove());
+
+  return `
+    <html>
+      <head>
+        <title>Expense Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2 { text-align: center; color: #2c5282; margin-bottom: 20px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+          th { background-color: #f0f0f0; }
+          .text-right { text-align: right; }
+        </style>
+      </head>
+      <body>
+        <h2>Expense Table</h2>
+        ${clonedTable.outerHTML}
+      </body>
+    </html>
+  `;
+};
+
+
 
   // Fixed pagination calculations
   const startIndex = (page - 1) * itemsPerPage;
@@ -252,13 +285,11 @@ const ListExpenses = () => {
                   <div className="text-blue-100 text-xs font-medium">Total Amount</div>
                   <div className="text-white text-xl font-bold">INR {totalMonthlyExpense.toLocaleString('en-IN')}</div>
                 </div>
-                <button
-                  onClick={generatePDF}
-                  className="flex items-center gap-2 px-6 py-3 bg-white text-blue-700 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
-                >
-                  <MdDownload className="w-4 h-4" />
-                  Export PDF
-                </button>
+               <PrintButton
+                      printData={{}} // optional, your function ignores this
+                      generateHtml={generateTableHtml}
+                      showAlert={(title, msg, type) => alert(msg)}
+                    />
               </div>
             </div>
           </div>
@@ -370,7 +401,7 @@ const ListExpenses = () => {
           )}
 
           {!loading && !error && (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" ref={tableRef}>
               <table className="min-w-full">
                 <thead>
                   <tr className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
