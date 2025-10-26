@@ -1665,6 +1665,127 @@ function Sidebar({
   )}
 </SidebarLinkGroup>
 
+{/* ================= Accounts Module ================= */}
+<SidebarLinkGroup activecondition={pathname.includes("accounts")}>
+  {(handleClickAcc, openAcc) => (
+    <>
+      <a
+        href="#0"
+        onClick={(e) => {
+          e.preventDefault();
+          handleClickAcc();
+          setSidebarExpanded(true);
+        }}
+        className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
+          pathname.includes("accounts")
+            ? "font-medium"
+            : "hover:text-gray-900 dark:hover:text-white"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <svg
+              className={`shrink-0 fill-current ${
+                openAcc
+                  ? "text-violet-500"
+                  : "text-gray-400 dark:text-gray-500"
+              }`}
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+            >
+              <path d="M3 1h10v14H3z" />
+            </svg>
+            <span className="text-sm font-medium ml-4 duration-200">
+              Accounts
+            </span>
+          </div>
+          <svg
+            className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
+              openAcc ? "rotate-180" : ""
+            }`}
+            viewBox="0 0 12 12"
+          >
+            <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+          </svg>
+        </div>
+      </a>
+
+      {openAcc && (
+        <ul className="mt-1 pl-6 space-y-1">
+          <li>
+            <NavLink
+              to="/accounts/ledger"
+              className={({ isActive }) =>
+                "block text-sm font-medium truncate " +
+                (isActive
+                  ? "text-violet-500"
+                  : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+              }
+            >
+              Account Ledger
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/accounts/journal-vouchers"
+              className={({ isActive }) =>
+                "block text-sm font-medium truncate " +
+                (isActive
+                  ? "text-violet-500"
+                  : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+              }
+            >
+              Journal Vouchers
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/accounts/trial-balance"
+              className={({ isActive }) =>
+                "block text-sm font-medium truncate " +
+                (isActive
+                  ? "text-violet-500"
+                  : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+              }
+            >
+              Trial Balance
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/accounts/daybook"
+              className={({ isActive }) =>
+                "block text-sm font-medium truncate " +
+                (isActive
+                  ? "text-violet-500"
+                  : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+              }
+            >
+              Daybook
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/accounts/profiles"
+              className={({ isActive }) =>
+                "block text-sm font-medium truncate " +
+                (isActive
+                  ? "text-violet-500"
+                  : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+              }
+            >
+              Account Profiles
+            </NavLink>
+          </li>
+        </ul>
+      )}
+    </>
+  )}
+</SidebarLinkGroup>
+
+
 
 
 

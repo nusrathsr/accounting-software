@@ -54,6 +54,7 @@ import CustomerCategories from './pages/customer/customerCategories.jsx';
 import BusinessRegister from './pages/settings/BusinessRegister.jsx';
 import MyProfile from './pages/settings/MyProfile.jsx';
 import UpdateProfile from './pages/settings/UpdateProfile.jsx';
+import Ledger from './pages/account/Ledger.jsx';
 
 function App() {
   const location = useLocation();
@@ -123,6 +124,7 @@ function App() {
          <Route path='/businessRegister' element={<BusinessRegister/>}/>
          <Route path='/myProfile' element={<MyProfile/>}/>
          <Route path='/updateProfile' element={<UpdateProfile/>}/>
+         <Route path="/accounts/ledger" element={<Ledger />} />
         </Route>
         
       </Routes>

@@ -2,6 +2,7 @@ const PurchaseInvoice = require("../models/PurchaseInvoice");
 const Product = require("../models/Product");
 const ProductVariant = require("../models/ProductVariant");
 const Payment = require("../models/Payment");
+const Ledger = require("../models/Ledger");
 
 // ➕ Add Purchase
 exports.addPurchase = async (req, res) => {
@@ -38,6 +39,31 @@ exports.addPurchase = async (req, res) => {
 
     await purchase.save();
 
+     // ✅ Create Ledger Entries (Double Entry)
+    const ledgerEntries = [
+  {
+    voucher_no: purchase.purchaseOrderNumber,
+    date: purchase.purchaseDate,
+    account_name: "Purchase A/c",
+    debit: purchase.totalAmount,
+    credit: 0,
+    reference_type: "Purchase",
+    reference_id: purchase._id,
+  },
+  {
+    voucher_no: purchase.purchaseOrderNumber,
+    date: purchase.purchaseDate,
+    account_name: supplierName,
+    debit: 0,
+    credit: purchase.totalAmount,
+    reference_type: "Purchase",
+    reference_id: purchase._id,
+  },
+];
+
+await Ledger.insertMany(ledgerEntries);
+console.log("✅ Ledger entries created for Purchase:", purchase.purchaseOrderNumber);
+
     // 🔹 If purchase is for a variant
     if (variantId) {
       const variant = await ProductVariant.findById(variantId);
@@ -69,7 +95,7 @@ exports.addPurchase = async (req, res) => {
       await product.save();
     }
 
-    res.status(201).json({ message: "✅ Purchase added & stock updated", purchase });
+    res.status(201).json({ message: "✅ Purchase added,stock updated & ledger entries created", purchase });
   } catch (err) {
     console.error("❌ Error adding purchase:", err);
     res.status(400).json({ error: err.message });
