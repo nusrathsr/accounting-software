@@ -1,5 +1,5 @@
 import api from "../../utils/api";
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { GlobalContext } from "../../context/GlobalContext";
 import {
   LineChart,
@@ -28,8 +28,10 @@ import {
   FaShoppingCart
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+import PrintButton from "../../components/PrintButton";
 
 const PurchaseReport = () => {
+  const tableRef = useRef(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [report, setReport] = useState(null);
@@ -108,6 +110,29 @@ const PurchaseReport = () => {
       </div>
     );
   }
+
+
+  const generateTableHtml = () => {
+    if (!tableRef.current) return "<p>No data available</p>";
+    return `
+    <html>
+      <head>
+        <title>Purchase Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+          th { background-color: #f0f0f0; }
+          .text-right { text-align: right; }
+        </style>
+      </head>
+      <body>
+        <h2>Purchase Report Table</h2>
+        ${tableRef.current.innerHTML}
+      </body>
+    </html>
+  `;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
@@ -242,10 +267,7 @@ const PurchaseReport = () => {
                       <FaChartBar className="w-5 h-5 text-blue-600" />
                       Daily Purchase Trend
                     </h2>
-                    <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
-                      <FaFileExport className="w-4 h-4" />
-                      Export
-                    </button>
+                    
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6">
                     <ResponsiveContainer width="100%" height={250}>
@@ -291,10 +313,7 @@ const PurchaseReport = () => {
                       <MdDashboard className="w-5 h-5 text-blue-600" />
                       Purchases by Supplier
                     </h2>
-                    <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
-                      <FaFileExport className="w-4 h-4" />
-                      Export
-                    </button>
+                  
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6">
                     <ResponsiveContainer width="100%" height={250}>
@@ -345,15 +364,16 @@ const PurchaseReport = () => {
                     Purchase Details
                   </h2>
                   <div className="flex gap-2">
-                    <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
-                      <FaFileExport className="w-4 h-4" />
-                      Export
-                    </button>
+                  <PrintButton
+                      printData={{}} // optional, your function ignores this
+                      generateHtml={generateTableHtml}
+                      showAlert={(title, msg, type) => alert(msg)}
+                    />
                   </div>
                 </div>
 
                 {/* Table Container */}
-                <div className="bg-gray-50 rounded-xl p-1">
+                <div className="bg-gray-50 rounded-xl p-1" ref={tableRef}>
                   <div className="bg-white rounded-lg overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                       <table className="min-w-full">

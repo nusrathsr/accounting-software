@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import api from "../../utils/api";
@@ -30,8 +30,11 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { GlobalContext } from "../../context/GlobalContext";
+import PrintButton from "../../components/PrintButton";
 
 const ExpenseReport = () => {
+  
+  const tableRef = useRef(null);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
@@ -109,83 +112,27 @@ const ExpenseReport = () => {
   }
 
 
-    // ✅ Generate PDF for Expenses
-const generatePDF = (expenses, filter, totalAmount) => {
-  const doc = new jsPDF();
-
-  // Title
-  doc.setFontSize(20);
-  doc.setTextColor(44, 82, 130);
-  doc.text("Expense Report", 14, 25);
-
-  // Date range
-  doc.setFontSize(12);
-  doc.setTextColor(100, 100, 100);
-  if (filter.startDate || filter.endDate) {
-    const dateRange = `Period: ${filter.startDate || "Beginning"} to ${
-      filter.endDate || "Present"
-    }`;
-    doc.text(dateRange, 14, 35);
-  }
-
-  // Total Expenses
-  doc.setFontSize(14);
-  doc.setTextColor(220, 38, 127);
-  doc.text(
-    `Total Expenses: INR${totalAmount.toFixed(2)}`,
-    14,
-    filter.startDate || filter.endDate ? 45 : 35
-  );
-
-  // Table columns
-  const tableColumn = [
-    "Expense ID",
-    "Date",
-    "Category",
-    "Paid To",
-    "Payment Mode",
-    "Amount",
-    "Description",
-  ];
-
-  // Table rows
-  const tableRows = expenses.map((exp) => [
-    exp.expenseId,
-    new Date(exp.date).toLocaleDateString(),
-    exp.category,
-    exp.paidTo || "--",
-    exp.paymentMethod,
-    `INR${exp.amount}`,
-    exp.description || "--",
-  ]);
-
-  // AutoTable
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: filter.startDate || filter.endDate ? 55 : 45,
-    headStyles: {
-      fillColor: [59, 130, 246],
-      textColor: 255,
-      fontStyle: "bold",
-    },
-    bodyStyles: { textColor: 50 },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-  });
-
-  // ✅ Auto open in print mode
-  doc.autoPrint();
-  doc.output("dataurlnewwindow");
-};
-
-// ✅ Handle Export PDF button
-const handleExportPDF = () => {
-  try {
-    generatePDF(expenses, { startDate, endDate }, totalAmount);
-  } catch (error) {
-    console.error("Error exporting PDF:", error);
-  }
-};
+  const generateTableHtml = () => {
+    if (!tableRef.current) return "<p>No data available</p>";
+    return `
+    <html>
+      <head>
+        <title>Expense Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+          th { background-color: #f0f0f0; }
+          .text-right { text-align: right; }
+        </style>
+      </head>
+      <body>
+        <h2>Expense Report Table</h2>
+        ${tableRef.current.innerHTML}
+      </body>
+    </html>
+  `;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
@@ -415,17 +362,16 @@ const handleExportPDF = () => {
                 Expense Details
               </h2>
               <div className="flex gap-2">
-                <button className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium"
-                 onClick={handleExportPDF}
-                >
-                  <FaFileExport className="w-4 h-4" />
-                  Export
-                </button>
+                 <PrintButton
+                      printData={{}} // optional, your function ignores this
+                      generateHtml={generateTableHtml}
+                      showAlert={(title, msg, type) => alert(msg)}
+                    />
               </div>
             </div>
 
             {/* Table Container */}
-            <div className="bg-gray-50 rounded-xl p-1">
+            <div className="bg-gray-50 rounded-xl p-1" ref={tableRef}>
               <div className="bg-white rounded-lg overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="min-w-full">

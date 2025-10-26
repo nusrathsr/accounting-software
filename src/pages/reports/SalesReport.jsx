@@ -2,6 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import api from "../../utils/api";
+import { useRef } from "react";
+
 import { GlobalContext } from "../../context/GlobalContext";
 import {
   LineChart,
@@ -30,14 +32,17 @@ import {
   FaChartLine
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
+import PrintButton from "../../components/PrintButton";
 
 const SalesReport = () => {
+
+  const tableRef = useRef(null);
   const [report, setReport] = useState(null);
   const [dates, setDates] = useState({ startDate: "", endDate: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const rowsPerPage = 10; // 👈 adjust as needed
- 
+
   // Fetch report function
   const fetchReport = async (startDate = "", endDate = "") => {
     try {
@@ -114,78 +119,28 @@ const SalesReport = () => {
   }
 
 
-  const generatePDF = (salesData, filter) => {
-  const doc = new jsPDF();
+  const generateTableHtml = () => {
+    if (!tableRef.current) return "<p>No data available</p>";
+    return `
+    <html>
+      <head>
+        <title>Sales Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+          th { background-color: #f0f0f0; }
+          .text-right { text-align: right; }
+        </style>
+      </head>
+      <body>
+        <h2>Sales Report Table</h2>
+        ${tableRef.current.innerHTML}
+      </body>
+    </html>
+  `;
+  };
 
-  // Title
-  doc.setFontSize(20);
-  doc.setTextColor(44, 82, 130);
-  doc.text("Sales Report", 14, 25);
-
-  // Date range (if filter applied)
-  doc.setFontSize(12);
-  doc.setTextColor(100, 100, 100);
-  if (filter.startDate || filter.endDate) {
-    const dateRange = `Period: ${filter.startDate || "Beginning"} to ${
-      filter.endDate || "Present"
-    }`;
-    doc.text(dateRange, 14, 35);
-  }
-
-  // Total Sales
-  const totalSales = salesData.reduce((acc, s) => acc + s.totalAmount, 0);
-  doc.setFontSize(14);
-  doc.setTextColor(220, 38, 127);
-  doc.text(
-    `Total Sales: INR${totalSales.toFixed(2)}`,
-    14,
-    filter.startDate || filter.endDate ? 45 : 35
-  );
-
-  // Table columns
-  const tableColumn = [
-    "Invoice No",
-    "Customer",
-    "Date",
-    "Payment Mode",
-    "Status",
-    "Subtotal",
-    "Tax",
-    "Total",
-  ];
-
-  // Table rows
-  const tableRows = salesData.map((sale) => [
-    sale.invoiceNumber,
-    sale.customerName || "--",
-    new Date(sale.date).toLocaleDateString(),
-    sale.paymentMode,
-    sale.paymentStatus ? "Paid" : "Unpaid",
-    `INR${sale.subtotal}`,
-    `INR${sale.tax}`,
-    `INR${sale.totalAmount}`,
-  ]);
-
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: filter.startDate || filter.endDate ? 55 : 45,
-    headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { textColor: 50 },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-  });
-
-  // ✅ Download PDF directly
-  doc.save("SalesReport.pdf");
-};
-
-const handleExportPDF = () => {
-  if (!report || !report.sales || report.sales.length === 0) {
-    alert("No sales data to export.");
-    return;
-  }
-  generatePDF(report.sales, dates);
-};
 
 
   return (
@@ -273,7 +228,7 @@ const handleExportPDF = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center gap-4">
                   <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-3">
@@ -285,7 +240,7 @@ const handleExportPDF = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center gap-4">
                   <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3">
@@ -297,7 +252,7 @@ const handleExportPDF = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex items-center gap-4">
                   <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-3">
@@ -323,30 +278,30 @@ const handleExportPDF = () => {
                       <FaChartBar className="w-5 h-5 text-blue-600" />
                       Daily Sales Trend
                     </h2>
-                  
+
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6">
                     <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={dailyChartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                        <Line 
-                          type="monotone" 
-                          dataKey="total" 
-                          stroke="#16a34a" 
+                        <Line
+                          type="monotone"
+                          dataKey="total"
+                          stroke="#16a34a"
                           strokeWidth={3}
                           dot={{ fill: '#16a34a', strokeWidth: 2, r: 4 }}
                           activeDot={{ r: 6, fill: '#15803d' }}
                         />
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis 
-                          dataKey="date" 
+                        <XAxis
+                          dataKey="date"
                           tick={{ fontSize: 12, fill: '#6b7280' }}
                           axisLine={{ stroke: '#d1d5db' }}
                         />
-                        <YAxis 
+                        <YAxis
                           tick={{ fontSize: 12, fill: '#6b7280' }}
                           axisLine={{ stroke: '#d1d5db' }}
                         />
-                        <Tooltip 
+                        <Tooltip
                           formatter={(value) => [`INR${value.toLocaleString()}`, 'Revenue']}
                           contentStyle={{
                             backgroundColor: '#fff',
@@ -369,27 +324,27 @@ const handleExportPDF = () => {
                       <MdDashboard className="w-5 h-5 text-blue-600" />
                       Monthly Sales
                     </h2>
-                   
+
                   </div>
                   <div className="bg-gray-50 rounded-xl p-6">
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={monthlyChartData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                        <Bar 
-                          dataKey="total" 
+                        <Bar
+                          dataKey="total"
                           fill="url(#colorGradient)"
                           radius={[8, 8, 0, 0]}
                         />
                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                        <XAxis 
-                          dataKey="month" 
+                        <XAxis
+                          dataKey="month"
                           tick={{ fontSize: 12, fill: '#6b7280' }}
                           axisLine={{ stroke: '#d1d5db' }}
                         />
-                        <YAxis 
+                        <YAxis
                           tick={{ fontSize: 12, fill: '#6b7280' }}
                           axisLine={{ stroke: '#d1d5db' }}
                         />
-                        <Tooltip 
+                        <Tooltip
                           formatter={(value) => [`INR${value.toLocaleString()}`, 'Revenue']}
                           contentStyle={{
                             backgroundColor: '#fff',
@@ -420,15 +375,18 @@ const handleExportPDF = () => {
                     Sales Details
                   </h2>
                   <div className="flex gap-2">
-                    <button  onClick={handleExportPDF} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium">
-                      <FaFileExport className="w-4 h-4" />
-                      Export
-                    </button>
+                    <PrintButton
+                      printData={{}} // optional, your function ignores this
+                      generateHtml={generateTableHtml}
+                      showAlert={(title, msg, type) => alert(msg)}
+                    />
+
+
                   </div>
                 </div>
 
                 {/* Table Container */}
-                <div className="bg-gray-50 rounded-xl p-1">
+                <div className="bg-gray-50 rounded-xl p-1" ref={tableRef} >
                   <div className="bg-white rounded-lg overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                       <table className="min-w-full">
@@ -477,23 +435,22 @@ const handleExportPDF = () => {
                       <FaChevronLeft className="w-4 h-4" />
                       Previous
                     </button>
-                    
+
                     <div className="flex gap-1">
                       {[...Array(totalPages)].map((_, i) => (
                         <button
                           key={i}
                           onClick={() => handlePageChange(i + 1)}
-                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                            currentPage === i + 1
-                              ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
-                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                          }`}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${currentPage === i + 1
+                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                            }`}
                         >
                           {i + 1}
                         </button>
                       ))}
                     </div>
-                    
+
                     <button
                       className="px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                       onClick={() => handlePageChange(currentPage + 1)}

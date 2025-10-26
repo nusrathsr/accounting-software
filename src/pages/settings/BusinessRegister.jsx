@@ -1,401 +1,3 @@
-// import React, { useContext, useState } from "react";
-// import api from "../../utils/api";
-// import { GlobalContext } from "../../context/GlobalContext";
-
-// const BusinessRegister = () => {
-//     const {setIsRegistered}=useContext(GlobalContext)
-//   const [step, setStep] = useState(1);
-//   const [formData, setFormData] = useState({
-//     businessName: "",
-//     businessType: "",
-//     industryType: "",
-//     startDate: "",
-//     logo: null,
-//     email: "",
-//     phone: "",
-//     address: "",
-//     pincode: "",
-//     city: "",
-//     state: "",
-//     gstin: "",
-//     pan: "",
-//     bankName: "",
-//     accountHolder: "",
-//     accountNumber: "",
-//     ifsc: "",
-//     upi: "",
-//     ownerName: "",
-//     ownerEmail: "",
-//     ownerMobile: "",
-//     password: "",
-//     financialYearStart: "",
-//     currency: "",
-//     invoicePrefix: "",
-//     enableInventory: false,
-//   });
-
-//   const handleChange = (e) => {
-//     const { name, value, type, checked, files } = e.target;
-//     setFormData({
-//       ...formData,
-//       [name]: type === "checkbox" ? checked : files ? files[0] : value,
-//     });
-//   };
-
-//   const nextStep = () => setStep((prev) => prev + 1);
-//   const prevStep = () => setStep((prev) => prev - 1);
-
-
-// const handleSubmit = async (e) => {
-//   e.preventDefault();
-//   try {
-//     const formDataToSend = new FormData();
-//     Object.entries(formData).forEach(([key, value]) => {
-//       formDataToSend.append(key, value);
-//     });
-
-//     const { data } = await api.post(
-//       "/business",
-//       formDataToSend,
-//       {
-//         headers: { "Content-Type": "multipart/form-data" },
-//       }
-//     );
-   
-//     alert("✅ " + data.message);
-//     console.log("Response:", data);
-//    localStorage.setItem("businessId", data.business._id);
-//    setIsRegistered(true)
-//   } catch (err) {
-//     console.error(err);
-//     alert("❌ Failed to register business");
-//   }
-// };
-
-
-//   const inputClass =
-//     "w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400";
-
-//   return (
-//     <div className="max-w-5xl w-7xl mx-auto bg-white shadow-lg rounded-2xl p-6 mt-10">
-//       <h2 className="text-2xl font-semibold mb-4 text-center text-blue-700">
-//         Business Setup (Step {step} of 6)
-//       </h2>
-
-//       <form onSubmit={handleSubmit} className="space-y-4">
-//         {/* Step 1: Basic Info */}
-//         {step === 1 && (
-//           <div>
-//             <h3 className="text-lg font-semibold mb-2">1. Basic Business Information</h3>
-//             <div className="grid grid-cols-2 gap-4">
-//               <input
-//                 type="text"
-//                 name="businessName"
-//                 placeholder="Business Name"
-//                 value={formData.businessName}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//                 required
-//               />
-//               <select
-//                 name="businessType"
-//                 value={formData.businessType}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               >
-//                 <option value="">Select Business Type</option>
-//                 <option value="proprietorship">Proprietorship</option>
-//                 <option value="partnership">Partnership</option>
-//                 <option value="pvt_ltd">Private Limited</option>
-//               </select>
-
-//               <select
-//                 name="industryType"
-//                 value={formData.industryType}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               >
-//                 <option value="">Select Industry Type</option>
-//                 <option value="retail">Retail</option>
-//                 <option value="manufacturing">Manufacturing</option>
-//                 <option value="service">Service</option>
-//               </select>
-
-//               <input
-//                 type="date"
-//                 name="startDate"
-//                 value={formData.startDate}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-
-//               <input
-//                 type="file"
-//                 name="logo"
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//             </div>
-//           </div>
-//         )}
-
-//         {/* Step 2: Contact */}
-//         {step === 2 && (
-//           <div>
-//             <h3 className="text-lg font-semibold mb-2">2. Contact & Address</h3>
-//             <div className="grid grid-cols-2 gap-4">
-//               <input
-//                 type="email"
-//                 name="email"
-//                 placeholder="Email"
-//                 value={formData.email}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="number"
-//                 name="phone"
-//                 placeholder="Phone Number"
-//                 value={formData.phone}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <textarea
-//                 name="address"
-//                 placeholder="Address"
-//                 value={formData.address}
-//                 onChange={handleChange}
-//                 className={`${inputClass} col-span-2`}
-//               />
-//               <input
-//                 type="text"
-//                 name="pincode"
-//                 placeholder="Pincode"
-//                 value={formData.pincode}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="text"
-//                 name="city"
-//                 placeholder="City"
-//                 value={formData.city}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <select
-//                 name="state"
-//                 value={formData.state}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               >
-//                 <option value="">Select State</option>
-//                 <option value="Kerala">Kerala</option>
-//                 <option value="Karnataka">Karnataka</option>
-//                 <option value="Tamil Nadu">Tamil Nadu</option>
-//               </select>
-//             </div>
-//           </div>
-//         )}
-
-//         {/* Step 3: Tax */}
-//         {step === 3 && (
-//           <div>
-//             <h3 className="text-lg font-semibold mb-2">3. Tax & Compliance</h3>
-//             <div className="grid grid-cols-2 gap-4">
-//               <input
-//                 type="text"
-//                 name="gstin"
-//                 placeholder="GSTIN (optional)"
-//                 value={formData.gstin}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="text"
-//                 name="pan"
-//                 placeholder="PAN / Tax ID"
-//                 value={formData.pan}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//             </div>
-//           </div>
-//         )}
-
-//         {/* Step 4: Bank */}
-//         {step === 4 && (
-//           <div>
-//             <h3 className="text-lg font-semibold mb-2">4. Bank / Payment Details</h3>
-//             <div className="grid grid-cols-2 gap-4">
-//               <input
-//                 type="text"
-//                 name="bankName"
-//                 placeholder="Bank Name"
-//                 value={formData.bankName}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="text"
-//                 name="accountHolder"
-//                 placeholder="Account Holder Name"
-//                 value={formData.accountHolder}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="number"
-//                 name="accountNumber"
-//                 placeholder="Account Number"
-//                 value={formData.accountNumber}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="text"
-//                 name="ifsc"
-//                 placeholder="IFSC Code"
-//                 value={formData.ifsc}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="text"
-//                 name="upi"
-//                 placeholder="UPI ID (optional)"
-//                 value={formData.upi}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//             </div>
-//           </div>
-//         )}
-
-//         {/* Step 5: Owner */}
-//         {step === 5 && (
-//           <div>
-//             <h3 className="text-lg font-semibold mb-2">5. Owner / Admin Account</h3>
-//             <div className="grid grid-cols-2 gap-4">
-//               <input
-//                 type="text"
-//                 name="ownerName"
-//                 placeholder="Owner Full Name"
-//                 value={formData.ownerName}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="email"
-//                 name="ownerEmail"
-//                 placeholder="Email (Login)"
-//                 value={formData.ownerEmail}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="number"
-//                 name="ownerMobile"
-//                 placeholder="Mobile (Login)"
-//                 value={formData.ownerMobile}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <input
-//                 type="password"
-//                 name="password"
-//                 placeholder="Password"
-//                 value={formData.password}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//             </div>
-//           </div>
-//         )}
-
-//         {/* Step 6: Accounting */}
-//         {step === 6 && (
-//           <div>
-//             <h3 className="text-lg font-semibold mb-2">6. Accounting Settings</h3>
-//             <div className="grid grid-cols-2 gap-4">
-//               <input
-//                 type="date"
-//                 name="financialYearStart"
-//                 value={formData.financialYearStart}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <select
-//                 name="currency"
-//                 value={formData.currency}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               >
-//                 <option value="">Select Currency</option>
-//                 <option value="INR">INR</option>
-//                 <option value="USD">USD</option>
-//                 <option value="EUR">EUR</option>
-//               </select>
-//               <input
-//                 type="text"
-//                 name="invoicePrefix"
-//                 placeholder="Invoice Prefix"
-//                 value={formData.invoicePrefix}
-//                 onChange={handleChange}
-//                 className={inputClass}
-//               />
-//               <label className="flex items-center gap-2 col-span-2">
-//                 <input
-//                   type="checkbox"
-//                   name="enableInventory"
-//                   checked={formData.enableInventory}
-//                   onChange={handleChange}
-//                 />
-//                 Enable Inventory Tracking
-//               </label>
-//             </div>
-//           </div>
-//         )}
-
-//         {/* Navigation Buttons */}
-//         <div className="flex justify-between mt-6">
-//           {step > 1 && (
-//             <button
-//               type="button"
-//               onClick={prevStep}
-//               className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-//             >
-//               Previous
-//             </button>
-//           )}
-//           {step < 6 && (
-//             <button
-//               type="button"
-//               onClick={nextStep}
-//               className="ml-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-//             >
-//               Next
-//             </button>
-//           )}
-//           {step === 6 && (
-//             <button
-//               type="submit"
-//               className="ml-auto px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-//             >
-//               Submit
-//             </button>
-//           )}
-//         </div>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default BusinessRegister;
-
-
-
-
 import React, { useContext, useState } from "react";
 import { 
   Building, 
@@ -458,32 +60,71 @@ const BusinessRegister = () => {
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataToSend.append(key, value);
-    });
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   try {
+//     const formDataToSend = new FormData();
+//     Object.entries(formData).forEach(([key, value]) => {
+//       formDataToSend.append(key, value);
+//     });
 
-    const { data } = await api.post(
-      "/business",
-      formDataToSend,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+//     const { data } = await api.post(
+//       "/business",
+//       formDataToSend,
+//       {
+//         headers: { "Content-Type": "multipart/form-data" },
+//       }
+//     );
    
-    alert("✅ " + data.message);
-    console.log("Response:", data);
-   localStorage.setItem("businessId", data.business._id);
-   setIsRegistered(true)
+//     alert("✅ " + data.message);
+//     console.log("Response:", data);
+//    localStorage.setItem("businessId", data.business._id);
+//    setIsRegistered(true)
+//   } catch (err) {
+//     console.error(err);
+//     alert("❌ Failed to register business");
+//   }
+// };
+
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // List all required fields
+  const requiredFields = [
+    "businessName",
+    "businessType",
+    "industryType",
+    "email",
+    "phone",
+    "ownerName",
+    "password",
+  ];
+
+  // Check if any required field is empty
+  const emptyField = requiredFields.find(field => !formData[field] || formData[field].toString().trim() === "");
+
+  if (emptyField) {
+    alert(`Please fill the required field: ${emptyField}`);
+    return; // Stop form submission
+  }
+
+  // If all required fields are filled, continue submitting
+  try {
+    const fd = new FormData();
+    Object.entries(formData).forEach(([k, v]) => fd.append(k, v));
+    const { data } = await api.post("/business", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    alert(data.message);
+    localStorage.setItem("businessId", data.business._id);
+    setIsRegistered(true);
   } catch (err) {
     console.error(err);
-    alert("❌ Failed to register business");
+    alert("Failed to register business");
   }
 };
-
 
 
   return (
@@ -535,11 +176,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Business Type
+                      Business Type<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <select
+                        required
                         name="businessType"
                         value={formData.businessType}
                         onChange={handleChange}
@@ -555,11 +197,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Industry Type
+                      Industry Type<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <select
+                        required
                         name="industryType"
                         value={formData.industryType}
                         onChange={handleChange}
@@ -611,11 +254,12 @@ const BusinessRegister = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Email Address
+                      Email Address<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
+                        required
                         type="email"
                         name="email"
                         value={formData.email}
@@ -628,13 +272,14 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Phone Number
+                      Phone Number<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
                         type="number"
                         name="phone"
+                        required
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="Enter phone number"
@@ -885,11 +530,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Email (Login)
+                      Email (Login)<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
+                      required
                         type="email"
                         name="ownerEmail"
                         value={formData.ownerEmail}
@@ -902,11 +548,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Mobile (Login)
+                      Mobile (Login)<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <input
+                      required
                         type="number"
                         name="ownerMobile"
                         value={formData.ownerMobile}
@@ -919,9 +566,10 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Password
+                      Password<span className="text-red-500">*</span>
                     </label>
                     <input
+                    required
                       type="password"
                       name="password"
                       value={formData.password}
@@ -957,11 +605,12 @@ const BusinessRegister = () => {
 
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Currency
+                      Currency<span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                       <select
+                      required
                         name="currency"
                         value={formData.currency}
                         onChange={handleChange}
