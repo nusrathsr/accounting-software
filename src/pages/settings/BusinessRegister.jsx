@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 // import React, { useContext, useState } from "react";
 // import api from "../../utils/api";
 // import { GlobalContext } from "../../context/GlobalContext";
@@ -1069,8 +1069,6 @@
 
 // export default BusinessRegister;
 
-=======
->>>>>>> 367c3a062da603795931a813675027d0b1c0cbbe
 import React, { useContext, useState } from "react";
 import { 
   Building, 
