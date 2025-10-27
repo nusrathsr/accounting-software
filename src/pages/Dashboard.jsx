@@ -1949,7 +1949,7 @@ function Dashboard() {
                     <p className="text-orange-100 text-sm font-medium mb-1">Today Sales</p>
                     <div className="flex items-baseline gap-2">
                       <p className="text-3xl font-bold">{loading ? "..." : todaySalesCount}</p>
-                      <p className="text-orange-100 text-sm">transactions</p>
+                      
                     </div>
                   </div>
 
@@ -1964,7 +1964,7 @@ function Dashboard() {
                     <p className="text-yellow-100 text-sm font-medium mb-1">Today Purchases</p>
                     <div className="flex items-baseline gap-2">
                       <p className="text-3xl font-bold">{loading ? "..." : todayPurchasesCount}</p>
-                      <p className="text-yellow-100 text-sm">transactions</p>
+                      
                     </div>
                   </div>
 
