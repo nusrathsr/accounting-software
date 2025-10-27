@@ -89,7 +89,7 @@ export default function AddSalesInvoice() {
   const [dropdownState, setDropdownState] = useState([{ open: false, searchTerm: "" }]);
 
   const generateInvoiceNumber = () =>
-    `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    `S-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
   useEffect(() => {
     setFormData((prev) => ({ ...prev, invoiceNumber: generateInvoiceNumber() }));

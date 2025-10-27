@@ -57,6 +57,8 @@ import UpdateProfile from './pages/settings/UpdateProfile.jsx';
 import Ledger from './pages/account/Ledger.jsx';
 import AllLedger from './pages/account/AllLedger.jsx';
 
+import AddSalesReturn from './pages/salesReturn/AddSalesReturn';
+import ViewSalesReturn from './pages/salesReturn/ViewSalesReturn';
 function App() {
   const location = useLocation();
 
@@ -121,12 +123,13 @@ function App() {
           <Route path='/financialYear' element={<FinancialYear/>} />
           <Route path='/units' element={<ProductUnits/>} />
           <Route path='/taxBands' element={<TaxBands/>} />
-          
          <Route path='/businessRegister' element={<BusinessRegister/>}/>
          <Route path='/myProfile' element={<MyProfile/>}/>
          <Route path='/updateProfile' element={<UpdateProfile/>}/>
          <Route path="/accounts/ledger" element={<Ledger />} />
           <Route path="/accounts/AllLedger" element={<AllLedger />} />
+          <Route path="sales-return/add" element={<AddSalesReturn />} />
+          <Route path="sales-return/view" element={<ViewSalesReturn />} />
         </Route>
         
       </Routes>
