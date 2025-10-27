@@ -55,6 +55,7 @@ import BusinessRegister from './pages/settings/BusinessRegister.jsx';
 import MyProfile from './pages/settings/MyProfile.jsx';
 import UpdateProfile from './pages/settings/UpdateProfile.jsx';
 import Ledger from './pages/account/Ledger.jsx';
+import AllLedger from './pages/account/AllLedger.jsx';
 
 function App() {
   const location = useLocation();
@@ -125,6 +126,7 @@ function App() {
          <Route path='/myProfile' element={<MyProfile/>}/>
          <Route path='/updateProfile' element={<UpdateProfile/>}/>
          <Route path="/accounts/ledger" element={<Ledger />} />
+          <Route path="/accounts/AllLedger" element={<AllLedger />} />
         </Route>
         
       </Routes>
