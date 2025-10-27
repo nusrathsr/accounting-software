@@ -51,6 +51,8 @@ import FinancialYear from './pages/settings/FinancialYear.jsx';
 import ProductUnits from './pages/settings/ProductUnit.jsx';
 import TaxBands from './pages/settings/TaxBands.jsx';
 
+import AddSalesReturn from './pages/salesReturn/AddSalesReturn';
+import ViewSalesReturn from './pages/salesReturn/ViewSalesReturn';
 function App() {
 
   const location = useLocation();
@@ -116,7 +118,8 @@ function App() {
           <Route path='/units' element={<ProductUnits/>} />
           <Route path='/taxBands' element={<TaxBands/>} />
 
-
+          <Route path="sales-return/add" element={<AddSalesReturn />} />
+          <Route path="sales-return/view" element={<ViewSalesReturn />} />
 
         </Route>
       </Routes>

@@ -308,8 +308,8 @@ function Sidebar({
                 Categories
               </span>
             </div> */}
-            {/* Arrow */}
-            {/* <div className="flex shrink-0 ml-2">
+              {/* Arrow */}
+              {/* <div className="flex shrink-0 ml-2">
               <svg
                 className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${
                   open && "rotate-180"
@@ -323,8 +323,8 @@ function Sidebar({
         </a>
         <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
           <ul className={`pl-8 mt-1 ${!open && "hidden"}`}> */}
-            {/* Add Category */}
-            {/* <li className="mb-1 last:mb-0">
+              {/* Add Category */}
+              {/* <li className="mb-1 last:mb-0">
               <NavLink
                 end
                 to="/addCategory"
@@ -341,8 +341,8 @@ function Sidebar({
               </NavLink>
             </li> */}
 
-            {/* View Categories */}
-            {/* <li className="mb-1 last:mb-0">
+              {/* View Categories */}
+              {/* <li className="mb-1 last:mb-0">
               <NavLink
                 end
                 to="/listCategories"
@@ -389,8 +389,8 @@ function Sidebar({
                               Customer
                             </span>
                           </div> */}
-                          {/* Icon */}
-                          {/* <div className="flex shrink-0 ml-2">
+              {/* Icon */}
+              {/* <div className="flex shrink-0 ml-2">
                             <svg className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"}`} viewBox="0 0 12 12">
                               <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
                             </svg>
@@ -433,162 +433,161 @@ function Sidebar({
                 }}
               </SidebarLinkGroup> */}
               {/* Master Data */}
-<SidebarLinkGroup activecondition={
-  pathname.includes("product") ||
-  pathname.includes("category") ||
-  pathname.includes("customer")
-}>
-  {(handleClick, open) => (
-    <React.Fragment>
-      <a
-        href="#0"
-        className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
-          pathname.includes("product") ||
-          pathname.includes("category") ||
-          pathname.includes("customer")
-            ? ""
-            : "hover:text-gray-900 dark:hover:text-white"
-        }`}
-        onClick={(e) => {
-          e.preventDefault();
-          handleClick();
-          setSidebarExpanded(true);
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            {/* Master Data Icon */}
-            <svg
-              className={`shrink-0 fill-current ${open ? "text-violet-500" : "text-gray-400 dark:text-gray-500"}`}
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"  // smaller
-              height="12" // smaller
-              viewBox="0 0 24 24"
-            >
-              <path d="M3 3h18v2H3V3zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
-            </svg>
-            <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
-              Master Data
-            </span>
-          </div>
-          {/* Arrow */}
-          <div className="flex shrink-0 ml-2">
-            <svg
-              className={`w-2.5 h-2.5 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"}`}
-              viewBox="0 0 12 12"
-            >
-              <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-            </svg>
-          </div>
-        </div>
-      </a>
+              <SidebarLinkGroup activecondition={
+                pathname.includes("product") ||
+                pathname.includes("category") ||
+                pathname.includes("customer")
+              }>
+                {(handleClick, open) => (
+                  <React.Fragment>
+                    <a
+                      href="#0"
+                      className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${pathname.includes("product") ||
+                          pathname.includes("category") ||
+                          pathname.includes("customer")
+                          ? ""
+                          : "hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleClick();
+                        setSidebarExpanded(true);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          {/* Master Data Icon */}
+                          <svg
+                            className={`shrink-0 fill-current ${open ? "text-violet-500" : "text-gray-400 dark:text-gray-500"}`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"  // smaller
+                            height="12" // smaller
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M3 3h18v2H3V3zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
+                          </svg>
+                          <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                            Master Data
+                          </span>
+                        </div>
+                        {/* Arrow */}
+                        <div className="flex shrink-0 ml-2">
+                          <svg
+                            className={`w-2.5 h-2.5 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500 ${open && "rotate-180"}`}
+                            viewBox="0 0 12 12"
+                          >
+                            <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </a>
 
-      {/* Submenus */}
-      <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
-        <ul className={`pl-8 mt-1 ${!open && "hidden"}`}>
-          {/* Product */}
-          <SidebarLinkGroup activecondition={pathname.includes("product")}>
-            {(handleClick2, open2) => (
-              <>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClick2();
-                  }}
-                  className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <span className="text-sm">📦 Products</span>
-                  <svg
-                    className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-                <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
-                  <li>
-                    <NavLink to="/addProduct" className="text-sm whitespace-nowrap block">➕ Add Product</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/addProductVariant" className="text-sm whitespace-nowrap block">➕Add Product Variant</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/listProduct" className="text-sm whitespace-nowrap block">📋 View Products</NavLink>
-                  </li>
-                </ul>
-              </>
-            )}
-          </SidebarLinkGroup>
+                    {/* Submenus */}
+                    <div className="lg:hidden lg:sidebar-expanded:block 2xl:block">
+                      <ul className={`pl-8 mt-1 ${!open && "hidden"}`}>
+                        {/* Product */}
+                        <SidebarLinkGroup activecondition={pathname.includes("product")}>
+                          {(handleClick2, open2) => (
+                            <>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClick2();
+                                }}
+                                className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                              >
+                                <span className="text-sm">📦 Products</span>
+                                <svg
+                                  className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+                              <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
+                                <li>
+                                  <NavLink to="/addProduct" className="text-sm whitespace-nowrap block">➕ Add Product</NavLink>
+                                </li>
+                                <li>
+                                  <NavLink to="/addProductVariant" className="text-sm whitespace-nowrap block">➕Add Product Variant</NavLink>
+                                </li>
+                                <li>
+                                  <NavLink to="/listProduct" className="text-sm whitespace-nowrap block">📋 View Products</NavLink>
+                                </li>
+                              </ul>
+                            </>
+                          )}
+                        </SidebarLinkGroup>
 
-          {/* Categories */}
-          <SidebarLinkGroup activecondition={pathname.includes("category")}>
-            {(handleClick2, open2) => (
-              <>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClick2();
-                  }}
-                  className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <span className="text-sm">🗂️ Categories</span>
-                  <svg
-                    className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-                <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
-                  <li>
-                    <NavLink to="/addCategory" className="text-sm whitespace-nowrap block">➕ Add Category</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/listCategories" className="text-sm whitespace-nowrap block">📋 View Categories</NavLink>
-                  </li>
-                </ul>
-              </>
-            )}
-          </SidebarLinkGroup>
+                        {/* Categories */}
+                        <SidebarLinkGroup activecondition={pathname.includes("category")}>
+                          {(handleClick2, open2) => (
+                            <>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClick2();
+                                }}
+                                className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                              >
+                                <span className="text-sm">🗂️ Categories</span>
+                                <svg
+                                  className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+                              <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
+                                <li>
+                                  <NavLink to="/addCategory" className="text-sm whitespace-nowrap block">➕ Add Category</NavLink>
+                                </li>
+                                <li>
+                                  <NavLink to="/listCategories" className="text-sm whitespace-nowrap block">📋 View Categories</NavLink>
+                                </li>
+                              </ul>
+                            </>
+                          )}
+                        </SidebarLinkGroup>
 
-          {/* Customers */}
-          <SidebarLinkGroup activecondition={pathname.includes("customer")}>
-            {(handleClick2, open2) => (
-              <>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClick2();
-                  }}
-                  className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <span className="text-sm">👥 Customers</span>
-                  <svg
-                    className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-                <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
-                  <li>
-                    <NavLink to="/addCustomer" className="text-sm whitespace-nowrap block">➕ Add Customer</NavLink>
-                  </li>
-                  <li>
-                    <NavLink to="/listCustomer" className="text-sm whitespace-nowrap block">📋 View Customers</NavLink>
-                  </li>
-                </ul>
-              </>
-            )}
-          </SidebarLinkGroup>
-        </ul>
-      </div>
-    </React.Fragment>
-  )}
-</SidebarLinkGroup>
+                        {/* Customers */}
+                        <SidebarLinkGroup activecondition={pathname.includes("customer")}>
+                          {(handleClick2, open2) => (
+                            <>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClick2();
+                                }}
+                                className="flex items-center justify-between text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                              >
+                                <span className="text-sm">👥 Customers</span>
+                                <svg
+                                  className={`w-2.5 h-2.5 ml-1 fill-current ${open2 && "rotate-180"}`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+                              <ul className={`pl-6 mt-1 ${!open2 && "hidden"}`}>
+                                <li>
+                                  <NavLink to="/addCustomer" className="text-sm whitespace-nowrap block">➕ Add Customer</NavLink>
+                                </li>
+                                <li>
+                                  <NavLink to="/listCustomer" className="text-sm whitespace-nowrap block">📋 View Customers</NavLink>
+                                </li>
+                              </ul>
+                            </>
+                          )}
+                        </SidebarLinkGroup>
+                      </ul>
+                    </div>
+                  </React.Fragment>
+                )}
+              </SidebarLinkGroup>
 
 
               {/* expense*/}
@@ -747,7 +746,7 @@ function Sidebar({
                 }}
               </SidebarLinkGroup>
 
-                  {/* sales*/}
+              {/* sales*/}
               <SidebarLinkGroup activecondition={pathname.includes("sales")}>
                 {(handleClick, open) => {
                   return (
@@ -812,7 +811,7 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                       
+
                         </ul>
                       </div>
                     </React.Fragment>
@@ -820,7 +819,63 @@ function Sidebar({
                 }}
               </SidebarLinkGroup>
 
-            
+              {/* Sales Return*/}
+              <SidebarLinkGroup activecondition={pathname.includes("sales-return")}>
+                {(handleClick, open) => (
+                  <React.Fragment>
+                    <a
+                      href="#0"
+                      className={`block text-gray-800 dark:text-gray-100 truncate transition ${pathname.includes("sales-return") ? "" : "hover:text-gray-900"
+                        }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleClick();
+                        setSidebarExpanded(true);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          {/* Icon */}
+                          <svg className={`shrink-0 fill-current ${pathname.includes('sales-return')
+                              ? 'text-violet-500'
+                              : 'text-gray-400'
+                            }`} width="16" height="16" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 108 8 8 8 0 00-8-8zm3.5 11.5L8 8l-3.5 3.5L3 10l5-5 5 5z" />
+                          </svg>
+                          <span className="text-sm font-medium ml-4">
+                            Sales Return
+                          </span>
+                        </div>
+                        {/* Arrow */}
+                        <svg className={`w-3 h-3 fill-current ${open && "rotate-180"}`}>
+                          <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                        </svg>
+                      </div>
+                    </a>
+
+                    <div className="lg:sidebar-expanded:block 2xl:block">
+                      <ul className={`pl-8 mt-1 ${!open && "hidden"}`}>
+                        <li className="mb-1">
+                          <NavLink to="/sales-return/add"
+                            className={({ isActive }) =>
+                              isActive ? "text-violet-500" : "text-gray-500"
+                            }>
+                            <span className="text-sm font-medium">Create Return</span>
+                          </NavLink>
+                        </li>
+                        <li className="mb-1">
+                          <NavLink to="/sales-return/view"
+                            className={({ isActive }) =>
+                              isActive ? "text-violet-500" : "text-gray-500"
+                            }>
+                            <span className="text-sm font-medium">View Returns</span>
+                          </NavLink>
+                        </li>
+                      </ul>
+                    </div>
+                  </React.Fragment>
+                )}
+              </SidebarLinkGroup>
 
               <SidebarLinkGroup activecondition={pathname.includes("payments") || pathname.includes("receipts")}>
                 {(handleClick, open) => (
@@ -1108,559 +1163,548 @@ function Sidebar({
                     </div>
                   </>
                 )}
-                  </SidebarLinkGroup>
+              </SidebarLinkGroup>
 
-<SidebarLinkGroup activecondition={pathname.includes("Inventory&Stock")}>
-  {(handleClickFirst, openFirst) => (
-    <>
-      {/* First-level: Inventory & Stock*/}
-      <a
-        href="#0"
-        onClick={(e) => {
-          e.preventDefault();
-          handleClickFirst();
-          setSidebarExpanded(true);
-        }}
-        className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
-          pathname.includes("Inventory&Stock") ? "font-medium" : "hover:text-gray-900 dark:hover:text-white"
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <svg
-              className={`shrink-0 fill-current ${openFirst ? "text-violet-500" : "text-gray-400 dark:text-gray-500"}`}
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-            >
-              <path d="M3 1h10v14H3z" />
-            </svg>
-            <span className="text-sm font-medium ml-4 duration-200">
-             Inventory & Stock
+              <SidebarLinkGroup activecondition={pathname.includes("Inventory&Stock")}>
+                {(handleClickFirst, openFirst) => (
+                  <>
+                    {/* First-level: Inventory & Stock*/}
+                    <a
+                      href="#0"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleClickFirst();
+                        setSidebarExpanded(true);
+                      }}
+                      className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${pathname.includes("Inventory&Stock") ? "font-medium" : "hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <svg
+                            className={`shrink-0 fill-current ${openFirst ? "text-violet-500" : "text-gray-400 dark:text-gray-500"}`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                          >
+                            <path d="M3 1h10v14H3z" />
+                          </svg>
+                          <span className="text-sm font-medium ml-4 duration-200">
+                            Inventory & Stock
 
-            </span>
-          </div>
-          <svg
-            className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-              openFirst ? "rotate-180" : ""
-            }`}
-            viewBox="0 0 12 12"
-          >
-            <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-          </svg>
-        </div>
-      </a>
+                          </span>
+                        </div>
+                        <svg
+                          className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openFirst ? "rotate-180" : ""
+                            }`}
+                          viewBox="0 0 12 12"
+                        >
+                          <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                        </svg>
+                      </div>
+                    </a>
 
-      {/* First-level dropdown */}
-      {openFirst && (
-        <ul className="mt-1 pl-6 space-y-1">
+                    {/* First-level dropdown */}
+                    {openFirst && (
+                      <ul className="mt-1 pl-6 space-y-1">
 
-           {/*  Purchase Entry */}
-          <SidebarLinkGroup activecondition={pathname.includes("PurchaseEntry")}>
-            {(handleClickpu, openpu) => (
-              <li>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickpu();
-                  }}
-                  className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
-                >
-                  <span className="text-sm font-medium">  Purchase Entry</span>
-                  <svg
-                    className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-                      openpu ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
+                        {/*  Purchase Entry */}
+                        <SidebarLinkGroup activecondition={pathname.includes("PurchaseEntry")}>
+                          {(handleClickpu, openpu) => (
+                            <li>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClickpu();
+                                }}
+                                className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
+                              >
+                                <span className="text-sm font-medium">  Purchase Entry</span>
+                                <svg
+                                  className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openpu ? "rotate-180" : ""
+                                    }`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
 
-                {openpu && (
-                  <ul className="mt-1 pl-4 space-y-1">
-                    <li>
-                      <NavLink
-                        to="/purchase/add"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                         Add Purchase
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/purchase/view"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        
-                          View Purchases
-                      </NavLink>
-                    </li>
-                      <li>
-                      <NavLink
-                        to="/purchase/dues"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        
-                           Purchases Dues
-                      </NavLink>
-                    </li>
-                  </ul>
+                              {openpu && (
+                                <ul className="mt-1 pl-4 space-y-1">
+                                  <li>
+                                    <NavLink
+                                      to="/purchase/add"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Add Purchase
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/purchase/view"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+
+                                      View Purchases
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/purchase/dues"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+
+                                      Purchases Dues
+                                    </NavLink>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          )}
+                        </SidebarLinkGroup>
+
+                        {/* StockAdjustment */}
+                        <SidebarLinkGroup activecondition={pathname.includes(" StockAdjustment")}>
+                          {(handleClickSA, openSA) => (
+                            <li>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClickSA();
+                                }}
+                                className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
+                              >
+                                <span className="text-sm font-medium"> Stock Adjustment</span>
+                                <svg
+                                  className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openSA ? "rotate-180" : ""
+                                    }`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+
+                              {openSA && (
+                                <ul className="mt-1 pl-4 space-y-1">
+                                  <li>
+                                    <NavLink
+                                      to="/addAdjustment"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Add Adjustment
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/viewAdjustments"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      View Adjustments
+                                    </NavLink>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          )}
+                        </SidebarLinkGroup>
+
+                        {/* Reports */}
+                        <SidebarLinkGroup activecondition={pathname.includes("Reports")}>
+                          {(handleClickrep, openrep) => (
+                            <li>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClickrep();
+                                }}
+                                className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
+                              >
+                                <span className="text-sm font-medium">Reports</span>
+                                <svg
+                                  className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openrep ? "rotate-180" : ""
+                                    }`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+
+                              {openrep && (
+                                <ul className="mt-1 pl-4 space-y-1">
+                                  <li>
+                                    <NavLink
+                                      to="/stockStatus"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Stock Status Report
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/lowStockAlert"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Low Stock Alerts
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/expiryReport"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Expiry Reports
+                                    </NavLink>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          )}
+                        </SidebarLinkGroup>
+
+
+
+                      </ul>
+                    )}
+                  </>
                 )}
-              </li>
-            )}
-          </SidebarLinkGroup>
+              </SidebarLinkGroup>
 
-          {/* StockAdjustment */}
-          <SidebarLinkGroup activecondition={pathname.includes(" StockAdjustment")}>
-            {(handleClickSA, openSA) => (
-              <li>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickSA();
-                  }}
-                  className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
-                >
-                  <span className="text-sm font-medium"> Stock Adjustment</span>
-                  <svg
-                    className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-                      openSA ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
+              <SidebarLinkGroup activecondition={pathname.includes("Employees")}>
+                {(handleClickFirst, openFirst) => (
+                  <>
+                    {/* First-level: Employee & Staff Management */}
+                    <a
+                      href="#0"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleClickFirst();
+                        setSidebarExpanded(true);
+                      }}
+                      className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${pathname.includes("Employees") ? "font-medium" : "hover:text-gray-900 dark:hover:text-white"
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <svg
+                            className={`shrink-0 fill-current ${openFirst ? "text-violet-500" : "text-gray-400 dark:text-gray-500"}`}
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                          >
+                            <path d="M3 1h10v14H3z" />
+                          </svg>
+                          <span className="text-sm font-medium ml-4 duration-200">
+                            Employee & Staff Management
+                          </span>
+                        </div>
+                        <svg
+                          className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openFirst ? "rotate-180" : ""
+                            }`}
+                          viewBox="0 0 12 12"
+                        >
+                          <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                        </svg>
+                      </div>
+                    </a>
 
-                {openSA && (
-                  <ul className="mt-1 pl-4 space-y-1">
-                    <li>
-                      <NavLink
-                        to="/addAdjustment"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                         Add Adjustment
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/viewAdjustments"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        View Adjustments
-                      </NavLink>
-                    </li>
-                  </ul>
+                    {/* First-level dropdown */}
+                    {openFirst && (
+                      <ul className="mt-1 pl-6 space-y-1">
+                        {/* Employee Records */}
+                        <SidebarLinkGroup activecondition={pathname.includes("EmployeeRecords")}>
+                          {(handleClickER, openER) => (
+                            <li>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClickER();
+                                }}
+                                className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
+                              >
+                                <span className="text-sm font-medium">Employee Records</span>
+                                <svg
+                                  className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openER ? "rotate-180" : ""
+                                    }`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+
+                              {openER && (
+                                <ul className="mt-1 pl-4 space-y-1">
+                                  <li>
+                                    <NavLink
+                                      to="/addEmployees"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Add Employee
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/listEmployees"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      List Employee
+                                    </NavLink>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          )}
+                        </SidebarLinkGroup>
+
+                        {/* Attendance */}
+                        <SidebarLinkGroup activecondition={pathname.includes("Attendance")}>
+                          {(handleClickAtt, openAtt) => (
+                            <li>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClickAtt();
+                                }}
+                                className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
+                              >
+                                <span className="text-sm font-medium">Attendance</span>
+                                <svg
+                                  className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openAtt ? "rotate-180" : ""
+                                    }`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+
+                              {openAtt && (
+                                <ul className="mt-1 pl-4 space-y-1">
+                                  <li>
+                                    <NavLink
+                                      to="/dailyAttendance"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Daily Attendance
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/attendanceReport"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Attendance Report
+                                    </NavLink>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          )}
+                        </SidebarLinkGroup>
+
+                        {/* shift */}
+                        <SidebarLinkGroup activecondition={pathname.includes("shiftManagement")}>
+                          {(handleClickShi, openShi) => (
+                            <li>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClickShi();
+                                }}
+                                className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
+                              >
+                                <span className="text-sm font-medium">Shift Management</span>
+                                <svg
+                                  className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openShi ? "rotate-180" : ""
+                                    }`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+
+                              {openShi && (
+                                <ul className="mt-1 pl-4 space-y-1">
+                                  <li>
+                                    <NavLink
+                                      to="/addShift"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Shift Setup
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/shift"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Shift Roster
+                                    </NavLink>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          )}
+                        </SidebarLinkGroup>
+
+                        {/* leave management */}
+                        <SidebarLinkGroup activecondition={pathname.includes("leaveManagement")}>
+                          {(handleClickLev, openLev) => (
+                            <li>
+                              <a
+                                href="#0"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleClickLev();
+                                }}
+                                className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
+                              >
+                                <span className="text-sm font-medium">Leave Management</span>
+                                <svg
+                                  className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${openLev ? "rotate-180" : ""
+                                    }`}
+                                  viewBox="0 0 12 12"
+                                >
+                                  <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                </svg>
+                              </a>
+
+                              {openLev && (
+                                <ul className="mt-1 pl-4 space-y-1">
+                                  <li>
+                                    <NavLink
+                                      to="/addLeave"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Leave Request
+                                    </NavLink>
+                                  </li>
+                                  <li>
+                                    <NavLink
+                                      to="/leave"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Leave Records
+                                    </NavLink>
+                                    <NavLink
+                                      to="/addHoliday"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Add Holiday
+                                    </NavLink>
+                                    <NavLink
+                                      to="/holidays"
+                                      className={({ isActive }) =>
+                                        "block text-sm font-medium truncate " +
+                                        (isActive
+                                          ? "text-violet-500"
+                                          : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+                                      }
+                                    >
+                                      Holiday Calendar
+                                    </NavLink>
+                                  </li>
+                                </ul>
+                              )}
+                            </li>
+                          )}
+                        </SidebarLinkGroup>
+                      </ul>
+                    )}
+                  </>
                 )}
-              </li>
-            )}
-          </SidebarLinkGroup>
-
-          {/* Reports */}
-          <SidebarLinkGroup activecondition={pathname.includes("Reports")}>
-            {(handleClickrep, openrep) => (
-              <li>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickrep();
-                  }}
-                  className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
-                >
-                  <span className="text-sm font-medium">Reports</span>
-                  <svg
-                    className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-                      openrep ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-
-                {openrep && (
-                  <ul className="mt-1 pl-4 space-y-1">
-                    <li>
-                      <NavLink
-                        to="/stockStatus"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                         Stock Status Report 
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/lowStockAlert"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                       Low Stock Alerts
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/expiryReport"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                     Expiry Reports
-                      </NavLink>
-                    </li>
-                  </ul>
-                )}
-              </li>
-            )}
-          </SidebarLinkGroup>
-
- 
-          
-          </ul>
-      )}
-    </>
-  )}
-</SidebarLinkGroup>
-
-<SidebarLinkGroup activecondition={pathname.includes("Employees")}>
-  {(handleClickFirst, openFirst) => (
-    <>
-      {/* First-level: Employee & Staff Management */}
-      <a
-        href="#0"
-        onClick={(e) => {
-          e.preventDefault();
-          handleClickFirst();
-          setSidebarExpanded(true);
-        }}
-        className={`block text-gray-800 dark:text-gray-100 truncate transition duration-150 ${
-          pathname.includes("Employees") ? "font-medium" : "hover:text-gray-900 dark:hover:text-white"
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <svg
-              className={`shrink-0 fill-current ${openFirst ? "text-violet-500" : "text-gray-400 dark:text-gray-500"}`}
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-            >
-              <path d="M3 1h10v14H3z" />
-            </svg>
-            <span className="text-sm font-medium ml-4 duration-200">
-              Employee & Staff Management
-            </span>
-          </div>
-          <svg
-            className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-              openFirst ? "rotate-180" : ""
-            }`}
-            viewBox="0 0 12 12"
-          >
-            <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-          </svg>
-        </div>
-      </a>
-
-      {/* First-level dropdown */}
-      {openFirst && (
-        <ul className="mt-1 pl-6 space-y-1">
-          {/* Employee Records */}
-          <SidebarLinkGroup activecondition={pathname.includes("EmployeeRecords")}>
-            {(handleClickER, openER) => (
-              <li>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickER();
-                  }}
-                  className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
-                >
-                  <span className="text-sm font-medium">Employee Records</span>
-                  <svg
-                    className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-                      openER ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-
-                {openER && (
-                  <ul className="mt-1 pl-4 space-y-1">
-                    <li>
-                      <NavLink
-                        to="/addEmployees"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        Add Employee
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/listEmployees"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        List Employee
-                      </NavLink>
-                    </li>
-                  </ul>
-                )}
-              </li>
-            )}
-          </SidebarLinkGroup>
-
-          {/* Attendance */}
-          <SidebarLinkGroup activecondition={pathname.includes("Attendance")}>
-            {(handleClickAtt, openAtt) => (
-              <li>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickAtt();
-                  }}
-                  className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
-                >
-                  <span className="text-sm font-medium">Attendance</span>
-                  <svg
-                    className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-                      openAtt ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-
-                {openAtt && (
-                  <ul className="mt-1 pl-4 space-y-1">
-                    <li>
-                      <NavLink
-                        to="/dailyAttendance"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        Daily Attendance
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/attendanceReport"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        Attendance Report
-                      </NavLink>
-                    </li>
-                  </ul>
-                )}
-              </li>
-            )}
-          </SidebarLinkGroup>
-
-          {/* shift */}
-           <SidebarLinkGroup activecondition={pathname.includes("shiftManagement")}>
-            {(handleClickShi, openShi) => (
-              <li>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickShi();
-                  }}
-                  className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
-                >
-                  <span className="text-sm font-medium">Shift Management</span>
-                  <svg
-                    className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-                      openShi ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-
-                {openShi && (
-                  <ul className="mt-1 pl-4 space-y-1">
-                    <li>
-                      <NavLink
-                        to="/addShift"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        Shift Setup
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/shift"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                        Shift Roster
-                      </NavLink>
-                    </li>
-                  </ul>
-                )}
-              </li>
-            )}
-          </SidebarLinkGroup>
-          
-          {/* leave management */}
-           <SidebarLinkGroup activecondition={pathname.includes("leaveManagement")}>
-            {(handleClickLev, openLev) => (
-              <li>
-                <a
-                  href="#0"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickLev();
-                  }}
-                  className="flex justify-between items-center text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition duration-150"
-                >
-                  <span className="text-sm font-medium">Leave Management</span>
-                  <svg
-                    className={`w-3 h-3 shrink-0 fill-current text-gray-400 dark:text-gray-500 transition-transform ${
-                      openLev ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 12 12"
-                  >
-                    <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                  </svg>
-                </a>
-
-                {openLev && (
-                  <ul className="mt-1 pl-4 space-y-1">
-                    <li>
-                      <NavLink
-                        to="/addLeave"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                       Leave Request
-                      </NavLink>
-                    </li>
-                    <li>
-                      <NavLink
-                        to="/leave"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                       Leave Records
-                      </NavLink>
-                           <NavLink
-                        to="/addHoliday"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                      Add Holiday 
-                      </NavLink>
-                      <NavLink
-                        to="/holidays"
-                        className={({ isActive }) =>
-                          "block text-sm font-medium truncate " +
-                          (isActive
-                            ? "text-violet-500"
-                            : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
-                        }
-                      >
-                       Holiday Calendar
-                      </NavLink>
-                    </li>
-                  </ul>
-                )}
-              </li>
-            )}
-          </SidebarLinkGroup>
-        </ul>
-      )}
-    </>
-  )}
-</SidebarLinkGroup>
+              </SidebarLinkGroup>
 
 
 
@@ -1740,7 +1784,7 @@ function Sidebar({
                             </NavLink>
                           </li>
 
-                            <li className="mb-1 last:mb-0">
+                          <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="/units"
@@ -1754,7 +1798,7 @@ function Sidebar({
                             </NavLink>
                           </li>
 
-                           <li className="mb-1 last:mb-0">
+                          <li className="mb-1 last:mb-0">
                             <NavLink
                               end
                               to="/taxBands"
@@ -1767,8 +1811,8 @@ function Sidebar({
                               </span>
                             </NavLink>
                           </li>
-                         
-                         
+
+
                           <li className="mb-1 last:mb-0">
                             <NavLink
                               end
