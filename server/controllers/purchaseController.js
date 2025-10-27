@@ -40,24 +40,29 @@ exports.addPurchase = async (req, res) => {
     await purchase.save();
 
      // ✅ Create Ledger Entries (Double Entry)
+    const ledgerDate = purchase.purchaseDate || new Date();
+    const narration = `Purchase from ${supplierName}`;
+
     const ledgerEntries = [
   {
     voucher_no: purchase.purchaseOrderNumber,
-    date: purchase.purchaseDate,
+    date: ledgerDate,
     account_name: "Purchase A/c",
     debit: purchase.totalAmount,
     credit: 0,
     reference_type: "Purchase",
     reference_id: purchase._id,
+    narration,
   },
   {
     voucher_no: purchase.purchaseOrderNumber,
-    date: purchase.purchaseDate,
+    date: ledgerDate,
     account_name: supplierName,
     debit: 0,
     credit: purchase.totalAmount,
     reference_type: "Purchase",
     reference_id: purchase._id,
+    narration,
   },
 ];
 

@@ -1,7 +1,124 @@
 const SalesInvoice = require("../models/SalesInvoice");
 const Product = require("../models/Product");
 const ProductVariant = require("../models/ProductVariant");
+const Ledger = require("../models/Ledger");
 
+
+// exports.addSale = async (req, res) => {
+//   const session = await Product.startSession();
+//   session.startTransaction();
+
+//   try {
+//     console.log("➡️ Incoming request body:", req.body);
+//     const { products, splitPayments = [] } = req.body;
+
+//     if (!products || products.length === 0) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({ message: "At least one product is required" });
+//     }
+
+//     // ✅ Reduce stock for each product variant
+//     for (const item of products) {
+//       const variant = await ProductVariant.findById(item.variantId).session(session);
+//       if (!variant) {
+//         await session.abortTransaction();
+//         session.endSession();
+//         return res.status(400).json({ message: `Variant not found: ${item.variantId}` });
+//       }
+
+//       if (variant.quantity < item.quantity) {
+//         await session.abortTransaction();
+//         session.endSession();
+//         return res.status(400).json({ message: `Insufficient stock for ${variant.variantName}` });
+//       }
+
+//       variant.quantity -= item.quantity;
+//       await variant.save({ session });
+
+//       await Product.findByIdAndUpdate(
+//         variant.productId,
+//         { $inc: { quantity: -item.quantity } },
+//         { session }
+//       );
+//     }
+
+//     // ✅ Extract other fields
+//     const {
+//       invoiceNumber,
+//       customerName,
+//       number,
+//       saleDate,
+//       subtotal,
+//       tax,
+//       totalAmount,
+//     } = req.body;
+
+//     // ✅ Convert splitPayments -> payments format
+//     const payments = splitPayments.map(p => ({
+//       mode: p.method,
+//       amount: Number(p.amount),
+//     }));
+
+//     // ✅ Create sale (pre("save") will auto-set status, balance, etc.)
+//     const sale = new SalesInvoice({
+//       invoiceNumber,
+//       customerName,
+//       number,
+//       saleDate,
+//       products,
+//       subtotal,
+//       tax,
+//       totalAmount,
+//       payments, // 👈 Correct format
+//     });
+
+//     console.log("💾 Saving sale:", sale);
+//     await sale.save({ session });
+
+//     await session.commitTransaction();
+//     session.endSession();
+//     console.log("✅ Sale saved successfully!");
+
+//     const saleDate = saleDate || new Date();
+// const accountName = customerName && customerName.trim() !== "" ? customerName : "Cash Customer";
+// const narration = `Sale to ${accountName}`;
+// const voucherNumber = invoiceNumber || `S-${sale._id.toString().slice(-4)}`;
+
+// const ledgerEntries = [
+//   {
+//     voucher_no: voucherNumber,
+//     date: saleDate,
+//     account_name: "Sales Account",
+//     debit: 0,
+//     credit: totalAmount,
+//     reference_type: "Sale",
+//     reference_id: sale._id,
+//     narration,
+//   },
+//   {
+//     voucher_no: voucherNumber,
+//     date: saleDate,
+//     account_name: accountName,
+//     debit: totalAmount,
+//     credit: 0,
+//     reference_type: "Sale",
+//     reference_id: sale._id,
+//     narration,
+//   },
+// ];
+
+// await Ledger.insertMany(ledgerEntries, { session });
+
+
+//     res.status(201).json(sale);
+//   } catch (err) {
+//     console.error("❌ Error in addSale:", err.message);
+//     await session.abortTransaction();
+//     session.endSession();
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 
 exports.addSale = async (req, res) => {
   const session = await Product.startSession();
@@ -32,9 +149,11 @@ exports.addSale = async (req, res) => {
         return res.status(400).json({ message: `Insufficient stock for ${variant.variantName}` });
       }
 
+      // Deduct stock
       variant.quantity -= item.quantity;
       await variant.save({ session });
 
+      // Update main product stock
       await Product.findByIdAndUpdate(
         variant.productId,
         { $inc: { quantity: -item.quantity } },
@@ -42,16 +161,18 @@ exports.addSale = async (req, res) => {
       );
     }
 
-    // ✅ Extract other fields
+    // ✅ Extract fields (use `date` from frontend)
     const {
       invoiceNumber,
       customerName,
       number,
-      saleDate,
+      date, // <-- changed here
       subtotal,
       tax,
       totalAmount,
     } = req.body;
+
+    const saleDate = date || new Date();
 
     // ✅ Convert splitPayments -> payments format
     const payments = splitPayments.map(p => ({
@@ -59,27 +180,58 @@ exports.addSale = async (req, res) => {
       amount: Number(p.amount),
     }));
 
-    // ✅ Create sale (pre("save") will auto-set status, balance, etc.)
+    // ✅ Create and save sale
     const sale = new SalesInvoice({
       invoiceNumber,
       customerName,
       number,
-      saleDate,
+      saleDate, // <-- now always defined
       products,
       subtotal,
       tax,
       totalAmount,
-      payments, // 👈 Correct format
+      payments,
     });
 
     console.log("💾 Saving sale:", sale);
     await sale.save({ session });
 
+    // ✅ Prepare Ledger Entries
+    const accountName = customerName && customerName.trim() !== "" ? customerName : "Cash Customer";
+    const narration = `Sale to ${accountName}`;
+    const voucherNumber = invoiceNumber || `S-${sale._id.toString().slice(-4)}`;
+
+    const ledgerEntries = [
+      {
+        voucher_no: voucherNumber,
+        date: saleDate,
+        account_name: "Sales Account",
+        debit: 0,
+        credit: totalAmount,
+        reference_type: "Sale",
+        reference_id: sale._id,
+        narration,
+      },
+      {
+        voucher_no: voucherNumber,
+        date: saleDate,
+        account_name: accountName,
+        debit: totalAmount,
+        credit: 0,
+        reference_type: "Sale",
+        reference_id: sale._id,
+        narration,
+      },
+    ];
+
+    await Ledger.insertMany(ledgerEntries, { session });
+    console.log("🧾 Ledger entries:", ledgerEntries);
+
     await session.commitTransaction();
     session.endSession();
-    console.log("✅ Sale saved successfully!");
 
-    res.status(201).json(sale);
+    console.log("✅ Sale & Ledger saved successfully!");
+    res.status(201).json({ message: "Sale added successfully", sale });
   } catch (err) {
     console.error("❌ Error in addSale:", err.message);
     await session.abortTransaction();
@@ -87,6 +239,7 @@ exports.addSale = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // Get all sales
 exports.getAllSales = async (req, res) => {

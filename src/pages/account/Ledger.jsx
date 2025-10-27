@@ -419,6 +419,9 @@ const Ledger = () => {
                     <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
                       Credit
                     </th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Narration
+                    </th>
                     
                   </tr>
                 </thead>
@@ -464,6 +467,9 @@ const Ledger = () => {
                             ? `₹${parseFloat(entry.credit).toLocaleString('en-IN')}` 
                             : '-'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {entry.narration || '-'}
                       </td>
                     </tr>
                   ))}

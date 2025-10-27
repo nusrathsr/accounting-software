@@ -764,49 +764,109 @@ export default function AddSalesInvoice() {
     `;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
 
-    const validItems = formData.items.filter((item) => {
-      const product = productOptions.find(p => p.id === item.productId);
-      if (!item.productId || n(item.quantity) <= 0) return false;
-      if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
-      return true;
+  //   const validItems = formData.items.filter((item) => {
+  //     const product = productOptions.find(p => p.id === item.productId);
+  //     if (!item.productId || n(item.quantity) <= 0) return false;
+  //     if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
+  //     return true;
+  //   });
+
+  //   if (validItems.length === 0) {
+  //     showAlert("Warning", "Please add at least one product with quantity greater than 0", "warning");
+  //     return;
+  //   }
+
+  //   const invoiceData = createInvoiceData();
+
+  //   try {
+  //     await api.post("/sales", invoiceData);
+  //     setLastSavedInvoice(invoiceData);
+
+  //     showAlert("Success!", `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${invoiceData.totalAmount.toFixed(2)}`, "success");
+
+  //     setFormData({
+  //       invoiceNumber: generateInvoiceNumber(),
+  //       customerName: "",
+  //       number: "",
+  //       saleDate: new Date().toISOString().slice(0, 10),
+  //       paymentMode: "single",
+  //       paymentStatus: false,
+  //       singlePaymentMode: "cash",
+  //       splitPayments: [
+  //         { method: "cash", amount: "", paid: false },
+  //         { method: "upi", amount: "", paid: false }
+  //       ],
+  //       items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
+  //     });
+  //     setDropdownState([{ open: false, searchTerm: "" }]);
+  //   } catch (err) {
+  //     console.error(err);
+  //     showAlert("Error!", "Failed to save invoice. Please check server connection.", "error");
+  //   }
+  // };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  const validItems = formData.items.filter((item) => {
+    const product = productOptions.find(p => p.id === item.productId);
+    if (!item.productId || Number(item.quantity) <= 0) return false;
+    if (product?.sizes?.some(s => s.trim() !== "") && !item.size) return false;
+    return true;
+  });
+
+  if (validItems.length === 0) {
+    showAlert("Warning", "Please add at least one product with quantity greater than 0", "warning");
+    return;
+  }
+
+  const invoiceData = createInvoiceData();
+
+  // ✅ Fix paymentStatus before sending to backend
+  let paymentStatus = "Pending"; // default
+  if (invoiceData.paymentMode === "single") {
+    paymentStatus = "Paid";
+  } else if (invoiceData.paymentMode === "split") {
+    const totalPaid = invoiceData.splitPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    paymentStatus = totalPaid >= invoiceData.totalAmount ? "Paid" : "Partial";
+  }
+
+  invoiceData.paymentStatus = paymentStatus; // string enum now
+
+  try {
+    await api.post("/sales", invoiceData);
+    setLastSavedInvoice(invoiceData);
+
+    showAlert(
+      "Success!",
+      `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${invoiceData.totalAmount.toFixed(2)}`,
+      "success"
+    );
+
+    // Reset form
+    setFormData({
+      invoiceNumber: generateInvoiceNumber(),
+      customerName: "",
+      number: "",
+      saleDate: new Date().toISOString().slice(0, 10),
+      paymentMode: "single",
+      paymentStatus: "Paid",
+      singlePaymentMode: "cash",
+      splitPayments: [
+        { method: "cash", amount: "", paid: false },
+        { method: "upi", amount: "", paid: false }
+      ],
+      items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
     });
+    setDropdownState([{ open: false, searchTerm: "" }]);
+  } catch (err) {
+    console.error(err);
+    showAlert("Error!", "Failed to save invoice. Please check server connection.", "error");
+  }
+};
 
-    if (validItems.length === 0) {
-      showAlert("Warning", "Please add at least one product with quantity greater than 0", "warning");
-      return;
-    }
-
-    const invoiceData = createInvoiceData();
-
-    try {
-      await api.post("/sales", invoiceData);
-      setLastSavedInvoice(invoiceData);
-
-      showAlert("Success!", `Invoice ${formData.invoiceNumber} saved successfully. Total: ₹${invoiceData.totalAmount.toFixed(2)}`, "success");
-
-      setFormData({
-        invoiceNumber: generateInvoiceNumber(),
-        customerName: "",
-        number: "",
-        saleDate: new Date().toISOString().slice(0, 10),
-        paymentMode: "single",
-        paymentStatus: false,
-        singlePaymentMode: "cash",
-        splitPayments: [
-          { method: "cash", amount: "", paid: false },
-          { method: "upi", amount: "", paid: false }
-        ],
-        items: [{ productId: null, productName: "", quantity: "", unitPrice: "", discount: "0", tax: "" }],
-      });
-      setDropdownState([{ open: false, searchTerm: "" }]);
-    } catch (err) {
-      console.error(err);
-      showAlert("Error!", "Failed to save invoice. Please check server connection.", "error");
-    }
-  };
 
 return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
