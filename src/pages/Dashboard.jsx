@@ -1695,7 +1695,7 @@ function Dashboard() {
         setError(null);
 
         const { data: dashboardData } = await api.get("/dashboard");
-        console.log("Dashboard Data:", dashboardData);
+        // console.log("Dashboard Data:", dashboardData);
         setStats(dashboardData);
 
         // Fetch today's sales count
@@ -1784,7 +1784,7 @@ function Dashboard() {
 
         try {
           const { data: inventoryData } = await api.get("/dashboard/inventory-value");
-          console.log("Inventory Data:", inventoryData);
+          // console.log("Inventory Data:", inventoryData);
           setInventoryValue(inventoryData || {});
         } catch (err) {
           console.error("Inventory value error:", err);
