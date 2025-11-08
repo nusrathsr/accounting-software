@@ -28,6 +28,8 @@ const customerCategoryRoutes = require("./routes/customerCategoryRoutes");
 const businessRoutes =require("./routes/businessRoutes")
 const ledgerRoutes = require("./routes/ledgerRoutes");
 const allLedgerRoutes =require("./routes/allLedgerRoutes")
+const journalVoucherRoutes=require("./routes/journalVoucherRoutes")
+
 // Load env variables
 dotenv.config();
 
@@ -71,6 +73,12 @@ app.use("/api/taxBand",taxBandRoutes)
 app.use("/api/business",businessRoutes)
 app.use("/api/ledger", ledgerRoutes);
 app.use("/api/allLedger",allLedgerRoutes)
+app.use("/api/journalVoucher",journalVoucherRoutes)
+
+
+
+
+
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')

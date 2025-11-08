@@ -1724,7 +1724,7 @@ function Sidebar({
                   : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
               }
             >
-              Account Ledger
+             Ledger Transactions
             </NavLink>
           </li>
            <li>
@@ -1737,7 +1737,7 @@ function Sidebar({
                   : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
               }
             >
-              All Ledger
+              Ledger Management
             </NavLink>
           </li>
           <li>

@@ -56,6 +56,7 @@ import MyProfile from './pages/settings/MyProfile.jsx';
 import UpdateProfile from './pages/settings/UpdateProfile.jsx';
 import Ledger from './pages/account/Ledger.jsx';
 import AllLedger from './pages/account/AllLedger.jsx';
+import JournalVoucher from './pages/account/JournalVoucher.jsx';
 
 function App() {
   const location = useLocation();
@@ -127,6 +128,8 @@ function App() {
          <Route path='/updateProfile' element={<UpdateProfile/>}/>
          <Route path="/accounts/ledger" element={<Ledger />} />
           <Route path="/accounts/AllLedger" element={<AllLedger />} />
+          <Route path="/accounts/journal-vouchers" element={<JournalVoucher />} />
+
         </Route>
         
       </Routes>
