@@ -56,7 +56,7 @@ import MyProfile from './pages/settings/MyProfile.jsx';
 import UpdateProfile from './pages/settings/UpdateProfile.jsx';
 import Ledger from './pages/account/Ledger.jsx';
 import AllLedger from './pages/account/AllLedger.jsx';
-
+import TrialBalance from './pages/account/TrialBalance.jsx';
 import AddSalesReturn from './pages/salesReturn/AddSalesReturn';
 import ViewSalesReturn from './pages/salesReturn/ViewSalesReturn';
 function App() {
@@ -130,6 +130,7 @@ function App() {
           <Route path="/accounts/AllLedger" element={<AllLedger />} />
           <Route path="sales-return/add" element={<AddSalesReturn />} />
           <Route path="sales-return/view" element={<ViewSalesReturn />} />
+          <Route path='/accounts/trial-balance' element={<TrialBalance />} />
         </Route>
         
       </Routes>

@@ -1856,11 +1856,6 @@ function Sidebar({
                 )}
               </SidebarLinkGroup>
 
-
-
-
-
-
               {/* Settings */}
               <SidebarLinkGroup activecondition={pathname.includes("settings")}>
                 {(handleClick, open) => {

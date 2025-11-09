@@ -836,6 +836,7 @@ const handleSubmit = async (e) => {
   invoiceData.paymentStatus = paymentStatus; // string enum now
 
   try {
+    console.log("Invoice Data being sent:", invoiceData);
     await api.post("/sales", invoiceData);
     setLastSavedInvoice(invoiceData);
 
