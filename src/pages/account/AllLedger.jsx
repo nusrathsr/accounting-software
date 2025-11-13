@@ -525,7 +525,7 @@ const AllLedger = () => {
 
         {/* Ledger Table */}
         {!form && <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-4 border-b border-gray-200 flex flex-wrap gap-210">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-4 border-b border-gray-200 flex item-center justify-between flex-wrap gap-4">
             <div>
               <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <FaList className="w-5 h-5 text-blue-600" />
