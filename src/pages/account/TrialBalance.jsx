@@ -1260,7 +1260,7 @@ const TrialBalance = () => {
             </div>
 
             {/* Branch */}
-            <div className="relative">
+            {/* <div className="relative">
               <label className="block text-xs font-medium text-gray-700 mb-2">Company / Branch</label>
               <select
                 value={branch}
@@ -1271,7 +1271,7 @@ const TrialBalance = () => {
                 <option>Branch 1</option>
                 <option>Branch 2</option>
               </select>
-            </div>
+            </div> */}
 
             {/* View Type */}
             <div className="relative">

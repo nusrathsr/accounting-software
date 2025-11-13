@@ -9,6 +9,7 @@ const ledgerSchema = new mongoose.Schema({
   reference_type: { type: String, default: "Purchase" }, // Purchase / Sale etc.
   reference_id: { type: mongoose.Schema.Types.ObjectId, refPath: "reference_type" },
   narration: { type: String },
+  
 });
 
 module.exports = mongoose.model("Ledger", ledgerSchema);
