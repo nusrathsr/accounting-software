@@ -319,58 +319,6 @@ import {
 } from "lucide-react";
 import api from "../../utils/api";
 
-// Mock API for demonstration
-const mockApi = {
-  get: async (endpoint) => {
-    if (endpoint === "/allLedger") {
-      return {
-        data: {
-          data: [
-            { accountName: "Cash", balanceType: "Debit" },
-            { accountName: "Bank", balanceType: "Debit" },
-            { accountName: "Sales", balanceType: "Credit" },
-            { accountName: "Purchase", balanceType: "Debit" },
-            { accountName: "Accounts Payable", balanceType: "Credit" },
-            { accountName: "Accounts Receivable", balanceType: "Debit" },
-          ]
-        }
-      };
-    }
-    if (endpoint === "/journalVoucher") {
-      return {
-        data: {
-          data: [
-            {
-              _id: "1",
-              voucherNo: "JV-123",
-              date: "2024-01-15",
-              voucherType: "Payment",
-              debitAccount: "Cash",
-              debitAmount: 5000,
-              creditAccount: "Sales",
-              creditAmount: 5000,
-              description: "Payment received from customer"
-            },
-            {
-              _id: "2",
-              voucherNo: "JV-456",
-              date: "2024-01-20",
-              voucherType: "Journal",
-              debitAccount: "Purchase",
-              debitAmount: 3000,
-              creditAccount: "Accounts Payable",
-              creditAmount: 3000,
-              description: "Purchase adjustment entry"
-            }
-          ]
-        }
-      };
-    }
-    return { data: { data: [] } };
-  },
-  post: async () => ({ data: {} }),
-  delete: async () => ({ data: {} })
-};
 
 const JournalVoucher = () => {
   const [form, setForm] = useState(false);
@@ -524,7 +472,7 @@ const JournalVoucher = () => {
   if (form) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 sm:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
               <div className="flex items-center justify-between">
