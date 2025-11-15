@@ -60,6 +60,7 @@ import TrialBalance from './pages/account/TrialBalance.jsx';
 import AddSalesReturn from './pages/salesReturn/AddSalesReturn';
 import ViewSalesReturn from './pages/salesReturn/ViewSalesReturn';
 import JournalVoucher from './pages/account/JournalVoucher.jsx';
+import Daybook from './pages/account/Daybook';
 function App() {
   const location = useLocation();
 
@@ -133,6 +134,7 @@ function App() {
           <Route path="sales-return/view" element={<ViewSalesReturn />} />
           <Route path='/accounts/trial-balance' element={<TrialBalance />} />
           <Route path="/accounts/journal-vouchers" element={<JournalVoucher />} />
+          <Route path="/accounts/daybook" element={<Daybook />} />
         </Route>
         
       </Routes>

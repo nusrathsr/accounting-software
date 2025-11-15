@@ -31,6 +31,7 @@ const allLedgerRoutes =require("./routes/allLedgerRoutes")
 const salesReturnRoutes = require('./routes/salesReturnRoutes'); 
 const trialBalanceRoutes = require("./routes/trialBalanceRoutes");
 const journalVoucherRoutes=require("./routes/journalVoucherRoutes")
+const daybookRoutes = require('./routes/daybookRoutes');
 // Load env variables
 dotenv.config();
 
@@ -53,30 +54,31 @@ mongoose.connect(process.env.MONGO_URL,{
 app.use('/api/products', productRoutes);
 app.use('/api/variants', variantRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/customer', customerRoutes)
+app.use('/api/customer', customerRoutes);
 app.use("/api/customer-categories", customerCategoryRoutes);
-app.use('/api/expense', expenseRoutes)
+app.use('/api/expense', expenseRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/purchases", purchaseRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/transactions", transactionRoutes);
-app.use("/api/reports",reportRouters)
-app.use('/api/employees',employeesRoutes)
-app.use('/api/attendance',attendanceRoutes)
-app.use('/api/shift',shiftRoutes)
+app.use("/api/reports",reportRouters);
+app.use('/api/employees',employeesRoutes);
+app.use('/api/attendance',attendanceRoutes);
+app.use('/api/shift',shiftRoutes);
 app.use("/api/leaves", leaveRoutes);
 app.use("/api/holiday",holidayRoutes);
 app.use("/api/stockAdjustment",stockAdjustmentRoutes);
-app.use("/api/financialYear",financialYearRoutes)
+app.use("/api/financialYear",financialYearRoutes);
 app.use("/api/units", unitRoutes);
-app.use("/api/dashboard",dashboardRoutes)
-app.use("/api/taxBand",taxBandRoutes)
-app.use("/api/business",businessRoutes)
+app.use("/api/dashboard",dashboardRoutes);
+app.use("/api/taxBand",taxBandRoutes);
+app.use("/api/business",businessRoutes);
 app.use("/api/ledger", ledgerRoutes);
-app.use("/api/allLedger",allLedgerRoutes)
+app.use("/api/allLedger",allLedgerRoutes);
 app.use('/api/sales-returns', salesReturnRoutes);
 app.use("/api/trial-balance", trialBalanceRoutes);
-app.use("/api/journalVoucher",journalVoucherRoutes)
+app.use("/api/journalVoucher",journalVoucherRoutes);
+app.use('/api', daybookRoutes);
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')
