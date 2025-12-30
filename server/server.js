@@ -31,13 +31,9 @@ const allLedgerRoutes =require("./routes/allLedgerRoutes")
 const salesReturnRoutes = require('./routes/salesReturnRoutes'); 
 const trialBalanceRoutes = require("./routes/trialBalanceRoutes");
 const journalVoucherRoutes=require("./routes/journalVoucherRoutes")
-<<<<<<< HEAD
 const daybookRoutes = require('./routes/daybookRoutes');
 const profitLossRoutes = require('./routes/profitLossRoutes');
-
-=======
 const accountProfileRoutes =require("./routes/accountprofileRoutes")
->>>>>>> c64e7024cc441f21c8513bae0cf078301d518b8c
 // Load env variables
 dotenv.config();
 
@@ -83,15 +79,11 @@ app.use("/api/ledger", ledgerRoutes);
 app.use("/api/allLedger",allLedgerRoutes);
 app.use('/api/sales-returns', salesReturnRoutes);
 app.use("/api/trial-balance", trialBalanceRoutes);
-<<<<<<< HEAD
 app.use("/api/journalVoucher",journalVoucherRoutes);
 app.use('/api', daybookRoutes);
 app.use('/api', profitLossRoutes);
-=======
 app.use("/api/journalVoucher",journalVoucherRoutes)
 app.use("/api/accountProfile",accountProfileRoutes)
->>>>>>> c64e7024cc441f21c8513bae0cf078301d518b8c
-//Root route
 app.get('/',(req,res)=>{
   res.send('API is running')
 })

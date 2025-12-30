@@ -60,12 +60,9 @@ import TrialBalance from './pages/account/TrialBalance.jsx';
 import AddSalesReturn from './pages/salesReturn/AddSalesReturn';
 import ViewSalesReturn from './pages/salesReturn/ViewSalesReturn';
 import JournalVoucher from './pages/account/JournalVoucher.jsx';
-<<<<<<< HEAD
 import Daybook from './pages/account/Daybook';
 import ProfitLoss from './pages/account/ProfitLoss';
-=======
 import AccountProfiles from './pages/account/AccountProfiles.jsx';
->>>>>>> c64e7024cc441f21c8513bae0cf078301d518b8c
 function App() {
   const location = useLocation();
 
@@ -112,15 +109,12 @@ function App() {
           <Route path='/addShift' element={<AddShift />} />
           <Route path='/editShift/:id' element={<EditShift />} />
           <Route path='/shift' element={<ShiftList />} />
-
           <Route path='/addLeave' element={<AddLeave />} />
           <Route path='/editLeave/:id' element={<EditLeave />} />
           <Route path='/leave' element={<LeaveRecords />} />
-
           <Route path='/addHoliday' element={<AddHoliday />} />
           <Route path='/editHoliday/:id' element={<EditHoliday />} />
           <Route path='/holidays' element={<ListHoliday />} />
-           
           <Route path='/addAdjustment' element={<AddAdjustment />} />
           <Route path='/viewAdjustments' element={<ListAdjustment/>} />
           <Route path='/stockStatus' element={<StockStatusReport/>} />
@@ -139,12 +133,9 @@ function App() {
           <Route path="sales-return/view" element={<ViewSalesReturn />} />
           <Route path='/accounts/trial-balance' element={<TrialBalance />} />
           <Route path="/accounts/journal-vouchers" element={<JournalVoucher />} />
-<<<<<<< HEAD
           <Route path="/accounts/daybook" element={<Daybook />} />
           <Route path="/accounts/profit-loss" element={<ProfitLoss />} />
-=======
           <Route path='/accounts/profiles' element={<AccountProfiles/>}/>
->>>>>>> c64e7024cc441f21c8513bae0cf078301d518b8c
         </Route>
         
       </Routes>
