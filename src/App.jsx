@@ -60,8 +60,12 @@ import TrialBalance from './pages/account/TrialBalance.jsx';
 import AddSalesReturn from './pages/salesReturn/AddSalesReturn';
 import ViewSalesReturn from './pages/salesReturn/ViewSalesReturn';
 import JournalVoucher from './pages/account/JournalVoucher.jsx';
+<<<<<<< HEAD
 import Daybook from './pages/account/Daybook';
 import ProfitLoss from './pages/account/ProfitLoss';
+=======
+import AccountProfiles from './pages/account/AccountProfiles.jsx';
+>>>>>>> c64e7024cc441f21c8513bae0cf078301d518b8c
 function App() {
   const location = useLocation();
 
@@ -135,8 +139,12 @@ function App() {
           <Route path="sales-return/view" element={<ViewSalesReturn />} />
           <Route path='/accounts/trial-balance' element={<TrialBalance />} />
           <Route path="/accounts/journal-vouchers" element={<JournalVoucher />} />
+<<<<<<< HEAD
           <Route path="/accounts/daybook" element={<Daybook />} />
           <Route path="/accounts/profit-loss" element={<ProfitLoss />} />
+=======
+          <Route path='/accounts/profiles' element={<AccountProfiles/>}/>
+>>>>>>> c64e7024cc441f21c8513bae0cf078301d518b8c
         </Route>
         
       </Routes>
