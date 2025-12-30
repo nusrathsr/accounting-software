@@ -32,6 +32,8 @@ const salesReturnRoutes = require('./routes/salesReturnRoutes');
 const trialBalanceRoutes = require("./routes/trialBalanceRoutes");
 const journalVoucherRoutes=require("./routes/journalVoucherRoutes")
 const daybookRoutes = require('./routes/daybookRoutes');
+const profitLossRoutes = require('./routes/profitLossRoutes');
+
 // Load env variables
 dotenv.config();
 
@@ -79,6 +81,7 @@ app.use('/api/sales-returns', salesReturnRoutes);
 app.use("/api/trial-balance", trialBalanceRoutes);
 app.use("/api/journalVoucher",journalVoucherRoutes);
 app.use('/api', daybookRoutes);
+app.use('/api', profitLossRoutes);
 //Root route
 app.get('/',(req,res)=>{
   res.send('API is running')

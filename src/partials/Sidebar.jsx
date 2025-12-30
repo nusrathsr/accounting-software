@@ -1848,6 +1848,19 @@ function Sidebar({
           </li>
           <li>
             <NavLink
+              to="/accounts/profit-loss"
+              className={({ isActive }) =>
+                "block text-sm font-medium truncate " +
+                (isActive
+                  ? "text-violet-500"
+                  : "text-gray-500/90 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200")
+              }
+            >
+              Profit & Loss
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
               to="/accounts/profiles"
               className={({ isActive }) =>
                 "block text-sm font-medium truncate " +
